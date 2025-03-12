@@ -4,19 +4,31 @@ import javax.persistence.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "PROJECTS")
-public class Projects {
+@Table(name = "ISSUES")
+public class Issue {
     @Id
-    @Column(name = "PROJECT_ID")
+    @Column(name = "ISSUE_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int ID;
+    
     @Column(name = "NAME")
     String name;
+
     @Column(name = "DESCRIPTION")
     String description;
+
+    @Column(name = "STATUS")
+    boolean status;
+
     @Column(name = "CREATION_TS")
     OffsetDateTime creation_ts;
+
     @ManyToOne
-    @JoinColumn(name = "MANAGER_ID")
-    private Manager manager;
+    @JoinColumn(name = "ASSIGNED_TO")
+    private User assignedTo;
+    
+    @ManyToOne
+    @JoinColumn(name = "SPRINT_ID")
+    private Sprint sprint;
+
 }

@@ -5,12 +5,20 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "ASSIGNMENTS")
-public class Assignments {
+public class Assignment {
     @Id
     @Column(name = "ASSIGNMENT_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int ID;
+    int id;
+
+    @ManyToOne
+    @JoinColumn(name = "TASK_ID")
+    private Task task;
+    
     @ManyToOne
     @JoinColumn(name = "USER_ID")
     private User user;
+
+    @Column(name = "ASSIGNMENT_DATE")
+    OffsetDateTime assignment_date;
 }
