@@ -1,6 +1,9 @@
 package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.time.OffsetDateTime;
 
 import java.util.List;
@@ -18,8 +21,10 @@ public class Project {
     String description;
     @Column(name = "CREATION_TS")
     OffsetDateTime creation_ts;
+    
     @ManyToOne
     @JoinColumn(name = "ASSIGNED_TO")
+    @JsonBackReference
     private Manager assignedTo;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

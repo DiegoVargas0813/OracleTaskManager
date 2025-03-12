@@ -13,11 +13,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/users")
+    @PostMapping
     public ResponseEntity createUser(@RequestBody User user) throws Exception {
         User newUser = userService.createUser(user);
         HttpHeaders responseHeaders = new HttpHeaders();
@@ -27,7 +28,6 @@ public class UserController {
             .headers(responseHeaders).build();
     }
 
-    /* 
     @GetMapping
     public List<User> getAllUsers(){
         return userService.getAllUsers();
@@ -47,5 +47,4 @@ public class UserController {
         }
         return ResponseEntity.ok(users);
     }
-    */
 }

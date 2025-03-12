@@ -3,6 +3,9 @@ package com.springboot.MyTodoList.model;
 //https://tenmilesquare.com/resources/software-development/spring-boot-jpa-relationship-quick-guide/
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 

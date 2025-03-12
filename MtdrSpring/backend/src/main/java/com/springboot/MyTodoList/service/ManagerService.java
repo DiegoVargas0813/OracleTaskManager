@@ -5,6 +5,9 @@ import com.springboot.MyTodoList.repository.ManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class ManagerService {
     @Autowired
@@ -14,7 +17,11 @@ public class ManagerService {
         return managerRepository.save(manager);
     }
 
-    public Manager getManagerById(int id){
-        return managerRepository.findById(id).orElse(null);
+    public List<Manager> getAllManagers(){
+        return managerRepository.findAll();
+    }
+
+    public Optional<Manager> getManagerById(int id){
+        return managerRepository.findById(id);
     }
 }

@@ -1,6 +1,9 @@
 package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.time.OffsetDateTime;
 
 import java.util.List;
@@ -25,6 +28,7 @@ public class User {
     
     @ManyToOne
     @JoinColumn(name = "MANAGER_ID")
+    @JsonBackReference
     private Manager manager;
 
     @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

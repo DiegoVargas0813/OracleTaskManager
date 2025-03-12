@@ -1,6 +1,9 @@
 package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.time.OffsetDateTime;
 
 @Entity
@@ -12,7 +15,6 @@ public class Assignment {
     int id;
 
     @ManyToOne
-    @JoinColumn(name = "TASK_ID")
     private Task task;
     
     @ManyToOne
@@ -21,4 +23,55 @@ public class Assignment {
 
     @Column(name = "ASSIGNMENT_DATE")
     OffsetDateTime assignment_date;
+
+    public Assignment() {
+    }
+
+    public Assignment(Task task, User user, OffsetDateTime assignment_date) {
+        this.task = task;
+        this.user = user;
+        this.assignment_date = assignment_date;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public OffsetDateTime getAssignment_date() {
+        return assignment_date;
+    }
+
+    public void setAssignment_date(OffsetDateTime assignment_date) {
+        this.assignment_date = assignment_date;
+    }
+
+    @Override
+    public String toString() {
+        return "Assignment{" +
+                "id=" + id +
+                ", task=" + task +
+                ", user=" + user +
+                ", assignment_date=" + assignment_date +
+                '}';
+    }
 }
