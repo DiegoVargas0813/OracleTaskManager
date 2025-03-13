@@ -24,4 +24,8 @@ public class ProjectService {
     public Optional<Project> getProjectById(int id){
         return projectRepository.findById(id);
     }
+
+    public List<Project> getProjectsByManagerId(int id){
+        return projectRepository.findByAssignedTo_Id(id); // Use corrected method
+    }
 }

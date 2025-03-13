@@ -36,4 +36,9 @@ public class ProjectController {
         Optional<Project> project = projectService.getProjectById(id);
         return project.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/manager/{id}")
+    public List<Project> getProjectsByManagerId(@PathVariable int id){
+        return projectService.getProjectsByManagerId(id);
+    }
 }
