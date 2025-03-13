@@ -1,0 +1,44 @@
+package com.springboot.MyTodoList.controller;
+
+import com.springboot.MyTodoList.model.Task;
+import com.springboot.MyTodoList.service.TaskService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/tasks")
+public class TaskController {
+    @Autowired
+    private TaskService taskService;
+
+    @PostMapping("/user/{UserId}")
+    public ResponseEntity createTask(@PathVariable Integer UserId, @RequestBody Task task) throws Exception {
+        Task newTask = taskService.createTask(UserId, task);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("location",""+newTask.getId());
+        responseHeaders.set("Access-Control-Expose-Headers","location");
+        return ResponseEntity.ok()
+            .headers(responseHeaders).build();
+    }
+
+    @GetMapping
+    public List<Task> getAllTasks() {
+        return taskService.getAllTasks();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Task> getTaskById(@PathVariable Integer id) {
+        Optional<Task> task = taskService.getTaskById(id);
+        return task.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Task> getTasksByUser(@PathVariable int userId) {
+        return taskService.getTasksByUserId(userId);
+    }
+}

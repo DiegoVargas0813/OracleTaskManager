@@ -3,6 +3,7 @@ package com.springboot.MyTodoList.model;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.OffsetDateTime;
 
@@ -10,19 +11,22 @@ import java.time.OffsetDateTime;
 @Table(name = "ASSIGNMENTS")
 public class Assignment {
     @Id
-    @Column(name = "ASSIGNMENT_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+    @Column(name = "ASSIGNMENT_ID")
+    private int id;
 
     @ManyToOne
+    @JoinColumn(name = "TASK_ID") 
+    @JsonIgnore
     private Task task;
     
     @ManyToOne
-    @JoinColumn(name = "USER_ID")
+    @JoinColumn(name = "USER_ID") // Explicitly specify foreign key column
+    @JsonIgnore
     private User user;
 
     @Column(name = "ASSIGNMENT_DATE")
-    OffsetDateTime assignment_date;
+    private OffsetDateTime assignment_date;
 
     public Assignment() {
     }

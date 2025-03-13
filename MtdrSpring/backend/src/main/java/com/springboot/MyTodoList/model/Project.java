@@ -3,6 +3,10 @@ package com.springboot.MyTodoList.model;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.time.OffsetDateTime;
 
@@ -24,10 +28,12 @@ public class Project {
     
     @ManyToOne
     @JoinColumn(name = "ASSIGNED_TO")
-    @JsonBackReference
+    @JsonIgnore
     private Manager assignedTo;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     private List<Sprint> sprints;
 
     public Project() {

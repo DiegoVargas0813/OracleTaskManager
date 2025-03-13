@@ -3,9 +3,12 @@ package com.springboot.MyTodoList.model;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.OffsetDateTime;
-
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,19 +31,23 @@ public class User {
     
     @ManyToOne
     @JoinColumn(name = "MANAGER_ID")
-    @JsonBackReference
+    @JsonIgnore
     private Manager manager;
 
-    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Task> tasks;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    private List<Assignment> assignments = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
     private List<Issue> issues;
 
     public User() {
     }
 
-    public User(int id, String name, String role, String email, String password, OffsetDateTime creation_ts, Manager manager, List<Task> tasks, List<Issue> issues) {
+    public User(int id, String name, String role, String email, String password, OffsetDateTime creation_ts, Manager manager, List<Assignment> assignments, List<Issue> issues) {
         this.id = id;
         this.name = name;
         this.role = role;
@@ -48,7 +55,7 @@ public class User {
         this.password = password;
         this.creation_ts = creation_ts;
         this.manager = manager;
-        this.tasks = tasks;
+        this.assignments = assignments;
         this.issues = issues;
     }
 
@@ -109,12 +116,13 @@ public class User {
         this.manager = manager;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public List<Assignment> getAssignments() {
+        return assignments;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
+    public void addAssignment(Assignment assignment) {
+        assignments.add(assignment);
+        assignment.setUser(this);
     }
 
     public List<Issue> getIssues() {
@@ -135,7 +143,7 @@ public class User {
                 ", password='" + password + '\'' +
                 ", creation_ts=" + creation_ts +
                 ", manager=" + manager +
-                ", tasks=" + tasks +
+                ", assignments=" + assignments +
                 ", issues=" + issues +
                 '}';
     }

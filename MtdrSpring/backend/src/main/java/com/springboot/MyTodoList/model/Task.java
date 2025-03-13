@@ -3,6 +3,12 @@ package com.springboot.MyTodoList.model;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import java.util.ArrayList;
 
 import java.util.List;
 
@@ -21,15 +27,14 @@ public class Task {
     boolean status;
     
     @ManyToOne
-    @JoinColumn(name = "ASSIGNED_TO")
-    private User assignedTo;
-    
-    @ManyToOne
     @JoinColumn(name = "SPRINT_ID")
+    @JsonIgnore
     private Sprint sprint;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Assignment> assignments;
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    private List<Assignment> assignments = new ArrayList<>();
 
     public Task() {
     }
@@ -39,7 +44,6 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.assignedTo = assignedTo;
         this.sprint = sprint;
         this.assignments = assignments;
     }
@@ -77,14 +81,6 @@ public class Task {
         this.status = status;
     }
 
-    public User getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(User assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
     public Sprint getSprint() {
         return sprint;
     }
@@ -97,10 +93,11 @@ public class Task {
         return assignments;
     }
 
-    public void setAssignments(List<Assignment> assignments) {
-        this.assignments = assignments;
+    public void addAssignment(Assignment assignment) {
+        assignments.add(assignment);
+        assignment.setTask(this);
     }
-
+    
     @Override
     public String toString() {
         return "Task{" +
@@ -108,7 +105,6 @@ public class Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", assignedTo=" + assignedTo +
                 ", sprint=" + sprint +
                 ", assignments=" + assignments +
                 '}';
