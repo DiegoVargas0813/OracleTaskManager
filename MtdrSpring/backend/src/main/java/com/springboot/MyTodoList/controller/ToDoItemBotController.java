@@ -44,16 +44,27 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	@Override
 	public void onUpdateReceived(Update update) {
 
+		//A la hora de manejar los mensajes en el bot, trabajamos junto con otros dos archivos.
+		//BotMessages.java y BotLabels.java
+		//BotMessages.java contiene los mensajes que el bot envia al usuario
+		//BotLabels.java contiene las etiquetas que el bot muestra en el teclado
+
 		if (update.hasMessage() && update.getMessage().hasText()) {
 
+			//El mensaje en cuestion
 			String messageTextFromTelegram = update.getMessage().getText();
+			//Id del mensaje
 			long chatId = update.getMessage().getChatId();
 
+			//Si el mensaje es /start o /showmainscreen
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
 
+				//Mensaje a enviar
 				SendMessage messageToTelegram = new SendMessage();
+				//Id del chat
 				messageToTelegram.setChatId(chatId);
+				//Texto a enviar
 				messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
 
 				ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
@@ -238,6 +249,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 
+	//Llamadas a repository
 	@Override
 	public String getBotUsername() {		
 		return botName;
