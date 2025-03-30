@@ -5,7 +5,6 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.util.ArrayList;
@@ -24,11 +23,17 @@ public class Task {
     @Column(name = "DESCRIPTION")
     String description;
     @Column(name = "STATUS")
-    boolean status;
+    String status;
+    @Column(name = "STORY_POINTS")
+    int storyPoints;
+    @Column(name = "ESTIMATED_HOURS")
+    int estimatedHours;
+    @Column(name = "REAL_HOURS")
+    int realHours;
     
     @ManyToOne
     @JoinColumn(name = "SPRINT_ID")
-    @JsonIgnore
+    @JsonBackReference
     private Sprint sprint;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -39,11 +44,14 @@ public class Task {
     public Task() {
     }
 
-    public Task(int id, String name, String description, boolean status, User assignedTo, Sprint sprint, List<Assignment> assignments) {
+    public Task(int id, String name, String description, String status, int storyPoints, int estimatedHours , int realHours, Sprint sprint, List<Assignment> assignments) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+        this.storyPoints = storyPoints;
+        this.estimatedHours = estimatedHours;
+        this.realHours = realHours;
         this.sprint = sprint;
         this.assignments = assignments;
     }
@@ -73,11 +81,11 @@ public class Task {
         this.description = description;
     }
 
-    public boolean isStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

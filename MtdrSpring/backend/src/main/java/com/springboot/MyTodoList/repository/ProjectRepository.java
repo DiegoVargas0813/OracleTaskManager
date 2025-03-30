@@ -13,5 +13,5 @@ import javax.transaction.Transactional;
 @Transactional
 @EnableTransactionManagement
 public interface ProjectRepository extends JpaRepository<Project,Integer> {
-    List<Project> findByAssignedTo_Id(int id);
+    List<Project> findByManager_Id(int id);
 }

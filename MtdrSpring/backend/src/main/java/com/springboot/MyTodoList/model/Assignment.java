@@ -2,7 +2,6 @@ package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.OffsetDateTime;
@@ -26,15 +25,15 @@ public class Assignment {
     private User user;
 
     @Column(name = "ASSIGNMENT_DATE")
-    private OffsetDateTime assignment_date;
+    private OffsetDateTime assignmentDate;
 
     public Assignment() {
     }
 
-    public Assignment(Task task, User user, OffsetDateTime assignment_date) {
+    public Assignment(Task task, User user, OffsetDateTime assignmentDate) {
         this.task = task;
         this.user = user;
-        this.assignment_date = assignment_date;
+        this.assignmentDate = assignmentDate;
     }
 
     public int getId() {
@@ -61,12 +60,12 @@ public class Assignment {
         this.user = user;
     }
 
-    public OffsetDateTime getAssignment_date() {
-        return assignment_date;
+    public OffsetDateTime getAssignmentDate() {
+        return assignmentDate;
     }
 
-    public void setAssignment_date(OffsetDateTime assignment_date) {
-        this.assignment_date = assignment_date;
+    public void setAssignmentDate(OffsetDateTime assignmentDate) {
+        this.assignmentDate = assignmentDate;
     }
 
     @Override
@@ -75,7 +74,7 @@ public class Assignment {
                 "id=" + id +
                 ", task=" + task +
                 ", user=" + user +
-                ", assignment_date=" + assignment_date +
+                ", assignmentDate=" + assignmentDate +
                 '}';
     }
 }

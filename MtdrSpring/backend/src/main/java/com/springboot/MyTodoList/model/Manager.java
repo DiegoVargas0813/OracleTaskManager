@@ -6,7 +6,6 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.time.OffsetDateTime;
@@ -28,28 +27,28 @@ public class Manager {
     @Column(name = "PASSWORD")
     String password;
     @Column(name = "CREATION_TS")
-    OffsetDateTime creation_ts;
+    OffsetDateTime creationTs;
     
     @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     private List<User> users;
 
-    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "manager", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    private List<Project> projects;
+    private Project projects;
 
     public Manager() {
     }
 
-    public Manager(int id, String name, String role, String email, String password, OffsetDateTime creation_ts, List<User> users, List<Project> projects) {
+    public Manager(int id, String name, String role, String email, String password, OffsetDateTime creationTs, List<User> users, Project projects) {
         this.id = id;
         this.name = name;
         this.role = role;
         this.email = email;
         this.password = password;
-        this.creation_ts = creation_ts;
+        this.creationTs = creationTs;
         this.users = users;
         this.projects = projects;
     }
@@ -95,12 +94,12 @@ public class Manager {
         this.password = password;
     }
 
-    public OffsetDateTime getCreation_ts() {
-        return creation_ts;
+    public OffsetDateTime getCreationTs() {
+        return creationTs;
     }
 
-    public void setCreation_ts(OffsetDateTime creation_ts) {
-        this.creation_ts = creation_ts;
+    public void setCreationTs(OffsetDateTime creationTs) {
+        this.creationTs = creationTs;
     }
 
     public List<User> getUsers() {
@@ -111,11 +110,11 @@ public class Manager {
         this.users = users;
     }
 
-    public List<Project> getProjects() {
+    public Project getProjects() {
         return projects;
     }
 
-    public void setProjects(List<Project> projects) {
+    public void setProjects(Project projects) {
         this.projects = projects;
     }
 
@@ -127,7 +126,7 @@ public class Manager {
                 ", role='" + role + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", creation_ts=" + creation_ts +
+                ", creationTs=" + creationTs +
                 ", users=" + users +
                 ", projects=" + projects +
                 '}';

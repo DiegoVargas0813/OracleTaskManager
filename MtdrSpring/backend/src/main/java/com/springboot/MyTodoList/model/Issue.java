@@ -24,8 +24,8 @@ public class Issue {
     OffsetDateTime creation_ts;
 
     @ManyToOne
-    @JoinColumn(name = "ASSIGNED_TO")
-    private User assignedTo;
+    @JoinColumn(name = "USER_ID")
+    private User user;
     
     @ManyToOne
     @JoinColumn(name = "SPRINT_ID")
@@ -34,13 +34,13 @@ public class Issue {
     public Issue() {
     }
 
-    public Issue(int id, String name, String description, boolean status, OffsetDateTime creation_ts, User assignedTo, Sprint sprint) {
+    public Issue(int id, String name, String description, boolean status, OffsetDateTime creation_ts, User user, Sprint sprint) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
         this.creation_ts = creation_ts;
-        this.assignedTo = assignedTo;
+        this.user = user;
         this.sprint = sprint;
     }
 
@@ -85,12 +85,12 @@ public class Issue {
         this.creation_ts = creation_ts;
     }
 
-    public User getAssignedTo() {
-        return assignedTo;
+    public User getuser() {
+        return user;
     }
 
-    public void setAssignedTo(User assignedTo) {
-        this.assignedTo = assignedTo;
+    public void setuser(User user) {
+        this.user = user;
     }
 
     public Sprint getSprint() {
@@ -109,7 +109,7 @@ public class Issue {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 ", creation_ts=" + creation_ts +
-                ", assignedTo=" + assignedTo +
+                ", user=" + user +
                 ", sprint=" + sprint +
                 '}';
     }

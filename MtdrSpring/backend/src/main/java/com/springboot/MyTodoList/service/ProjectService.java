@@ -26,6 +26,6 @@ public class ProjectService {
     }
 
     public List<Project> getProjectsByManagerId(int id){
-        return projectRepository.findByAssignedTo_Id(id); // Use corrected method
+        return projectRepository.findByManager_Id(id); // Use corrected method
     }
 }

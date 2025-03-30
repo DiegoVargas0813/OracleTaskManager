@@ -5,7 +5,6 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.time.OffsetDateTime;
@@ -24,12 +23,12 @@ public class Project {
     @Column(name = "DESCRIPTION")
     String description;
     @Column(name = "CREATION_TS")
-    OffsetDateTime creation_ts;
+    OffsetDateTime creationTs;
     
-    @ManyToOne
-    @JoinColumn(name = "ASSIGNED_TO")
-    @JsonIgnore
-    private Manager assignedTo;
+    @OneToOne
+    @JoinColumn(name = "MANAGER_ID")
+    @JsonBackReference
+    private Manager manager;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -39,12 +38,12 @@ public class Project {
     public Project() {
     }
 
-    public Project(int id, String name, String description, OffsetDateTime creation_ts, Manager assignedTo, List<Sprint> sprints) {
+    public Project(int id, String name, String description, OffsetDateTime creationTs, Manager manager, List<Sprint> sprints) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.creation_ts = creation_ts;
-        this.assignedTo = assignedTo;
+        this.creationTs = creationTs;
+        this.manager = manager;
         this.sprints = sprints;
     }
 
@@ -73,20 +72,20 @@ public class Project {
         this.description = description;
     }
 
-    public OffsetDateTime getCreation_ts() {
-        return creation_ts;
+    public OffsetDateTime getCreationTs() {
+        return creationTs;
     }
 
-    public void setCreation_ts(OffsetDateTime creation_ts) {
-        this.creation_ts = creation_ts;
+    public void setCreationTs(OffsetDateTime creationTs) {
+        this.creationTs = creationTs;
     }
 
-    public Manager getAssignedTo() {
-        return assignedTo;
+    public Manager getmanager() {
+        return manager;
     }
 
-    public void setAssignedTo(Manager assignedTo) {
-        this.assignedTo = assignedTo;
+    public void setmanager(Manager manager) {
+        this.manager = manager;
     }
 
     public List<Sprint> getSprints() {
@@ -103,8 +102,8 @@ public class Project {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", creation_ts=" + creation_ts +
-                ", assignedTo=" + assignedTo +
+                ", creationTs=" + creationTs +
+                ", manager=" + manager +
                 ", sprints=" + sprints +
                 '}';
     }

@@ -38,7 +38,7 @@ public class TaskService {
         Assignment assignment = new Assignment();
         assignment.setTask(savedTask);
         assignment.setUser(user);
-        assignment.setAssignment_date(OffsetDateTime.now());
+        assignment.setAssignmentDate(OffsetDateTime.now());
 
         // 4. Maintain bidirectional relationships if needed
         savedTask.getAssignments().add(assignment); // If Task has an assignments list

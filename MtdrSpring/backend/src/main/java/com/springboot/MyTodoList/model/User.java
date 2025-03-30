@@ -5,7 +5,6 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -27,11 +26,11 @@ public class User {
     @Column(name = "PASSWORD")
     String password;
     @Column(name = "CREATION_TS")
-    OffsetDateTime creation_ts;
+    OffsetDateTime creationTs;
     
     @ManyToOne
     @JoinColumn(name = "MANAGER_ID")
-    @JsonIgnore
+    @JsonBackReference
     private Manager manager;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -39,7 +38,7 @@ public class User {
     @JsonIdentityReference(alwaysAsId = true)
     private List<Assignment> assignments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     private List<Issue> issues;
@@ -47,13 +46,13 @@ public class User {
     public User() {
     }
 
-    public User(int id, String name, String role, String email, String password, OffsetDateTime creation_ts, Manager manager, List<Assignment> assignments, List<Issue> issues) {
+    public User(int id, String name, String role, String email, String password, OffsetDateTime creationTs, Manager manager, List<Assignment> assignments, List<Issue> issues) {
         this.id = id;
         this.name = name;
         this.role = role;
         this.email = email;
         this.password = password;
-        this.creation_ts = creation_ts;
+        this.creationTs = creationTs;
         this.manager = manager;
         this.assignments = assignments;
         this.issues = issues;
@@ -100,12 +99,12 @@ public class User {
         this.password = password;
     }
 
-    public OffsetDateTime getCreation_ts() {
-        return creation_ts;
+    public OffsetDateTime getCreationTs() {
+        return creationTs;
     }
 
-    public void setCreation_ts(OffsetDateTime creation_ts) {
-        this.creation_ts = creation_ts;
+    public void setCreationTs(OffsetDateTime creationTs) {
+        this.creationTs = creationTs;
     }
 
     public Manager getManager() {
@@ -141,7 +140,7 @@ public class User {
                 ", role='" + role + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", creation_ts=" + creation_ts +
+                ", creationTs=" + creationTs +
                 ", manager=" + manager +
                 ", assignments=" + assignments +
                 ", issues=" + issues +
