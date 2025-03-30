@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,5 +41,15 @@ public class TaskController {
     @GetMapping("/user/{userId}")
     public List<Task> getTasksByUser(@PathVariable int userId) {
         return taskService.getTasksByUserId(userId);
+    }
+
+    @PutMapping("/{id}/assign-sprint/{sprintId}")
+    public ResponseEntity<String> assignTaskToSprint(@PathVariable int id, @PathVariable int sprintId) {
+        try {
+            taskService.assignTaskToSprint(id, sprintId);
+            return ResponseEntity.ok("Task assigned to sprint successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to assign task to sprint.");
+        }
     }
 }

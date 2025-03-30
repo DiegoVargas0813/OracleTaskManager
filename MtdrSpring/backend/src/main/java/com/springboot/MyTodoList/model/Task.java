@@ -81,6 +81,31 @@ public class Task {
         this.description = description;
     }
 
+    public int getStoryPoints() {
+        return storyPoints;
+    }
+
+    public void setStoryPoints(int storyPoints) {
+        this.storyPoints = storyPoints;
+    }
+
+    public int getEstimatedHours() {
+        return estimatedHours;
+    }
+
+    public void setEstimatedHours(int estimatedHours) {
+        this.estimatedHours = estimatedHours;
+    }
+
+    public int getRealHours() {
+        return realHours;
+    }
+
+    public void setRealHours(int realHours) {
+        this.realHours = realHours;
+    }
+
+
     public String getStatus() {
         return status;
     }

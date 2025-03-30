@@ -61,4 +61,8 @@ public class TaskService {
     public List<Task> getTasksByUserId(int userId) {
         return taskRepository.findAllTasksByUserId(userId);
     }
+
+    public void assignTaskToSprint(int taskId, int sprintId) {
+        taskRepository.assignTaskToSprint(taskId, sprintId);
+    }
 }
