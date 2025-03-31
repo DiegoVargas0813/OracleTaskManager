@@ -5,6 +5,7 @@ import com.springboot.MyTodoList.repository.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,5 +24,10 @@ public class SprintService {
 
     public Optional<Sprint> getSprintById(int id){
         return sprintRepository.findById(id);
+    }
+
+    public List<Sprint> getActiveSprints() {
+        OffsetDateTime now = OffsetDateTime.now();
+        return sprintRepository.findByStartDateBeforeAndEndDateAfter(now, now);
     }
 }
