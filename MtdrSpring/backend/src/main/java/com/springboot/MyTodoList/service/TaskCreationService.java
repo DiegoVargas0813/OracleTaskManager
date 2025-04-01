@@ -1,4 +1,4 @@
-/* package com.springboot.MyTodoList.service;
+package com.springboot.MyTodoList.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,12 +58,11 @@ public class TaskCreationService {
             return task;
         }
     }
-
     // Mapa para almacenar el estado de creación de tareas por usuario
     private Map<Long, TaskCreationState> userTaskStates = new HashMap<>();
 
     //Utilidades
-    private SendMessage startTaskCreation(long chatId) {
+    public SendMessage startTaskCreation(long chatId) {
         userTaskStates.put(chatId, new TaskCreationState());
     
         SendMessage message = new SendMessage();
@@ -78,12 +77,13 @@ public class TaskCreationService {
         return message;
     }
 
-    private void handleTaskCreation(long chatId, String userInput) {
+    public SendMessage handleTaskCreation(long chatId, String userInput) {
         TaskCreationState state = userTaskStates.get(chatId);
+        SendMessage message = new SendMessage();
     
         if (state == null) {
-            sendMessage(chatId, "No task creation in progress. Use /create to start.");
-            return;
+            message = sendMessage(chatId, "No task creation in progress. Use /create to start.");
+            return message;
         }
     
         Task task = state.getTask();
@@ -93,31 +93,32 @@ public class TaskCreationService {
             case NAME:
                 task.setName(userInput);
                 state.setCurrentStep(TaskStep.DESCRIPTION);
-                sendMessage(chatId, "Now enter the task description:");
-                break;
+                message = sendMessage(chatId, "Now enter the task description:");
+                return message;
     
             case DESCRIPTION:
                 task.setDescription(userInput);
                 state.setCurrentStep(TaskStep.STORY_POINTS);
-                sendMessage(chatId, "Enter the story points (a number):");
-                break;
+                message = sendMessage(chatId, "Enter the story points (a number):");
+                return message;
     
             case STORY_POINTS:
                 try {
                     task.setStoryPoints(Integer.parseInt(userInput));
                     state.setCurrentStep(TaskStep.ESTIMATED_HOURS);
-                    sendMessage(chatId, "Enter estimated hours (a number):");
+                    message = sendMessage(chatId, "Enter estimated hours (a number):");
+                    return message;
                 } catch (NumberFormatException e) {
-                    sendMessage(chatId, "Invalid input. Please enter a valid number for story points.");
+                    message = sendMessage(chatId, "Invalid input. Please enter a valid number for story points.");
+                    return message;
                 }
-                break;
     
             case ESTIMATED_HOURS:
                 try {
                     task.setEstimatedHours(Integer.parseInt(userInput));
                     state.setCurrentStep(TaskStep.SPRINT);
                     
-                    SendMessage message = new SendMessage();
+                    message = new SendMessage();
                     message.setChatId(chatId);
                     message.setText("Select a sprint for the task:");
 
@@ -136,69 +137,75 @@ public class TaskCreationService {
 
                     message.setReplyMarkup(keyboardMarkup);
 
-                    try {
-                        execute(message);
-                    } catch (TelegramApiException e) {
-                        logger.error(e.getLocalizedMessage(), e);
-                    }
+                    return message;
 
                 } catch (NumberFormatException e) {
-                    sendMessage(chatId, "Invalid input. Please enter a valid number for estimated hours.");
+                    message = sendMessage(chatId, "Invalid input. Please enter a valid number for estimated hours.");
+                    return message;
                 }
-                break;
 
 
             case SPRINT:
                 try {
                     int sprintId = Integer.parseInt(userInput.split("\\.")[0]);
-                    Sprint selectedSprint = getSprintById(sprintId);
+                    Sprint selectedSprint = sprintService.getSprintById(sprintId).orElse(null);
     
                     if (selectedSprint != null) {
                         task.setSprint(selectedSprint);
                         state.setCurrentStep(TaskStep.COMPLETED);
-                        saveTask(chatId, task);
+                        message = saveTask(chatId, task);
+                        return message;
                     } else {
-                        sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
+                        message = sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
+                        return message;
                     }
                 } catch (NumberFormatException e) {
-                    sendMessage(chatId, "Invalid input. Please enter a valid number for the sprint.");
+                    message = sendMessage(chatId, "Invalid input. Please enter a valid number for the sprint.");
+                    return message;
                 }
-                break;
     
             case COMPLETED:
-                sendMessage(chatId, "Task creation is already completed. Use the menu to create another.");
-                break;
+                message = sendMessage(chatId, "Task creation is already completed. Use the menu to create another.");
+                return message;
+            default:
+                message = sendMessage(chatId, "Unknown step. Please start over.");
+                return message;
         }
     }
 
 
-    private void saveTask(long chatId, Task task) {
+    private SendMessage saveTask(long chatId, Task task) {
         // Simulate saving task to DB
         task.setStatus("Not-started");
 
-        createTask(1, task);
+        taskService.createTask(1,task);
 
-        sendMessage(chatId, "Task saved successfully! ✅");
+        SendMessage message = sendMessage(chatId, "Task saved successfully! ✅");
     
         // Remove from tracking map
         userTaskStates.remove(chatId);
+
+        return message;
     
+
+        
         // Show main menu again
-        sendMainMenu(chatId);
+        //sendMainMenu(chatId);
     }
     
 
-    private void sendMessage(long chatId, String text) {
+    private SendMessage sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
-    
+        /*     
         try {
             execute(message);
         } catch (TelegramApiException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
+         */
+        return message;
     }
 
 }
- */

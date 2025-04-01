@@ -30,8 +30,8 @@ import com.springboot.MyTodoList.util.BotCommands;
 import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
-import com.springboot.MyTodoList.util.BotTaskCreator;
 
+import com.springboot.MyTodoList.service.TaskCreationService;
 
 import java.util.Map;
 
@@ -43,38 +43,12 @@ import io.swagger.models.Response;
 //y contiene métodos para enviar mensajes y manejar comandos de los usuarios.
 public class TaskItemBotController extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TaskItemBotController.class);
+    private TaskCreationService taskCreationService;
     private TaskService taskService;
     private SprintService sprintService;
     private String botName;
-    
-    public enum TaskStep {
-        NAME, DESCRIPTION, STORY_POINTS, ESTIMATED_HOURS, SPRINT, COMPLETED
-    }
 
-    
-    public class TaskCreationState {
-        private TaskStep currentStep;
-        private Task task;
-    
-        public TaskCreationState() {
-            this.currentStep = TaskStep.NAME;
-            this.task = new Task();
-        }
-    
-        public TaskStep getCurrentStep() {
-            return currentStep;
-        }
-    
-        public void setCurrentStep(TaskStep currentStep) {
-            this.currentStep = currentStep;
-        }
-    
-        public Task getTask() {
-            return task;
-        }
-    }
 
-    private Map<Long, TaskCreationState> userTaskStates = new HashMap<>();
 
     
     public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService) {
@@ -84,6 +58,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.taskService = taskService;
         this.sprintService = sprintService;
         this.botName = botName;
+        this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
     }
 
     @Override
@@ -100,26 +75,41 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                 sendMainMenu(chatId);
             } else if(messageTextFromTelegram.equals(BotLabels.LIST_ALL_TASKS.getLabel())){
                 //Obtenemos la lista de tareas
-                List<Task> tasks = getTasksByUserId(1);
+                //List<Task> tasks = getTasksByUserId(1);
                 ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
                 List<KeyboardRow> keyboard = new ArrayList<>();
 
+                //Boton de menu
+                KeyboardRow mainScreen = new KeyboardRow();
+                mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+                keyboard.add(mainScreen);
+
+                //Backlog
+                KeyboardRow backlog = new KeyboardRow();
+                backlog.add(BotLabels.BACKLOG.getLabel());
+                keyboard.add(backlog);
+
+                //Sprint activo
+                KeyboardRow currentSprint = new KeyboardRow();
+                currentSprint.add(BotLabels.CURRENT_SPRINT.getLabel());
+                keyboard.add(currentSprint);
+
+                
+                /*                 
                 //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
                 for(Task task : tasks){
-                    KeyboardRow currentRow = new KeyboardRow();
-                    currentRow.add(String.valueOf(task.getId()) + ".-"+ task.getName());
+                     currentRow.add(task.getName());
 
-                    if(task.getSprint() != null){
-                        currentRow.add("Sprint: " + task.getSprint().getName());
-                    } else {
-                        currentRow.add("Assign Sprint");
+                    if(task.getStatus()== "Not-started"){
+                        currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.START.getLabel());
+                        currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
+                    } else if (task.getStatus() == "Started"){
+                        currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel())
                     }
 
-                    currentRow.add("Done");
-
-                    keyboard.add(currentRow);
+                    keyboard.add(currentRow); 
                 }
-
+                */
 
 
                 //Setear teclado
@@ -137,144 +127,23 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 					logger.error(e.getLocalizedMessage(), e);
 				}
             } else if(messageTextFromTelegram.equals(BotLabels.CREATE_NEW_TASK.getLabel())){
-                startTaskCreation(chatId);
+                SendMessage message = taskCreationService.startTaskCreation(chatId);
+ 
+                try {
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
             } else {
-                handleTaskCreation(chatId, messageTextFromTelegram);
+                SendMessage message = taskCreationService.handleTaskCreation(chatId, messageTextFromTelegram);
+                try {
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
             }
         }
     }
-
-
-    //Utilidades
-    private void startTaskCreation(long chatId) {
-        userTaskStates.put(chatId, new TaskCreationState());
-    
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Please enter the task name:");
-    
-        // Remove keyboard for free text input
-        ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
-        keyboardRemove.setRemoveKeyboard(true);
-        message.setReplyMarkup(keyboardRemove);
-    
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private void handleTaskCreation(long chatId, String userInput) {
-        TaskCreationState state = userTaskStates.get(chatId);
-    
-        if (state == null) {
-            sendMessage(chatId, "No task creation in progress. Use /create to start.");
-            return;
-        }
-    
-        Task task = state.getTask();
-        TaskStep currentStep = state.getCurrentStep();
-    
-        switch (currentStep) {
-            case NAME:
-                task.setName(userInput);
-                state.setCurrentStep(TaskStep.DESCRIPTION);
-                sendMessage(chatId, "Now enter the task description:");
-                break;
-    
-            case DESCRIPTION:
-                task.setDescription(userInput);
-                state.setCurrentStep(TaskStep.STORY_POINTS);
-                sendMessage(chatId, "Enter the story points (a number):");
-                break;
-    
-            case STORY_POINTS:
-                try {
-                    task.setStoryPoints(Integer.parseInt(userInput));
-                    state.setCurrentStep(TaskStep.ESTIMATED_HOURS);
-                    sendMessage(chatId, "Enter estimated hours (a number):");
-                } catch (NumberFormatException e) {
-                    sendMessage(chatId, "Invalid input. Please enter a valid number for story points.");
-                }
-                break;
-    
-            case ESTIMATED_HOURS:
-                try {
-                    task.setEstimatedHours(Integer.parseInt(userInput));
-                    state.setCurrentStep(TaskStep.SPRINT);
-                    
-                    SendMessage message = new SendMessage();
-                    message.setChatId(chatId);
-                    message.setText("Select a sprint for the task:");
-
-                    List<Sprint> activeSprints = getActiveSprints();
-                    ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-
-                    List<KeyboardRow> keyboard = new ArrayList<>();
-
-                    for (Sprint sprint : activeSprints) {
-                        KeyboardRow row = new KeyboardRow();
-                        row.add(String.valueOf(sprint.getId()) + ".-" + sprint.getName());
-                        keyboard.add(row);
-                    }
-
-                    keyboardMarkup.setKeyboard(keyboard);
-
-                    message.setReplyMarkup(keyboardMarkup);
-
-                    try {
-                        execute(message);
-                    } catch (TelegramApiException e) {
-                        logger.error(e.getLocalizedMessage(), e);
-                    }
-
-                } catch (NumberFormatException e) {
-                    sendMessage(chatId, "Invalid input. Please enter a valid number for estimated hours.");
-                }
-                break;
-
-
-            case SPRINT:
-                try {
-                    int sprintId = Integer.parseInt(userInput.split("\\.")[0]);
-                    Sprint selectedSprint = getSprintById(sprintId);
-    
-                    if (selectedSprint != null) {
-                        task.setSprint(selectedSprint);
-                        state.setCurrentStep(TaskStep.COMPLETED);
-                        saveTask(chatId, task);
-                    } else {
-                        sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
-                    }
-                } catch (NumberFormatException e) {
-                    sendMessage(chatId, "Invalid input. Please enter a valid number for the sprint.");
-                }
-                break;
-    
-            case COMPLETED:
-                sendMessage(chatId, "Task creation is already completed. Use the menu to create another.");
-                break;
-        }
-    }
-
-
-    private void saveTask(long chatId, Task task) {
-        // Simulate saving task to DB
-        task.setStatus("Not-started");
-
-        createTask(1, task);
-
-        sendMessage(chatId, "Task saved successfully! ✅");
-    
-        // Remove from tracking map
-        userTaskStates.remove(chatId);
-    
-        // Show main menu again
-        sendMainMenu(chatId);
-    }
-    
-
     private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
@@ -314,7 +183,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
-    
     
     
 
