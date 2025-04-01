@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -50,6 +52,17 @@ public class TaskController {
             return ResponseEntity.ok("Task assigned to sprint successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to assign task to sprint.");
+        }
+    }
+
+    @PutMapping("/{id}/update-status")
+    public ResponseEntity<String> updateTaskStatus(@PathVariable int id, @RequestBody Map<String, String> requestBody) {
+        try {
+            String status = requestBody.get("status");
+            taskService.putTaskStatus(id, status);
+            return ResponseEntity.ok("Task status updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update task status.");
         }
     }
 }

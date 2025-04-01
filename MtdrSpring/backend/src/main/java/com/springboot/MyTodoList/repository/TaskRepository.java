@@ -21,4 +21,18 @@ public interface TaskRepository extends JpaRepository<Task,Integer> {
     @Transactional
     @Modifying
     void assignTaskToSprint(int taskId, int sprintId);
+
+    @Query("UPDATE Task t SET t.status = :status WHERE t.id = :taskId")
+    @Transactional
+    @Modifying
+    void updateTaskStatus(int taskId, String status);
+
+    // Obtener tareas de un usuario en un sprint específico
+    @Query("SELECT t FROM Task t JOIN t.assignments a WHERE a.user.id = :userId AND t.sprint.id = :sprintId")
+    List<Task> findTasksByUserIdAndSprintId(int userId, int sprintId);
+
+    @Query("UPDATE Task t SET t.realHours = :realHours WHERE t.id = :taskId")
+    @Transactional
+    @Modifying
+    void updateTaskRealHours(int taskId, int realHours); // Actualizar horas reales de una tarea
 }

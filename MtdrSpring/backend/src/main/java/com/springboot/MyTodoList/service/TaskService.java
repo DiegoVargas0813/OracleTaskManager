@@ -62,7 +62,20 @@ public class TaskService {
         return taskRepository.findAllTasksByUserId(userId);
     }
 
+    public List<Task> getTasksByUserIdAndSprintId(int userId, int sprintId) {
+        return taskRepository.findTasksByUserIdAndSprintId(userId, sprintId);
+    }
+
     public void assignTaskToSprint(int taskId, int sprintId) {
         taskRepository.assignTaskToSprint(taskId, sprintId);
     }
+
+    public void putTaskStatus(int taskId, String status) {
+        taskRepository.updateTaskStatus(taskId, status);
+    }
+
+    public void putTaskRealHours(int taskId, int realHours) {
+        taskRepository.updateTaskRealHours(taskId, realHours);
+    }
+
 }

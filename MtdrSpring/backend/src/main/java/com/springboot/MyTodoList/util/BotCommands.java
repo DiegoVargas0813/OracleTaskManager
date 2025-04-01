@@ -4,6 +4,8 @@ public enum BotCommands {
 
 	START_COMMAND("/start"), 
 	HIDE_COMMAND("/hide"), 
+
+	//Obsoletos
 	TODO_LIST("/todolist"),
 	ADD_ITEM("/additem");
 

@@ -9,8 +9,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 
 import org.slf4j.Logger;
@@ -19,6 +17,9 @@ import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
+import com.springboot.MyTodoList.util.UserState;
+
+import com.springboot.MyTodoList.util.BotMessages;
 
 public class TaskCreationService {
     private Logger logger;
@@ -67,7 +68,7 @@ public class TaskCreationService {
     
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText("Please enter the task name:");
+        message.setText(BotMessages.ENTER_TASK_NAME.getMessage());
     
         // Remove keyboard for free text input
         ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
@@ -93,23 +94,23 @@ public class TaskCreationService {
             case NAME:
                 task.setName(userInput);
                 state.setCurrentStep(TaskStep.DESCRIPTION);
-                message = sendMessage(chatId, "Now enter the task description:");
+                message = sendMessage(chatId, BotMessages.ENTER_TASK_DESCRIPTION.getMessage());
                 return message;
     
             case DESCRIPTION:
                 task.setDescription(userInput);
                 state.setCurrentStep(TaskStep.STORY_POINTS);
-                message = sendMessage(chatId, "Enter the story points (a number):");
+                message = sendMessage(chatId, BotMessages.ENTER_STORY_POINTS.getMessage());
                 return message;
     
             case STORY_POINTS:
                 try {
                     task.setStoryPoints(Integer.parseInt(userInput));
                     state.setCurrentStep(TaskStep.ESTIMATED_HOURS);
-                    message = sendMessage(chatId, "Enter estimated hours (a number):");
+                    message = sendMessage(chatId, BotMessages.ENTER_ESTIMATED_HOURS.getMessage());
                     return message;
                 } catch (NumberFormatException e) {
-                    message = sendMessage(chatId, "Invalid input. Please enter a valid number for story points.");
+                    message = sendMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
                     return message;
                 }
     
@@ -120,7 +121,7 @@ public class TaskCreationService {
                     
                     message = new SendMessage();
                     message.setChatId(chatId);
-                    message.setText("Select a sprint for the task:");
+                    message.setText(BotMessages.ENTER_SPRINT.getMessage());
 
                     List<Sprint> activeSprints = sprintService.getActiveSprints();
                     ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
@@ -140,7 +141,7 @@ public class TaskCreationService {
                     return message;
 
                 } catch (NumberFormatException e) {
-                    message = sendMessage(chatId, "Invalid input. Please enter a valid number for estimated hours.");
+                    message = sendMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
                     return message;
                 }
 
@@ -154,6 +155,7 @@ public class TaskCreationService {
                         task.setSprint(selectedSprint);
                         state.setCurrentStep(TaskStep.COMPLETED);
                         message = saveTask(chatId, task);
+                        
                         return message;
                     } else {
                         message = sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
@@ -178,17 +180,21 @@ public class TaskCreationService {
         // Simulate saving task to DB
         task.setStatus("Not-started");
 
+        //Cambiar user id por una variable de constructor
         taskService.createTask(1,task);
 
         SendMessage message = sendMessage(chatId, "Task saved successfully! ✅");
     
+        // Remueve el teclado
+        ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+        keyboardRemove.setRemoveKeyboard(true);
+        message.setReplyMarkup(keyboardRemove);
+
         // Remove from tracking map
         userTaskStates.remove(chatId);
 
         return message;
     
-
-        
         // Show main menu again
         //sendMainMenu(chatId);
     }
@@ -207,5 +213,4 @@ public class TaskCreationService {
          */
         return message;
     }
-
 }
