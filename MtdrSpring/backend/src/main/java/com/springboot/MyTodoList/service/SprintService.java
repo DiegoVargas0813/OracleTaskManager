@@ -30,4 +30,8 @@ public class SprintService {
         OffsetDateTime now = OffsetDateTime.now();
         return sprintRepository.findByStartDateBeforeAndEndDateAfter(now, now);
     }
+
+    public List<Sprint> getSprintsByDateRange(OffsetDateTime startDate, OffsetDateTime endDate) {
+        return sprintRepository.findByStartDateBeforeAndEndDateAfter(startDate, endDate);
+    }
 }

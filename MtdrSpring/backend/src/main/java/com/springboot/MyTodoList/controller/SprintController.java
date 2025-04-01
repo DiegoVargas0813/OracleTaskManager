@@ -36,4 +36,9 @@ public class SprintController {
         Optional<Sprint> sprint = sprintService.getSprintById(id);
         return sprint.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/active")
+    public List<Sprint> getActiveSprints() {
+        return sprintService.getActiveSprints();
+    }
 }
