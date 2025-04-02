@@ -42,6 +42,7 @@ import com.springboot.MyTodoList.util.UserState;
 import java.util.Map;
 
 import io.swagger.models.Response;
+import oracle.net.aso.b;
 
 
 
@@ -86,6 +87,10 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
             SendMessage message = new SendMessage();
 
+            // Este switch case se encarga de controlar el flujo de la aplicacion
+            // Hay ciertos comandos que requieren un flujo de mensajes continous.
+            // En este caso, el flujo de mensajes es controlado por el estado del usuario
+            // En el caso de no tener un estado, se ejecuta el flujo normal
             switch(userState.getCurrentProcess()) {
                 case EMAIL_VERIFICATION:
                 // Validate email and retrieve user ID
@@ -94,12 +99,12 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     if (userId != null) {
                         userState.setCurrentProcess(UserState.Process.NONE);
                         userState.setProcessState(userId);
-                        sendMessage(chatId, "Email verified successfully. You can now use the bot.");
+                        sendMessage(chatId, BotMessages.LOGIN_SUCCESS.getMessage());
                     } else {
-                        sendMessage(chatId, "Email not found. Please try again.");
+                        sendMessage(chatId, BotMessages.LOGIN_FAILURE.getMessage());
                     }
                 } else {
-                    sendMessage(chatId, "Invalid email format. Please enter a valid email.");
+                    sendMessage(chatId, BotMessages.LOGIN_INVALID_FORMAT.getMessage());
                 }
                 break;
 
@@ -112,7 +117,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     logger.error(e.getLocalizedMessage(), e);
                     }
 
-                    if (message.getText().contains("Task saved successfully")) {
+                    if (message.getText().contains(BotMessages.FINISH_TASK_CREATION.getMessage())) {
                         resetUserState(chatId);
                     }
 
@@ -126,7 +131,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         logger.error(e.getLocalizedMessage(), e);
                     }
 
-                    if (message.getText().contains("Task completion finished.")) {
+                    if (message.getText().contains(BotMessages.FINISH_COMPLETION.getMessage())) {
                         resetUserState(chatId);
                     }
                     break;
@@ -157,8 +162,11 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         sendBacklogMenu(chatId, userId);
                     } else if (messageTextFromTelegram.equals(BotLabels.SPRINT.getLabel())){
                         //Recuperamos los sprints activos
-                        sendMessage(chatId, "Sprint activo: " + sprintService.getActiveSprints().get(0).getName());
-                    }else if (messageTextFromTelegram.equals(BotLabels.CURRENT_SPRINT.getLabel())){
+                        sendMessage(chatId, "Active Sprint: " + sprintService.getActiveSprints().get(0).getName());
+                    }else if (
+                        messageTextFromTelegram.equals(BotLabels.CURRENT_SPRINT.getLabel())
+                        || messageTextFromTelegram.equals(BotCommands.CURRENT_SPRINT.getCommand())
+                    ){
                         //Recuperamos las tareas del sprint activo
                         sendCurrentSprintMenu(chatId, userId);
                     } else if (messageTextFromTelegram.indexOf(BotLabels.START_TASK.getLabel()) != -1) {
@@ -180,6 +188,11 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         } catch (TelegramApiException e) {
                             logger.error(e.getLocalizedMessage(), e);
                         }
+                    } else if(messageTextFromTelegram.equals(BotCommands.LOGOUT.getCommand())){
+                        userState.setCurrentProcess(UserState.Process.EMAIL_VERIFICATION);
+                        userState.setProcessState(null);
+                        userId = null;
+                        sendMessage(chatId, BotMessages.LOGOUT_SUCCESS.getMessage());
                     } else {
                         sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
                     }

@@ -15,8 +15,8 @@ public enum BotLabels {
 
 	// Obsoleto
 	ADD_NEW_ITEM("Add New Item"),
-	START_TASK("START"),
-	DONE("DONE"),
+	START_TASK("MARK AS STARTED"),
+	DONE("MARK AS DONE"),
 	CONFIRM("CONFIRM"),
 	UNDO("UNDO"),
 	DELETE("DELETE"),

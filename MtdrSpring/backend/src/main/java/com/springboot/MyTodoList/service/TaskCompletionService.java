@@ -143,7 +143,7 @@ public class TaskCompletionService {
                     taskService.putTaskStatus(taskId, "Complete");
                     state.setCurrentStep(TaskStep.COMPLETED);
 
-                    message = sendMessage(chatId, "Task completion finished.");
+                    message = sendMessage(chatId, BotMessages.FINISH_COMPLETION.getMessage());
 
                     //Removemos el teclado
                     ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
