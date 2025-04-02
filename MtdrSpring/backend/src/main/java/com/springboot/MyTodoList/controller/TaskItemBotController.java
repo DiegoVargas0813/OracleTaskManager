@@ -28,6 +28,7 @@ import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.UserService;
 
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
@@ -41,6 +42,7 @@ import com.springboot.MyTodoList.util.UserState;
 import java.util.Map;
 
 import io.swagger.models.Response;
+import oracle.net.aso.b;
 
 
 
@@ -52,18 +54,21 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private TaskCompletionService taskCompletionService;
     private TaskService taskService;
     private SprintService sprintService;
+    private UserService userService;
     private String botName;
+    private Integer userId;
 
 
     private Map<Long, UserState> userStates = new HashMap<>();
 
     
-    public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService) {
+    public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService) {
         super(botToken);
         logger.info("Bot Token: " + botToken);
         logger.info("Bot Name: " + botName);
         this.taskService = taskService;
         this.sprintService = sprintService;
+        this.userService = userService;
         this.botName = botName;
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
         this.taskCompletionService = new TaskCompletionService(taskService);
@@ -71,7 +76,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-
         if(update.hasMessage() && update.getMessage().hasText()){
             //Recuperamos el texto del mensaje y el id del chat
             String messageTextFromTelegram = update.getMessage().getText();
@@ -83,7 +87,27 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
             SendMessage message = new SendMessage();
 
+            // Este switch case se encarga de controlar el flujo de la aplicacion
+            // Hay ciertos comandos que requieren un flujo de mensajes continous.
+            // En este caso, el flujo de mensajes es controlado por el estado del usuario
+            // En el caso de no tener un estado, se ejecuta el flujo normal
             switch(userState.getCurrentProcess()) {
+                case EMAIL_VERIFICATION:
+                // Validate email and retrieve user ID
+                if (isValidEmail(messageTextFromTelegram)) {
+                    userId = userService.getUserIdByEmail(messageTextFromTelegram);
+                    if (userId != null) {
+                        userState.setCurrentProcess(UserState.Process.NONE);
+                        userState.setProcessState(userId);
+                        sendMessage(chatId, BotMessages.LOGIN_SUCCESS.getMessage());
+                    } else {
+                        sendMessage(chatId, BotMessages.LOGIN_FAILURE.getMessage());
+                    }
+                } else {
+                    sendMessage(chatId, BotMessages.LOGIN_INVALID_FORMAT.getMessage());
+                }
+                break;
+
                 case TASK_CREATION:
                     message = new SendMessage();
                     message = taskCreationService.handleTaskCreation(chatId, messageTextFromTelegram);
@@ -93,8 +117,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     logger.error(e.getLocalizedMessage(), e);
                     }
 
-                    if (message.getText().contains("Task saved successfully")) {
+                    if (message.getText().contains(BotMessages.FINISH_TASK_CREATION.getMessage())) {
                         resetUserState(chatId);
+                        sendCurrentSprintMenu(chatId, userId);
                     }
 
                     break;
@@ -107,8 +132,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         logger.error(e.getLocalizedMessage(), e);
                     }
 
-                    if (message.getText().contains("Task completion finished.")) {
+                    if (message.getText().contains(BotMessages.FINISH_COMPLETION.getMessage())) {
                         resetUserState(chatId);
+                        sendCurrentSprintMenu(chatId, userId);
                     }
                     break;
                 case OTHER_PROCESS:
@@ -116,7 +142,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     break;
                 case NONE:
                 default:
-                    // No hay proceso activo, continuar con el flujo normal
+                    // No hay proceso especial activo, manejar comandos normales
                     if(
                         messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
                         ||  messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
@@ -125,7 +151,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         sendListAllTasksMenu(chatId);
                     } else if(messageTextFromTelegram.equals(BotLabels.CREATE_NEW_TASK.getLabel())){
                         message = new SendMessage();
-                        message = taskCreationService.startTaskCreation(chatId);
+                        message = taskCreationService.startTaskCreation(chatId, userId);
                         userState.setCurrentProcess(UserState.Process.TASK_CREATION);
          
                         try {
@@ -135,13 +161,16 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         }
                     } else if (messageTextFromTelegram.equals(BotLabels.BACKLOG.getLabel())){
                         //Recuperamos las tareas del backlog
-                        sendBacklogMenu(chatId, 1);
+                        sendBacklogMenu(chatId, userId);
                     } else if (messageTextFromTelegram.equals(BotLabels.SPRINT.getLabel())){
                         //Recuperamos los sprints activos
-                        sendMessage(chatId, "Sprint activo: " + sprintService.getActiveSprints().get(0).getName());
-                    }else if (messageTextFromTelegram.equals(BotLabels.CURRENT_SPRINT.getLabel())){
+                        sendMessage(chatId, "Active Sprint: " + sprintService.getActiveSprints().get(0).getName());
+                    }else if (
+                        messageTextFromTelegram.equals(BotLabels.CURRENT_SPRINT.getLabel())
+                        || messageTextFromTelegram.equals(BotCommands.CURRENT_SPRINT.getCommand())
+                    ){
                         //Recuperamos las tareas del sprint activo
-                        sendCurrentSprintMenu(chatId, 1);
+                        sendCurrentSprintMenu(chatId, userId);
                     } else if (messageTextFromTelegram.indexOf(BotLabels.START_TASK.getLabel()) != -1) {
                         String start = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[0];
                         int taskId = Integer.parseInt(start);
@@ -153,7 +182,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         int taskId = Integer.parseInt(done);
 
                         message = new SendMessage();
-                        message = taskCompletionService.startTaskCompletionProcess(chatId, taskId);
+                        message = taskCompletionService.startTaskCompletionProcess(chatId, taskId, userId);
                         userState.setCurrentProcess(UserState.Process.TASK_COMPLETION);
 
                         try {
@@ -161,6 +190,11 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         } catch (TelegramApiException e) {
                             logger.error(e.getLocalizedMessage(), e);
                         }
+                    } else if(messageTextFromTelegram.equals(BotCommands.LOGOUT.getCommand())){
+                        userState.setCurrentProcess(UserState.Process.EMAIL_VERIFICATION);
+                        userState.setProcessState(null);
+                        userId = null;
+                        sendMessage(chatId, BotMessages.LOGOUT_SUCCESS.getMessage());
                     } else {
                         sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
                     }
@@ -249,7 +283,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
     private void sendBacklogMenu(long chatId, int userId){
         //TODO: Cambiar el id de usuario por el id del usuario que ha iniciado sesion
-        List<Task> tasks = taskService.getTasksByUserId(1);
+        List<Task> tasks = taskService.getTasksByUserId(userId);
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
@@ -266,13 +300,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         for(Task task : tasks){
             KeyboardRow currentRow = new KeyboardRow();
             currentRow.add(task.getId() + BotLabels.DASH.getLabel() + task.getName());
-/*             
-            if(task.getSprint() != null){
-                currentRow.add("Sprint: " + task.getSprint());
-            } else {
-                currentRow.add("Sprint: No sprint");
-            }
-             */
+            
+            
             if (task.getStatus() != null){
                 currentRow.add("Status: " + task.getStatus());
             } else {
@@ -296,7 +325,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private void sendCurrentSprintMenu(long chatId, int userId){
         //userId sera el id del usuario que ha iniciado sesion
         Sprint currentSprint = sprintService.getActiveSprints().get(0);
-        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(1, currentSprint.getId());
+        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
 
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -315,6 +344,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                 currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
             } else if (task.getStatus().equals("Started")){
                 currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
+            } else {
+                currentRow.add(BotLabels.IS_COMPLETED.getLabel());
             }
 
             keyboard.add(currentRow); 
@@ -357,6 +388,10 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             userState.setCurrentProcess(UserState.Process.NONE);
             userState.setProcessState(null);
         }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 
     //Llamadas a repository

@@ -29,4 +29,9 @@ public class UserService {
     public List<User> getUserByManagerId(int id){
         return userRepository.findUserByManagerId(id);
     }
+
+    public Integer getUserIdByEmail(String email) {
+        // Replace with actual repository call to fetch user ID by email
+        return userRepository.findUserIdByEmail(email);
+    }
 }

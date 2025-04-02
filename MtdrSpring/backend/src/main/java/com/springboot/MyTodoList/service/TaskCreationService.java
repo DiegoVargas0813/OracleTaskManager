@@ -19,12 +19,15 @@ import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.util.UserState;
 
+import oracle.net.aso.b;
+
 import com.springboot.MyTodoList.util.BotMessages;
 
 public class TaskCreationService {
     private Logger logger;
     private TaskService taskService;
     private SprintService sprintService;
+    private int userId;
 
     public TaskCreationService(Logger logger, TaskService taskService, SprintService sprintService) {
         this.logger = logger;
@@ -63,7 +66,8 @@ public class TaskCreationService {
     private Map<Long, TaskCreationState> userTaskStates = new HashMap<>();
 
     //Utilidades
-    public SendMessage startTaskCreation(long chatId) {
+    public SendMessage startTaskCreation(long chatId, int userId) {
+        this.userId = userId;
         userTaskStates.put(chatId, new TaskCreationState());
     
         SendMessage message = new SendMessage();
@@ -162,7 +166,7 @@ public class TaskCreationService {
                         return message;
                     }
                 } catch (NumberFormatException e) {
-                    message = sendMessage(chatId, "Invalid input. Please enter a valid number for the sprint.");
+                    message = sendMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
                     return message;
                 }
     
@@ -181,9 +185,9 @@ public class TaskCreationService {
         task.setStatus("Not-started");
 
         //Cambiar user id por una variable de constructor
-        taskService.createTask(1,task);
+        taskService.createTask(userId,task);
 
-        SendMessage message = sendMessage(chatId, "Task saved successfully! ✅");
+        SendMessage message = sendMessage(chatId, BotMessages.FINISH_TASK_CREATION.getMessage());
     
         // Remueve el teclado
         ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
