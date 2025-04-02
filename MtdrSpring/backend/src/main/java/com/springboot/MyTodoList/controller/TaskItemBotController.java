@@ -119,6 +119,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
                     if (message.getText().contains(BotMessages.FINISH_TASK_CREATION.getMessage())) {
                         resetUserState(chatId);
+                        sendCurrentSprintMenu(chatId, userId);
                     }
 
                     break;
@@ -133,6 +134,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
                     if (message.getText().contains(BotMessages.FINISH_COMPLETION.getMessage())) {
                         resetUserState(chatId);
+                        sendCurrentSprintMenu(chatId, userId);
                     }
                     break;
                 case OTHER_PROCESS:
@@ -140,7 +142,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     break;
                 case NONE:
                 default:
-                    // No hay proceso activo, continuar con el flujo normal
+                    // No hay proceso especial activo, manejar comandos normales
                     if(
                         messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
                         ||  messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
@@ -298,13 +300,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         for(Task task : tasks){
             KeyboardRow currentRow = new KeyboardRow();
             currentRow.add(task.getId() + BotLabels.DASH.getLabel() + task.getName());
-/*             
-            if(task.getSprint() != null){
-                currentRow.add("Sprint: " + task.getSprint());
-            } else {
-                currentRow.add("Sprint: No sprint");
-            }
-             */
+            
+            
             if (task.getStatus() != null){
                 currentRow.add("Status: " + task.getStatus());
             } else {
@@ -347,6 +344,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                 currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
             } else if (task.getStatus().equals("Started")){
                 currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
+            } else {
+                currentRow.add(BotLabels.IS_COMPLETED.getLabel());
             }
 
             keyboard.add(currentRow); 

@@ -31,7 +31,7 @@ public class Task {
     @Column(name = "REAL_HOURS")
     int realHours;
     
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.EAGER)
     @JoinColumn(name = "SPRINT_ID")
     @JsonBackReference
     private Sprint sprint;

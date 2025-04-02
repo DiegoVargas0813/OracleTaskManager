@@ -15,19 +15,21 @@ public enum BotLabels {
 
 	// Obsoleto
 	ADD_NEW_ITEM("Add New Item"),
-	START_TASK("MARK AS STARTED"),
-	DONE("MARK AS DONE"),
+	START_TASK("Mark as started"),
+	DONE("Mark as done"),
+	IS_COMPLETED("Task is complete"),
 	CONFIRM("CONFIRM"),
 	UNDO("UNDO"),
 	DELETE("DELETE"),
 	MY_TODO_LIST("MY TODO LIST"),
 	
 	//Sprint labels
-	BACKLOG("BACKLOG"),
+	BACKLOG("Backlog"),
 	CURRENT_SPRINT("Current Sprint"),
 	SPRINT("SPRINT"),
-	DASH("-");
 
+	// Labels de utilidad
+	DASH("-");
 
 
 

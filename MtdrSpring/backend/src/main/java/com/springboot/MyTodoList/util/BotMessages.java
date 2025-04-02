@@ -1,7 +1,5 @@
 package com.springboot.MyTodoList.util;
 
-import com.springboot.MyTodoList.model.Task;
-
 public enum BotMessages {
 	// Saludo inicial
 	HELLO_MYTODO_BOT(
@@ -29,7 +27,7 @@ public enum BotMessages {
 	ENTER_TASK_DESCRIPTION("Now enter the task description:"),
 	ENTER_STORY_POINTS("Enter the story points (a number):"),
 	ENTER_ESTIMATED_HOURS("Enter estimated hours (a number):"),
-	ENTER_SPRINT("Select a sprint for the task:"),
+	ENTER_SPRINT("Confirm the sprint for the task:"),
 	FINISH_TASK_CREATION("Task creation finished."),
 	ERROR_INVALID_NUMBER("Invalid input. Please enter a valid number."),
 
