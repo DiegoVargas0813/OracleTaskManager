@@ -28,6 +28,7 @@ import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.UserService;
 
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
@@ -52,18 +53,21 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private TaskCompletionService taskCompletionService;
     private TaskService taskService;
     private SprintService sprintService;
+    private UserService userService;
     private String botName;
+    private Integer userId;
 
 
     private Map<Long, UserState> userStates = new HashMap<>();
 
     
-    public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService) {
+    public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService) {
         super(botToken);
         logger.info("Bot Token: " + botToken);
         logger.info("Bot Name: " + botName);
         this.taskService = taskService;
         this.sprintService = sprintService;
+        this.userService = userService;
         this.botName = botName;
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
         this.taskCompletionService = new TaskCompletionService(taskService);
@@ -71,7 +75,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-
         if(update.hasMessage() && update.getMessage().hasText()){
             //Recuperamos el texto del mensaje y el id del chat
             String messageTextFromTelegram = update.getMessage().getText();
@@ -84,6 +87,22 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             SendMessage message = new SendMessage();
 
             switch(userState.getCurrentProcess()) {
+                case EMAIL_VERIFICATION:
+                // Validate email and retrieve user ID
+                if (isValidEmail(messageTextFromTelegram)) {
+                    userId = userService.getUserIdByEmail(messageTextFromTelegram);
+                    if (userId != null) {
+                        userState.setCurrentProcess(UserState.Process.NONE);
+                        userState.setProcessState(userId);
+                        sendMessage(chatId, "Email verified successfully. You can now use the bot.");
+                    } else {
+                        sendMessage(chatId, "Email not found. Please try again.");
+                    }
+                } else {
+                    sendMessage(chatId, "Invalid email format. Please enter a valid email.");
+                }
+                break;
+
                 case TASK_CREATION:
                     message = new SendMessage();
                     message = taskCreationService.handleTaskCreation(chatId, messageTextFromTelegram);
@@ -125,7 +144,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         sendListAllTasksMenu(chatId);
                     } else if(messageTextFromTelegram.equals(BotLabels.CREATE_NEW_TASK.getLabel())){
                         message = new SendMessage();
-                        message = taskCreationService.startTaskCreation(chatId);
+                        message = taskCreationService.startTaskCreation(chatId, userId);
                         userState.setCurrentProcess(UserState.Process.TASK_CREATION);
          
                         try {
@@ -135,13 +154,13 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         }
                     } else if (messageTextFromTelegram.equals(BotLabels.BACKLOG.getLabel())){
                         //Recuperamos las tareas del backlog
-                        sendBacklogMenu(chatId, 1);
+                        sendBacklogMenu(chatId, userId);
                     } else if (messageTextFromTelegram.equals(BotLabels.SPRINT.getLabel())){
                         //Recuperamos los sprints activos
                         sendMessage(chatId, "Sprint activo: " + sprintService.getActiveSprints().get(0).getName());
                     }else if (messageTextFromTelegram.equals(BotLabels.CURRENT_SPRINT.getLabel())){
                         //Recuperamos las tareas del sprint activo
-                        sendCurrentSprintMenu(chatId, 1);
+                        sendCurrentSprintMenu(chatId, userId);
                     } else if (messageTextFromTelegram.indexOf(BotLabels.START_TASK.getLabel()) != -1) {
                         String start = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[0];
                         int taskId = Integer.parseInt(start);
@@ -153,7 +172,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         int taskId = Integer.parseInt(done);
 
                         message = new SendMessage();
-                        message = taskCompletionService.startTaskCompletionProcess(chatId, taskId);
+                        message = taskCompletionService.startTaskCompletionProcess(chatId, taskId, userId);
                         userState.setCurrentProcess(UserState.Process.TASK_COMPLETION);
 
                         try {
@@ -249,7 +268,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
     private void sendBacklogMenu(long chatId, int userId){
         //TODO: Cambiar el id de usuario por el id del usuario que ha iniciado sesion
-        List<Task> tasks = taskService.getTasksByUserId(1);
+        List<Task> tasks = taskService.getTasksByUserId(userId);
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
@@ -296,7 +315,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private void sendCurrentSprintMenu(long chatId, int userId){
         //userId sera el id del usuario que ha iniciado sesion
         Sprint currentSprint = sprintService.getActiveSprints().get(0);
-        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(1, currentSprint.getId());
+        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
 
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -357,6 +376,10 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             userState.setCurrentProcess(UserState.Process.NONE);
             userState.setProcessState(null);
         }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 
     //Llamadas a repository

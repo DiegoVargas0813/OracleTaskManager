@@ -25,6 +25,7 @@ public class TaskCreationService {
     private Logger logger;
     private TaskService taskService;
     private SprintService sprintService;
+    private int userId;
 
     public TaskCreationService(Logger logger, TaskService taskService, SprintService sprintService) {
         this.logger = logger;
@@ -63,7 +64,8 @@ public class TaskCreationService {
     private Map<Long, TaskCreationState> userTaskStates = new HashMap<>();
 
     //Utilidades
-    public SendMessage startTaskCreation(long chatId) {
+    public SendMessage startTaskCreation(long chatId, int userId) {
+        this.userId = userId;
         userTaskStates.put(chatId, new TaskCreationState());
     
         SendMessage message = new SendMessage();
@@ -181,7 +183,7 @@ public class TaskCreationService {
         task.setStatus("Not-started");
 
         //Cambiar user id por una variable de constructor
-        taskService.createTask(1,task);
+        taskService.createTask(userId,task);
 
         SendMessage message = sendMessage(chatId, "Task saved successfully! ✅");
     

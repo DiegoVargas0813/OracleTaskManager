@@ -20,6 +20,7 @@ import java.util.Optional;
 
 public class TaskCompletionService {
     private TaskService taskService;    
+    private int userId;
 
     // Constructor
     public TaskCompletionService(TaskService taskService) {
@@ -71,7 +72,8 @@ public class TaskCompletionService {
     private Map<Long, TaskCompletionState> userTaskCompletionStates = new HashMap<>();
 
     // Método para iniciar el proceso de creación de tareas
-    public SendMessage startTaskCompletionProcess(long chatId, int taskId) {
+    public SendMessage startTaskCompletionProcess(long chatId, int taskId, int userId) {
+        this.userId = userId;
         TaskCompletionState taskCompletionState = new TaskCompletionState();
 
         taskCompletionState.setTaskId(taskId);
