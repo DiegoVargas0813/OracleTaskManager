@@ -110,7 +110,15 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
                 case TASK_CREATION:
                     message = new SendMessage();
+
+                    if (messageTextFromTelegram.equalsIgnoreCase(BotCommands.CANCEL.getCommand())) {
+                        resetUserState(chatId);
+                        sendMessage(chatId, BotMessages.FINISH_TASK_CREATION.getMessage());
+                        return;
+                    }
+
                     message = taskCreationService.handleTaskCreation(chatId, messageTextFromTelegram);
+
                     try {
                         execute(message);
                     } catch (TelegramApiException e) {
@@ -125,6 +133,13 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     break;
                 case TASK_COMPLETION:
                     message = new SendMessage();
+
+                    if (messageTextFromTelegram.equalsIgnoreCase(BotCommands.CANCEL.getCommand())) {
+                        resetUserState(chatId);
+                        sendMessage(chatId, BotMessages.FINISH_COMPLETION.getMessage());
+                        return;
+                    }
+
                     message = taskCompletionService.handleTaskCompletition(chatId, messageTextFromTelegram);
                     try {
                         execute(message);
@@ -147,9 +162,13 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
                         ||  messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
                         sendMainMenu(chatId);
-                    } else if(messageTextFromTelegram.equals(BotLabels.LIST_ALL_TASKS.getLabel())){
+                    } else if(
+                        messageTextFromTelegram.equals(BotLabels.LIST_ALL_TASKS.getLabel())
+                        || messageTextFromTelegram.equals(BotCommands.LIST_ALL.getCommand())) {
                         sendListAllTasksMenu(chatId);
-                    } else if(messageTextFromTelegram.equals(BotLabels.CREATE_NEW_TASK.getLabel())){
+                    } else if(
+                        messageTextFromTelegram.equals(BotLabels.CREATE_NEW_TASK.getLabel())
+                        || messageTextFromTelegram.equals(BotCommands.CREATE_TASK.getCommand())) {
                         message = new SendMessage();
                         message = taskCreationService.startTaskCreation(chatId, userId);
                         userState.setCurrentProcess(UserState.Process.TASK_CREATION);
