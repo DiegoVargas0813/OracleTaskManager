@@ -7,7 +7,11 @@ public enum BotCommands {
 	HIDE_COMMAND("/hide"), 
 	LOGOUT("/logout"),
 
-	// Comandos de sprints
+	CANCEL("/cancel"),
+
+	// Comandos de tareas
+	CREATE_TASK("/createtask"),
+	LIST_ALL("/listall"),
 	CURRENT_SPRINT("/currentsprint"),
 
 	//Obsoletos

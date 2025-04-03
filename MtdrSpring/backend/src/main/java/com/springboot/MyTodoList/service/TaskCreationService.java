@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -22,6 +23,7 @@ import com.springboot.MyTodoList.util.UserState;
 import oracle.net.aso.b;
 
 import com.springboot.MyTodoList.util.BotMessages;
+import com.springboot.MyTodoList.util.BotCommands;
 
 public class TaskCreationService {
     private Logger logger;
@@ -90,7 +92,6 @@ public class TaskCreationService {
             message = sendMessage(chatId, "No task creation in progress. Use /create to start.");
             return message;
         }
-    
         Task task = state.getTask();
         TaskStep currentStep = state.getCurrentStep();
     
@@ -120,7 +121,13 @@ public class TaskCreationService {
     
             case ESTIMATED_HOURS:
                 try {
-                    task.setEstimatedHours(Integer.parseInt(userInput));
+                    int estimatedHours = Integer.parseInt(userInput);
+                    if (estimatedHours > 4) {
+                        // Reject input and repeat the step
+                        message = sendMessage(chatId, "Estimated hours cannot exceed 4. Please enter a valid number (1-4).");
+                        return message;
+                    }
+                    task.setEstimatedHours(estimatedHours);
                     state.setCurrentStep(TaskStep.SPRINT);
                     
                     message = new SendMessage();

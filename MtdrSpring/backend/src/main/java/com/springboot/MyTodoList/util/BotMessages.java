@@ -3,7 +3,7 @@ package com.springboot.MyTodoList.util;
 public enum BotMessages {
 	// Saludo inicial
 	HELLO_MYTODO_BOT(
-	"Hola! Soy el Oracle Task Manager!\n Selecciona una de las siguentes opciones del menu para continua!:"),
+	"Hi! I'm the Oracle Task Manager!\n Select any of the menu options to continue!:"),
 	BOT_REGISTERED_STARTED("Bot registered and started succesfully!"),
 
 	// Mensajes obsoletos
@@ -28,16 +28,16 @@ public enum BotMessages {
 	ENTER_STORY_POINTS("Enter the story points (a number):"),
 	ENTER_ESTIMATED_HOURS("Enter estimated hours (a number):"),
 	ENTER_SPRINT("Confirm the sprint for the task:"),
-	FINISH_TASK_CREATION("Task creation finished."),
+	FINISH_TASK_CREATION("Task creation finished. Use /listall to see all tasks."),
 	ERROR_INVALID_NUMBER("Invalid input. Please enter a valid number."),
 
 	//Mensaje de backlog
-	BACKLOG_NOTICE("This menu is purely visual, to modify current tasks please use the 'Current Sprint' button or the /currentsprint command."),
+	BACKLOG_NOTICE("This menu is purely visual, to modify current tasks please use the 'Current Sprint' button, the /currentsprint command or /listall to return to the previous menu."),
 
 	// Mensajes de completado de tareas
 	ENTER_REAL_HOURS("Enter the real hours spent on the task:"),
-	ENTER_CONFIRMATION("Once a task is marked as completed, it cannot be undone. Press the button to confirm \nTime spent: "),
-	FINISH_COMPLETION("Task completion finished."),
+	ENTER_CONFIRMATION("Once a task is marked as completed, it cannot be undone. Press the button to confirm \nHours Spent: "),
+	FINISH_COMPLETION("Task completion finished. Use /listall to see all tasks."),
 	CANCEL_COMPLETION("An error occurred while marking the task as completed. Please try again."),
 
 	// Mensajes de error
