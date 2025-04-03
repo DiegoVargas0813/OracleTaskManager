@@ -1,4 +1,4 @@
-/================= create ATP Instance =======================================
+//================= create ATP Instance =======================================
 variable "autonomous_database_db_workload" { default = "OLTP" }
 variable "autonomous_database_defined_tags_value" { default = "value" }
 variable "autonomous_database_license_model" { default = "BRING_YOUR_OWN_LICENSE" }
