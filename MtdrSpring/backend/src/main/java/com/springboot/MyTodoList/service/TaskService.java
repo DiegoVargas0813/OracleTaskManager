@@ -3,9 +3,11 @@ package com.springboot.MyTodoList.service;
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.model.Assignment;
 import com.springboot.MyTodoList.model.User;
+import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.repository.AssignmentRepository;
 import com.springboot.MyTodoList.repository.TaskRepository;
 import com.springboot.MyTodoList.repository.UserRepository;
+import com.springboot.MyTodoList.repository.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,26 +27,36 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SprintRepository sprintRepository;
+
     @Transactional // Ensures atomicity: either all operations succeed or none.
     public Task createTask(int userId, Task task) {
         // 1. Find the User, or throw an exception if not found
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        // 2. Save the Task
+        // 2. Handle sprint assignment - if no sprint is set, use sprint_id=21 as fallback
+        if (task.getSprint() == null) {
+            Sprint defaultSprint = sprintRepository.findById(21)
+                    .orElseThrow(() -> new RuntimeException("Default sprint not found with ID: 21"));
+            task.setSprint(defaultSprint);
+        }
+
+        // 3. Save the Task
         Task savedTask = taskRepository.save(task);
 
-        // 3. Create a new Assignment entry linking the Task and User
+        // 4. Create a new Assignment entry linking the Task and User
         Assignment assignment = new Assignment();
         assignment.setTask(savedTask);
         assignment.setUser(user);
         assignment.setAssignmentDate(OffsetDateTime.now());
 
-        // 4. Maintain bidirectional relationships if needed
+        // 5. Maintain bidirectional relationships if needed
         savedTask.getAssignments().add(assignment); // If Task has an assignments list
         user.getAssignments().add(assignment); // If User has an assignments list
 
-        // 5. Save the Assignment
+        // 6. Save the Assignment
         assignmentRepository.save(assignment);
 
         return savedTask;
@@ -76,6 +88,10 @@ public class TaskService {
 
     public void putTaskRealHours(int taskId, int realHours) {
         taskRepository.updateTaskRealHours(taskId, realHours);
+    }
+
+    public List<Task> getTasksBySprintId(int sprintId) {
+        return taskRepository.findTasksBySprintId(sprintId);
     }
 
 }

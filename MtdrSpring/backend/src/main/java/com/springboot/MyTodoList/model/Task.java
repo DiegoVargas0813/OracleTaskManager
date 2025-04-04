@@ -1,19 +1,23 @@
 package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
-
 import java.util.List;
 
 @Entity
 @Table(name = "TASKS")
 public class Task {
+    private static final Logger logger = LoggerFactory.getLogger(Task.class);
+    
     @Id
     @Column(name = "TASK_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,9 +35,9 @@ public class Task {
     @Column(name = "REAL_HOURS")
     int realHours;
     
-    @ManyToOne (fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "SPRINT_ID")
-    @JsonBackReference
+    @JsonIgnore
     private Sprint sprint;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -105,7 +109,6 @@ public class Task {
         this.realHours = realHours;
     }
 
-
     public String getStatus() {
         return status;
     }
@@ -120,6 +123,15 @@ public class Task {
 
     public void setSprint(Sprint sprint) {
         this.sprint = sprint;
+    }
+
+    // Add this setter to handle the sprint_id field from frontend
+    public void setSprint_id(int sprintId) {
+        logger.info("Setting sprint_id: {}", sprintId);
+        Sprint sprint = new Sprint();
+        sprint.setId(sprintId);
+        this.sprint = sprint;
+        logger.info("Sprint set to: {}", this.sprint);
     }
 
     public List<Assignment> getAssignments() {
