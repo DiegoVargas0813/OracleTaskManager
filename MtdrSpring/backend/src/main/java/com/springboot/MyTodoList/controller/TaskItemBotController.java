@@ -28,6 +28,8 @@ import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
 
+import com.springboot.MyTodoList.handler.TelegramBotHandler;
+
 import com.springboot.MyTodoList.util.BotCommands;
 import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
@@ -35,7 +37,6 @@ import com.springboot.MyTodoList.util.BotMessages;
 import com.springboot.MyTodoList.util.UserState;
 
 import java.util.Map;
-
 
 
 //Nuestra clase TaskItemBotController extiende TelegramLongPollingBot para manejar las interacciones con el bot de Telegram
@@ -52,6 +53,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private SprintService sprintService;
     private UserService userService;
     private UserStateService userStateService;
+
+    // Handlers para el bot
+    private TelegramBotHandler telegramBotHandler;
 
     // Variables para el bot
     private String botName;
@@ -70,6 +74,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
         this.taskCompletionService = new TaskCompletionService(taskService);
         this.userStateService = new UserStateService();
+        this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService);
     }
 
     @Override
@@ -159,7 +164,12 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     if(
                         messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
                         ||  messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-                        sendMainMenu(chatId);
+                        message = telegramBotHandler.sendMainMenu(chatId);
+                        try {
+                            execute(message);
+                        } catch (TelegramApiException e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
                     } else if(
                         messageTextFromTelegram.equals(BotLabels.LIST_ALL_TASKS.getLabel())
                         || messageTextFromTelegram.equals(BotCommands.LIST_ALL.getCommand())) {
@@ -232,7 +242,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         }
     }
     
-    private void sendMainMenu(long chatId) {
+/*     private void sendMainMenu(long chatId) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText("Main Menu:");
@@ -258,7 +268,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-    }
+    } */
+   
 
     private void sendListAllTasksMenu(long chatId){
         //Obtenemos la lista de tareas
