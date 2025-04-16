@@ -130,7 +130,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
                     if (message.getText().contains(BotMessages.FINISH_TASK_CREATION.getMessage())) {
                         userStateService.resetUserState(chatId);
-                        sendCurrentSprintMenu(chatId, userId);
+                        message = telegramBotHandler.sendCurrentSprintMenu(chatId, userId);
+                        trySendMessage(message);
                     }
 
                     break;
@@ -152,7 +153,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
                     if (message.getText().contains(BotMessages.FINISH_COMPLETION.getMessage())) {
                         userStateService.resetUserState(chatId);
-                        sendCurrentSprintMenu(chatId, userId);
+                        message = telegramBotHandler.sendCurrentSprintMenu(chatId, userId);
+                        trySendMessage(message);
                     }
                     break;
                 case OTHER_PROCESS:
@@ -164,16 +166,14 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     if(
                         messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
                         ||  messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
+                        
                         message = telegramBotHandler.sendMainMenu(chatId);
-                        try {
-                            execute(message);
-                        } catch (TelegramApiException e) {
-                            logger.error(e.getLocalizedMessage(), e);
-                        }
+                        trySendMessage(message);
                     } else if(
                         messageTextFromTelegram.equals(BotLabels.LIST_ALL_TASKS.getLabel())
                         || messageTextFromTelegram.equals(BotCommands.LIST_ALL.getCommand())) {
-                        sendListAllTasksMenu(chatId);
+                        message = telegramBotHandler.sendListAllTasksMenu(chatId);
+                        trySendMessage(message);
                     } else if(
                         messageTextFromTelegram.equals(BotLabels.CREATE_NEW_TASK.getLabel())
                         || messageTextFromTelegram.equals(BotCommands.CREATE_TASK.getCommand())) {
@@ -188,7 +188,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         }
                     } else if (messageTextFromTelegram.equals(BotLabels.BACKLOG.getLabel())){
                         //Recuperamos las tareas del backlog
-                        sendBacklogMenu(chatId, userId);
+                        message = telegramBotHandler.sendBacklogMenu(chatId, userId);
+                        trySendMessage(message);
                     } else if (messageTextFromTelegram.equals(BotLabels.SPRINT.getLabel())){
                         //Recuperamos los sprints activos
                         sendMessage(chatId, "Active Sprint: " + sprintService.getActiveSprints().get(0).getName());
@@ -197,13 +198,15 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         || messageTextFromTelegram.equals(BotCommands.CURRENT_SPRINT.getCommand())
                     ){
                         //Recuperamos las tareas del sprint activo
-                        sendCurrentSprintMenu(chatId, userId);
+                        message = telegramBotHandler.sendCurrentSprintMenu(chatId, userId);
+                        trySendMessage(message);
                     } else if (messageTextFromTelegram.indexOf(BotLabels.START_TASK.getLabel()) != -1) {
                         String start = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[0];
                         int taskId = Integer.parseInt(start);
 
                         sendStartTaskMessage(chatId, taskId);
-                        sendListAllTasksMenu(chatId);
+                        message = telegramBotHandler.sendListAllTasksMenu(chatId);
+                        trySendMessage(message);
                     } else if (messageTextFromTelegram.indexOf(BotLabels.DONE.getLabel()) != -1) {
                         String done = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[0];
                         int taskId = Integer.parseInt(done);
@@ -242,107 +245,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         }
     }
     
-/*     private void sendMainMenu(long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Main Menu:");
-    
-        // Create keyboard
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-    
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(BotLabels.LIST_ALL_TASKS.getLabel());
-    
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(BotLabels.CREATE_NEW_TASK.getLabel());
-    
-        keyboard.add(row1);
-        keyboard.add(row2);
-    
-        keyboardMarkup.setKeyboard(keyboard);
-        message.setReplyMarkup(keyboardMarkup);
-    
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    } */
-   
-
-    private void sendListAllTasksMenu(long chatId){
-        //Obtenemos la lista de tareas
-        //List<Task> tasks = getTasksByUserId(1);
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        //Boton de menu
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
-
-        //Backlog
-        KeyboardRow backlog = new KeyboardRow();
-        backlog.add(BotLabels.BACKLOG.getLabel());
-        keyboard.add(backlog);
-
-        //Sprint activo
-        KeyboardRow currentSprint = new KeyboardRow();
-        currentSprint.add(BotLabels.CURRENT_SPRINT.getLabel());
-        keyboard.add(currentSprint);
-
-        //Setear teclado
-        keyboardMarkup.setKeyboard(keyboard);
-
-        //Crear mensaje
-        SendMessage messageToTelegram = new SendMessage();
-        messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
-        messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-                
-        try {
-            execute(messageToTelegram);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private void sendBacklogMenu(long chatId, int userId){
-        //TODO: Cambiar el id de usuario por el id del usuario que ha iniciado sesion
-        List<Task> tasks = taskService.getTasksByUserId(userId);
-
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(BotMessages.BACKLOG_NOTICE.getMessage());
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
-
-        //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
-        for(Task task : tasks){
-            KeyboardRow currentRow = new KeyboardRow();
-            currentRow.add(task.getId() + BotLabels.DASH.getLabel() + task.getName());
-            
-            
-            if (task.getStatus() != null){
-                currentRow.add("Status: " + task.getStatus());
-            } else {
-                currentRow.add("Status: No status");
-            }
-
-            keyboard.add(currentRow); 
-        }
-
-        //Setear teclado
-        keyboardMarkup.setKeyboard(keyboard);
-        message.setReplyMarkup(keyboardMarkup);
-
+    private void trySendMessage(SendMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -350,51 +253,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         }
     }
 
-    private void sendCurrentSprintMenu(long chatId, int userId){
-        //userId sera el id del usuario que ha iniciado sesion
-        Sprint currentSprint = sprintService.getActiveSprints().get(0);
-        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
-
-        //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
-        for(Task task : tasks){
-            KeyboardRow currentRow = new KeyboardRow();
-            currentRow.add(task.getName());
-
-            if(task.getStatus().equals("Not-started")){
-                currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.START_TASK.getLabel());
-                currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
-            } else if (task.getStatus().equals("Started")){
-                currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
-            } else {
-                currentRow.add(BotLabels.IS_COMPLETED.getLabel());
-            }
-
-            keyboard.add(currentRow); 
-        }
-
-        //Setear teclado
-        keyboardMarkup.setKeyboard(keyboard);
-
-        //Crear mensaje
-        SendMessage messageToTelegram = new SendMessage();
-        messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
-        messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-                
-        try {
-            execute(messageToTelegram);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
 
     private void sendStartTaskMessage(long chatId, int taskId) {
         taskService.putTaskStatus(taskId, "Started");
