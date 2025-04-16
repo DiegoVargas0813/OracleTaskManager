@@ -11,16 +11,10 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -30,6 +24,7 @@ import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.service.UserService;
 
+import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
 
@@ -41,26 +36,28 @@ import com.springboot.MyTodoList.util.UserState;
 
 import java.util.Map;
 
-import io.swagger.models.Response;
-import oracle.net.aso.b;
-
 
 
 //Nuestra clase TaskItemBotController extiende TelegramLongPollingBot para manejar las interacciones con el bot de Telegram
 //y contiene métodos para enviar mensajes y manejar comandos de los usuarios.
 public class TaskItemBotController extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TaskItemBotController.class);
+
+    // Servicios para manejo de multiples mensajes
     private TaskCreationService taskCreationService;
     private TaskCompletionService taskCompletionService;
+
+    // Servicios de base de datos
     private TaskService taskService;
     private SprintService sprintService;
     private UserService userService;
+    private UserStateService userStateService;
+
+    // Variables para el bot
     private String botName;
     private Integer userId;
 
-
-    private Map<Long, UserState> userStates = new HashMap<>();
-
+    // Variables para el manejo de estados de usuario
     
     public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService) {
         super(botToken);
@@ -72,6 +69,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.botName = botName;
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
         this.taskCompletionService = new TaskCompletionService(taskService);
+        this.userStateService = new UserStateService();
     }
 
     @Override
@@ -82,8 +80,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
 
             //Recuperamos si hay un estado de usuario
-            UserState userState = userStates.getOrDefault(chatId, new UserState());
-            userStates.put(chatId, userState);
+            UserState userState = userStateService.getUserState(chatId);
+            userStateService.updateUserState(chatId, userState);
 
             SendMessage message = new SendMessage();
 
@@ -112,7 +110,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     message = new SendMessage();
 
                     if (messageTextFromTelegram.equalsIgnoreCase(BotCommands.CANCEL.getCommand())) {
-                        resetUserState(chatId);
+                        userStateService.resetUserState(chatId);
                         sendMessage(chatId, BotMessages.FINISH_TASK_CREATION.getMessage());
                         return;
                     }
@@ -126,7 +124,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     }
 
                     if (message.getText().contains(BotMessages.FINISH_TASK_CREATION.getMessage())) {
-                        resetUserState(chatId);
+                        userStateService.resetUserState(chatId);
                         sendCurrentSprintMenu(chatId, userId);
                     }
 
@@ -135,7 +133,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     message = new SendMessage();
 
                     if (messageTextFromTelegram.equalsIgnoreCase(BotCommands.CANCEL.getCommand())) {
-                        resetUserState(chatId);
+                        userStateService.resetUserState(chatId);
                         sendMessage(chatId, BotMessages.FINISH_COMPLETION.getMessage());
                         return;
                     }
@@ -148,7 +146,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     }
 
                     if (message.getText().contains(BotMessages.FINISH_COMPLETION.getMessage())) {
-                        resetUserState(chatId);
+                        userStateService.resetUserState(chatId);
                         sendCurrentSprintMenu(chatId, userId);
                     }
                     break;
@@ -398,14 +396,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-
-    private void resetUserState(long chatId) {
-        UserState userState = userStates.get(chatId);
-        if (userState != null) {
-            userState.setCurrentProcess(UserState.Process.NONE);
-            userState.setProcessState(null);
         }
     }
 
