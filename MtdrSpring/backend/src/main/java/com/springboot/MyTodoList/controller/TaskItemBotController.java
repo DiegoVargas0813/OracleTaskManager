@@ -1,21 +1,12 @@
 package com.springboot.MyTodoList.controller;
 
-import java.security.Key;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.springboot.MyTodoList.model.Task;
@@ -28,15 +19,14 @@ import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
 
-import com.springboot.MyTodoList.handler.TelegramBotHandler;
+import com.springboot.MyTodoList.handler.*;
+import com.springboot.MyTodoList.command.*;
 
 import com.springboot.MyTodoList.util.BotCommands;
 import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
 import com.springboot.MyTodoList.util.UserState;
-
-import java.util.Map;
 
 
 //Nuestra clase TaskItemBotController extiende TelegramLongPollingBot para manejar las interacciones con el bot de Telegram
@@ -62,6 +52,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private Integer userId;
 
     // Variables para el manejo de estados de usuario
+    private CommandRegistry commandRegistry;
+    private StateHandlerRegistry stateHandlerRegistry;
+
     
     public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService) {
         super(botToken);
@@ -75,17 +68,58 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.taskCompletionService = new TaskCompletionService(taskService);
         this.userStateService = new UserStateService();
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService);
+
+        //Command registry
+        this.commandRegistry = new CommandRegistry();
+        commandRegistry.registerCommand(BotCommands.START_COMMAND.getCommand(), new StartCommand(telegramBotHandler));
+        commandRegistry.registerCommand(BotLabels.SHOW_MAIN_SCREEN.getLabel(), new StartCommand(telegramBotHandler));
+
+        //List All
+        commandRegistry.registerCommand(BotCommands.LIST_ALL.getCommand(), new ListAllCommand(telegramBotHandler));
+        commandRegistry.registerCommand(BotLabels.LIST_ALL_TASKS.getLabel(), new ListAllCommand(telegramBotHandler));
+
+        //Create Task
+        commandRegistry.registerCommand(BotCommands.CREATE_TASK.getCommand(), new CreateTaskCommand(taskCreationService, userStateService));
+        commandRegistry.registerCommand(BotLabels.CREATE_NEW_TASK.getLabel(), new CreateTaskCommand(taskCreationService, userStateService));
+
+        //Current Sprint
+        commandRegistry.registerCommand(BotCommands.CURRENT_SPRINT.getCommand(), new CurrentSprintCommand(telegramBotHandler));
+        commandRegistry.registerCommand(BotLabels.CURRENT_SPRINT.getLabel(), new CurrentSprintCommand(telegramBotHandler));
+
+        //Backlog
+        commandRegistry.registerCommand(BotLabels.BACKLOG.getLabel(), new BacklogCommand(telegramBotHandler));
+        //commandRegistry.registerCommand(BotCommands.BACKLOG.getCommand(), new BacklogCommand(telegramBotHandler));
+
+        //Mark task as Started
+        commandRegistry.registerCommand(BotLabels.START_TASK.getLabel(), new StartTaskCommand(telegramBotHandler));
+
+        //Mark task as Done
+        commandRegistry.registerCommand(BotLabels.DONE.getLabel(), new CompleteTaskCommand(taskCompletionService, userStateService));
+
+        //Logout
+        commandRegistry.registerCommand(BotCommands.LOGOUT.getCommand(), new LogoutCommand(userStateService));
+
+        //State handler registry
+        this.stateHandlerRegistry = new StateHandlerRegistry();
+
+        //Email verification state
+        stateHandlerRegistry.registerHandler(UserState.Process.EMAIL_VERIFICATION, new EmailVerificationState(userService, userStateService));
+
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage() && update.getMessage().hasText()){
+
+
             //Recuperamos el texto del mensaje y el id del chat
             String messageTextFromTelegram = update.getMessage().getText();
+            String filteredCommand = null;
             long chatId = update.getMessage().getChatId();
 
             //Recuperamos si hay un estado de usuario
             UserState userState = userStateService.getUserState(chatId);
+            
             userStateService.updateUserState(chatId, userState);
 
             SendMessage message = new SendMessage();
@@ -163,7 +197,33 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                 case NONE:
                 default:
                     // No hay proceso especial activo, manejar comandos normales
-                    if(
+
+                    // Este if se encarga de recuperar el comando en caso de use una estructura especial.
+                    // Ej: 123-START o 123-DONE
+                    if(messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()) != -1){
+                        filteredCommand = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[1];
+                    } else {
+                        filteredCommand = messageTextFromTelegram;
+                    }
+                    
+                    System.out.println("Filtered command: " + filteredCommand);
+                    System.out.println("Message text: " + messageTextFromTelegram);
+
+                    Command command = commandRegistry.getCommand(filteredCommand);
+
+                    // Ahora que determinamos el tipo de comando, delegamos la logica a la clase correspondiente
+                    // Por ejemplo, START y DONE deben partir el comando en la taskId y el comando
+                    // y luego ejecutar la logica correspondiente
+                    if(command != null) {
+                        message = command.execute(chatId, messageTextFromTelegram, userId);
+                        trySendMessage(message);
+                    } else {
+                        sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                    }
+                    
+                    // El bloque de codigo inferior ha sido sustituto por el CommandRegistry
+                    // Se mantendra temporalmente en caso de que el nuevo sistema falle
+                    /* if(
                         messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
                         ||  messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
                         
@@ -204,7 +264,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         String start = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[0];
                         int taskId = Integer.parseInt(start);
 
-                        sendStartTaskMessage(chatId, taskId);
+                        message = telegramBotHandler.sendStartTaskMessage(chatId, taskId);
+                        trySendMessage(message);
+
                         message = telegramBotHandler.sendListAllTasksMenu(chatId);
                         trySendMessage(message);
                     } else if (messageTextFromTelegram.indexOf(BotLabels.DONE.getLabel()) != -1) {
@@ -227,10 +289,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         sendMessage(chatId, BotMessages.LOGOUT_SUCCESS.getMessage());
                     } else {
                         sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
-                    }
-            }
-
-            
+                    } */
+            } 
         }
     }
     private void sendMessage(long chatId, String text) {
@@ -254,19 +314,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     }
 
 
-    private void sendStartTaskMessage(long chatId, int taskId) {
-        taskService.putTaskStatus(taskId, "Started");
-        
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Task #" + taskId + " started successfully.");
-
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
 
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");

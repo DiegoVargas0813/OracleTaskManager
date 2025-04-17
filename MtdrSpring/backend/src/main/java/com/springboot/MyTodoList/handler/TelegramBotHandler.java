@@ -10,7 +10,6 @@ import java.util.List;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.model.Task;
@@ -160,4 +159,13 @@ public class TelegramBotHandler {
         return messageToTelegram;
     }
 
+    public SendMessage sendStartTaskMessage(long chatId, int taskId) {
+        taskService.putTaskStatus(taskId, "Started");
+        
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("Task #" + taskId + " started successfully.");
+
+        return message;
+    }
 }
