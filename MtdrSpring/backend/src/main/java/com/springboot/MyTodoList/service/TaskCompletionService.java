@@ -74,7 +74,7 @@ public class TaskCompletionService {
     // Método para iniciar el proceso de creación de tareas
     public SendMessage startTaskCompletionProcess(long chatId, int taskId, int userId) {
         this.userId = userId;
-        System.out.println("Task ID in service start: " + taskId);
+        System.out.println("Start Task Completion");
 
         TaskCompletionState taskCompletionState = new TaskCompletionState();
 
@@ -113,11 +113,11 @@ public class TaskCompletionService {
         }
 
         Task task = state.getTask();
-        System.out.println("Task ID in service handle: " + state.getTaskId());
         TaskStep currentStep = state.getCurrentStep();
 
         switch (currentStep){
             case REAL_HOURS:
+                System.out.println("Confirmation step");
                 try {
                     int realHours = Integer.parseInt(userInput);
                     state.setCurrentStep(TaskStep.CONFIRMATION);
@@ -139,9 +139,9 @@ public class TaskCompletionService {
                 }
                 return message;
             case CONFIRMATION:
+                System.out.println("Completed step");
                 if(userInput.indexOf(BotLabels.CONFIRM.getLabel()) != -1){
                     int taskId = state.getTaskId();
-                    System.out.println("Task ID in service confirmation: " + taskId);
                     int realHours = Integer.parseInt(userInput.substring(0, userInput.indexOf(BotLabels.DASH.getLabel())));
                     taskService.putTaskRealHours(taskId, realHours);
                     taskService.putTaskStatus(taskId, "Complete");

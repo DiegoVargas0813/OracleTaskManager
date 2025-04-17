@@ -105,6 +105,12 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         //Email verification state
         stateHandlerRegistry.registerHandler(UserState.Process.EMAIL_VERIFICATION, new EmailVerificationState(userService, userStateService));
 
+        //Task creation state
+        stateHandlerRegistry.registerHandler(UserState.Process.TASK_CREATION, new TaskCreationState(taskCreationService, userStateService));
+
+        //Task completion state
+        stateHandlerRegistry.registerHandler(UserState.Process.TASK_COMPLETION, new TaskCompletionState(taskCompletionService, userStateService));
+
     }
 
     @Override
@@ -128,7 +134,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             // Hay ciertos comandos que requieren un flujo de mensajes continous.
             // En este caso, el flujo de mensajes es controlado por el estado del usuario
             // En el caso de no tener un estado, se ejecuta el flujo normal
-            switch(userState.getCurrentProcess()) {
+           /*  switch(userState.getCurrentProcess()) {
                 case EMAIL_VERIFICATION:
                 // Validate email and retrieve user ID
                 if (isValidEmail(messageTextFromTelegram)) {
@@ -195,22 +201,32 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     // Manejar otros procesos aquí
                     break;
                 case NONE:
-                default:
+                default: */
                     // No hay proceso especial activo, manejar comandos normales
 
                     // Este if se encarga de recuperar el comando en caso de use una estructura especial.
                     // Ej: 123-START o 123-DONE
+
+                StateHandler handler = stateHandlerRegistry.getHandler(userState.getCurrentProcess());
+                if (handler != null) {
+                    System.out.println("Proceso encontrado!");
+                    message = handler.handle(chatId, messageTextFromTelegram, userId);
+                    trySendMessage(message);
+
+                    // If the user ID is set during email verification, update the controller's userId
+                    if (userState.getCurrentProcess() == UserState.Process.NONE && userState.getProcessState() != null) {
+                        userId = (Integer) userState.getProcessState();
+                    }
+                } else {
                     if(messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()) != -1){
                         filteredCommand = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[1];
                     } else {
                         filteredCommand = messageTextFromTelegram;
                     }
                     
-                    System.out.println("Filtered command: " + filteredCommand);
-                    System.out.println("Message text: " + messageTextFromTelegram);
-
+    
                     Command command = commandRegistry.getCommand(filteredCommand);
-
+    
                     // Ahora que determinamos el tipo de comando, delegamos la logica a la clase correspondiente
                     // Por ejemplo, START y DONE deben partir el comando en la taskId y el comando
                     // y luego ejecutar la logica correspondiente
@@ -220,6 +236,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     } else {
                         sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
                     }
+                }
+
                     
                     // El bloque de codigo inferior ha sido sustituto por el CommandRegistry
                     // Se mantendra temporalmente en caso de que el nuevo sistema falle
@@ -292,7 +310,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     } */
             } 
         }
-    }
+    
     private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
