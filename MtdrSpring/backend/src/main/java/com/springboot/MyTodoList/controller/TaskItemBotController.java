@@ -14,6 +14,7 @@ import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.service.UserService;
+import com.springboot.MyTodoList.service.ManagerService;
 
 import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
@@ -42,6 +43,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private TaskService taskService;
     private SprintService sprintService;
     private UserService userService;
+    private ManagerService managerService;
     private UserStateService userStateService;
 
     // Handlers para el bot
@@ -56,13 +58,14 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private StateHandlerRegistry stateHandlerRegistry;
 
     
-    public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService) {
+    public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService, ManagerService managerService) {
         super(botToken);
         logger.info("Bot Token: " + botToken);
         logger.info("Bot Name: " + botName);
         this.taskService = taskService;
         this.sprintService = sprintService;
         this.userService = userService;
+        this.managerService = managerService;
         this.botName = botName;
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
         this.taskCompletionService = new TaskCompletionService(taskService);
@@ -103,7 +106,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.stateHandlerRegistry = new StateHandlerRegistry();
 
         //Email verification state
-        stateHandlerRegistry.registerHandler(UserState.Process.EMAIL_VERIFICATION, new EmailVerificationState(userService, userStateService));
+        stateHandlerRegistry.registerHandler(UserState.Process.EMAIL_VERIFICATION, new EmailVerificationState(userService, userStateService, managerService));
 
         //Task creation state
         stateHandlerRegistry.registerHandler(UserState.Process.TASK_CREATION, new TaskCreationState(taskCreationService, userStateService));

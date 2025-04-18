@@ -24,4 +24,9 @@ public class ManagerService {
     public Optional<Manager> getManagerById(int id){
         return managerRepository.findById(id);
     }
+
+    public Integer getManagerIdByEmail(String email) {
+        // Replace with actual repository call to fetch user ID by email
+        return managerRepository.findManagerIdByEmail(email);
+    }
 }

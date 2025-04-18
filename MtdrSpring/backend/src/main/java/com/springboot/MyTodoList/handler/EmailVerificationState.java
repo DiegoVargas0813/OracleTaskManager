@@ -3,18 +3,21 @@ package com.springboot.MyTodoList.handler;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.springboot.MyTodoList.service.UserService;
+import com.springboot.MyTodoList.service.ManagerService;
 import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.util.BotMessages;
 import com.springboot.MyTodoList.util.UserState;
 
 public class EmailVerificationState implements StateHandler {
     private final UserService userService;
+    private final ManagerService managerService;
     private final UserStateService userStateService;
     
-    public EmailVerificationState(UserService userService, UserStateService userStateService) {
+    public EmailVerificationState(UserService userService, UserStateService userStateService, ManagerService managerService) {
         this.userService = userService;
         this.userStateService = userStateService;
-    }
+        this.managerService = managerService;
+    }   
 
     @Override
     public SendMessage handle(long chatId, String messageText, Integer userId) {
@@ -23,19 +26,29 @@ public class EmailVerificationState implements StateHandler {
 
 
         // Validate email format
-        if (isValidEmail(messageText)) {
-            
-            
+        if (isValidEmail(messageText)) {  
             Integer retrievedUserId = userService.getUserIdByEmail(messageText);
+            Integer retrievedManagerId = managerService.getManagerIdByEmail(messageText);
+            
             if (retrievedUserId != null) {
                 // Update user state
                 UserState userState = userStateService.getUserState(chatId);
                 userState.setCurrentProcess(UserState.Process.NONE);
                 userState.setProcessState(retrievedUserId);
+                userState.setRole(UserState.Role.USER);
                 userStateService.updateUserState(chatId, userState);
 
                 message.setText(BotMessages.LOGIN_SUCCESS.getMessage());
-            } else {
+            } else if (retrievedManagerId != null) {
+                // Update user state
+                UserState userState = userStateService.getUserState(chatId);
+                userState.setCurrentProcess(UserState.Process.NONE);
+                userState.setProcessState(retrievedManagerId);
+                userState.setRole(UserState.Role.MANAGER);
+                userStateService.updateUserState(chatId, userState);
+                message.setText(BotMessages.LOGIN_SUCCESS.getMessage());
+            }
+            else {
                 message.setText(BotMessages.LOGIN_FAILURE.getMessage());
             }
         } else {
