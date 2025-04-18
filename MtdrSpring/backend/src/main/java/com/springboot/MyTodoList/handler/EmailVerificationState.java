@@ -21,11 +21,11 @@ public class EmailVerificationState implements StateHandler {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
 
-        System.out.println("Verificacion de correo");
 
         // Validate email format
         if (isValidEmail(messageText)) {
-            System.out.println("Buscamos al usuario en la base de datos");
+            
+            
             Integer retrievedUserId = userService.getUserIdByEmail(messageText);
             if (retrievedUserId != null) {
                 // Update user state
