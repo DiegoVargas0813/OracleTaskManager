@@ -72,6 +72,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.userStateService = new UserStateService();
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService);
 
+        //Creamos los distintos command registry.
+        //Esta clase se encarga de registrar los comandos y sus respectivas clases que manejan la logica de cada comando.
+
         //Command registry
         this.commandRegistry = new CommandRegistry();
         commandRegistry.registerCommand(BotCommands.START_COMMAND.getCommand(), new StartCommand(telegramBotHandler));
@@ -144,13 +147,17 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                     userId = (Integer) userState.getProcessState();
                 }
             } else {
+                // Si no hay un comando que involucre estados, ejecutamos comandos normales
+
+                // Verficiamos si el comando es un mensaje compusto por un argumento y un comando. EJ: 12-DASH-START
+                // Si el mensaje contiene un guion, lo separamos en dos partes
                 if(messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()) != -1){
                     filteredCommand = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[1];
                 } else {
+                    // Si no es un comando compuesto, lo dejamos como esta
                     filteredCommand = messageTextFromTelegram;
                 }
                 
-
                 Command command = commandRegistry.getCommand(filteredCommand);
 
                 // Ahora que determinamos el tipo de comando, delegamos la logica a la clase correspondiente

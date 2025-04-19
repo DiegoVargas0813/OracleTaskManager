@@ -16,7 +16,7 @@ public enum BotMessages {
 	TYPE_NEW_TASK("Escribe la nueva tarea a crear y presiona el boton de enviar (flecha azul) en la parte derecha."),
 
 	// Mensajes de login
-	LOGIN_SUCCESS("Email verified successfully. You can now use the bot."),
+	LOGIN_SUCCESS("Email verified successfully. You can now use the bot. \nUse /start to see the main menu."),
 	LOGIN_FAILURE("Email not found. Please try again."),
 	LOGIN_INVALID_FORMAT("Invalid email format. Please enter a valid email."),
 	
@@ -37,7 +37,7 @@ public enum BotMessages {
 
 	// Mensajes de completado de tareas
 	ENTER_REAL_HOURS("Enter the real hours spent on the task:"),
-	ENTER_CONFIRMATION("Once a task is marked as completed, it cannot be undone. Press the button to confirm \nHours Spent: "),
+	ENTER_CONFIRMATION("Once a task is marked as completed, it cannot be undone. Press the button to confirm or /cancel to stop the creation. \nHours Spent: "),
 	FINISH_COMPLETION("Task completion finished. Use /listall to see all tasks."),
 	CANCEL_COMPLETION("An error occurred while marking the task as completed. Please try again."),
 

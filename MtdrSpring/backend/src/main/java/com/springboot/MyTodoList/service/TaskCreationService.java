@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -250,13 +249,6 @@ public class TaskCreationService {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
-        /*     
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-         */
         return message;
     }
 }
