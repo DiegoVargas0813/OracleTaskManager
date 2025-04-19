@@ -37,7 +37,6 @@ public class EmailVerificationState implements StateHandler {
                 userState.setProcessState(retrievedUserId);
                 userState.setRole(UserState.Role.USER);
                 userStateService.updateUserState(chatId, userState);
-
                 message.setText(BotMessages.LOGIN_SUCCESS.getMessage());
             } else if (retrievedManagerId != null) {
                 // Update user state

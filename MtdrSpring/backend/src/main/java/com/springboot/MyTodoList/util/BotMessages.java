@@ -23,6 +23,7 @@ public enum BotMessages {
 	LOGOUT_SUCCESS("Logout successful."),
 
 	// Mensajes de creacion de tareas
+	ENTER_TASK_ASSIGNEE("Please enter the task assignee: "),
 	ENTER_TASK_NAME("Please enter the task name:"),
 	ENTER_TASK_DESCRIPTION("Now enter the task description:"),
 	ENTER_STORY_POINTS("Enter the story points (a number):"),

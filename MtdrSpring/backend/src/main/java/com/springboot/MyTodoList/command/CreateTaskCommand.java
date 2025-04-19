@@ -19,10 +19,11 @@ public class CreateTaskCommand implements Command {
     public SendMessage execute(long chatId, String messageText, int userId) {
         // Update user state to TASK_CREATION
         UserState userState = userStateService.getUserState(chatId);
+        boolean isManager = userState.getRole().equals(UserState.Role.MANAGER);
         userState.setCurrentProcess(UserState.Process.TASK_CREATION);
         userStateService.updateUserState(chatId, userState);
 
         // Start task creation
-        return taskCreationService.startTaskCreation(chatId, userId); // Pass userId if needed
+        return taskCreationService.startTaskCreation(chatId, userId, isManager); // Pass userId if needed
     }
 }

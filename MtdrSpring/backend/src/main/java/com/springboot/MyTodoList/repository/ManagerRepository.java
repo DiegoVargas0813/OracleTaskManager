@@ -17,4 +17,5 @@ public interface ManagerRepository extends JpaRepository<Manager,Integer> {
 
     @Query("SELECT m.id FROM Manager m WHERE m.email = :email")
     Integer findManagerIdByEmail(@Param("email") String email);
+
 }

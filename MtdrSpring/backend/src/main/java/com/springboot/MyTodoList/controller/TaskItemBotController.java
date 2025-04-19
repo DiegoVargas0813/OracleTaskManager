@@ -67,7 +67,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.userService = userService;
         this.managerService = managerService;
         this.botName = botName;
-        this.taskCreationService = new TaskCreationService(logger, taskService, sprintService);
+        this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService);
         this.taskCompletionService = new TaskCompletionService(taskService);
         this.userStateService = new UserStateService();
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService);

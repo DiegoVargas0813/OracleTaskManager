@@ -18,28 +18,33 @@ import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
+import com.springboot.MyTodoList.model.User;
+import com.springboot.MyTodoList.service.UserService;
 import com.springboot.MyTodoList.util.UserState;
 
 import oracle.net.aso.b;
 
 import com.springboot.MyTodoList.util.BotMessages;
 import com.springboot.MyTodoList.util.BotCommands;
+import com.springboot.MyTodoList.util.BotLabels;
 
 public class TaskCreationService {
     private Logger logger;
     private TaskService taskService;
     private SprintService sprintService;
+    private UserService userService;
     private int userId;
 
-    public TaskCreationService(Logger logger, TaskService taskService, SprintService sprintService) {
+    public TaskCreationService(Logger logger, TaskService taskService, SprintService sprintService, UserService userService) {
         this.logger = logger;
         this.taskService = taskService;
         this.sprintService = sprintService;
+        this.userService = userService;
     }
  
     // Pasos para la creación de tareas
     public enum TaskStep {
-        NAME, DESCRIPTION, STORY_POINTS, ESTIMATED_HOURS, SPRINT, COMPLETED
+        ASSIGNEE,NAME, DESCRIPTION, STORY_POINTS, ESTIMATED_HOURS, SPRINT, COMPLETED
     }
 
     // Estado de la creación de tareas
@@ -68,13 +73,37 @@ public class TaskCreationService {
     private Map<Long, TaskCreationState> userTaskStates = new HashMap<>();
 
     //Utilidades
-    public SendMessage startTaskCreation(long chatId, int userId) {
+    public SendMessage startTaskCreation(long chatId, int userId, boolean isManager) {
         this.userId = userId;
         userTaskStates.put(chatId, new TaskCreationState());
+        TaskCreationState state = userTaskStates.get(chatId);
     
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText(BotMessages.ENTER_TASK_NAME.getMessage());
+
+        if(isManager) {
+            message.setText(BotMessages.ENTER_TASK_ASSIGNEE.getMessage());
+            state.setCurrentStep(TaskStep.ASSIGNEE);
+            List<User> managedUsers = userService.getUserByManagerId(userId);
+
+            ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+            List<KeyboardRow> keyboard = new ArrayList<>();
+            
+            
+            for(User user : managedUsers) {
+                KeyboardRow row = new KeyboardRow();
+                row.add(user.getId() + BotLabels.DASH.getLabel() + user.getName());
+                keyboard.add(row);
+            }  
+
+            keyboardMarkup.setKeyboard(keyboard);
+            message.setReplyMarkup(keyboardMarkup);
+
+            return message;
+        } else {
+            message.setText(BotMessages.ENTER_TASK_NAME.getMessage());
+        }
+       
     
         // Remove keyboard for free text input
         ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
@@ -96,6 +125,12 @@ public class TaskCreationService {
         TaskStep currentStep = state.getCurrentStep();
     
         switch (currentStep) {
+            case ASSIGNEE:
+                int assigneeId = Integer.parseInt(userInput.split(BotLabels.DASH.getLabel())[0]);
+                this.userId = assigneeId;
+                state.setCurrentStep(TaskStep.NAME);
+                message = sendMessage(chatId, BotMessages.ENTER_TASK_NAME.getMessage());
+                return message;
             case NAME:
                 task.setName(userInput);
                 state.setCurrentStep(TaskStep.DESCRIPTION);
