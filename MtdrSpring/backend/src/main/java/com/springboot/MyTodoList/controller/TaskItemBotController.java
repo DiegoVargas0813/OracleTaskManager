@@ -15,7 +15,7 @@ import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.service.UserService;
 import com.springboot.MyTodoList.service.ManagerService;
-
+import com.springboot.MyTodoList.service.SessionMappingService;
 import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
@@ -57,6 +57,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private CommandRegistry commandRegistry;
     private StateHandlerRegistry stateHandlerRegistry;
 
+    // Variables para manejar IDs de base de datos a IDs mas cortos.
+    private SessionMappingService sessionMappingService;
+
     
     public TaskItemBotController(String botToken, String botName, TaskService taskService, SprintService sprintService, UserService userService, ManagerService managerService) {
         super(botToken);
@@ -70,7 +73,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService);
         this.taskCompletionService = new TaskCompletionService(taskService);
         this.userStateService = new UserStateService();
-        this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService);
+        this.sessionMappingService = new SessionMappingService();
+        this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, sessionMappingService);
 
         //Creamos los distintos command registry.
         //Esta clase se encarga de registrar los comandos y sus respectivas clases que manejan la logica de cada comando.
@@ -122,21 +126,18 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage() && update.getMessage().hasText()){
-
-
             //Recuperamos el texto del mensaje y el id del chat
             String messageTextFromTelegram = update.getMessage().getText();
             String filteredCommand = null;
             long chatId = update.getMessage().getChatId();
+            SendMessage message = new SendMessage();
 
             //Recuperamos si hay un estado de usuario
             UserState userState = userStateService.getUserState(chatId);
-            
             userStateService.updateUserState(chatId, userState);
-
-            SendMessage message = new SendMessage();
-
             StateHandler handler = stateHandlerRegistry.getHandler(userState.getCurrentProcess());
+
+
             if (handler != null) {
                 System.out.println("Proceso encontrado!");
                 message = handler.handle(chatId, messageTextFromTelegram, userId);
@@ -148,7 +149,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                 }
             } else {
                 // Si no hay un comando que involucre estados, ejecutamos comandos normales
-
                 // Verficiamos si el comando es un mensaje compusto por un argumento y un comando. EJ: 12-DASH-START
                 // Si el mensaje contiene un guion, lo separamos en dos partes
                 if(messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()) != -1){

@@ -5,7 +5,9 @@ import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -14,14 +16,17 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.SessionMappingService;
 
 public class TelegramBotHandler {
     private final TaskService taskService;
     private final SprintService sprintService;
+    private final SessionMappingService sessionMappingService;
 
-    public TelegramBotHandler(TaskService taskService, SprintService sprintService) {
+    public TelegramBotHandler(TaskService taskService, SprintService sprintService, SessionMappingService sessionMappingService) {
         this.taskService = taskService;
         this.sprintService = sprintService;
+        this.sessionMappingService = sessionMappingService;
     }
 
     // Add methods to handle Telegram bot commands and interactions here
@@ -123,6 +128,15 @@ public class TelegramBotHandler {
         Sprint currentSprint = sprintService.getActiveSprints().get(0);
         List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
 
+        Map<String, Integer> taskIdMapping = new HashMap<>();
+        int index = 1;
+        for (Task task : tasks) {
+            taskIdMapping.put(String.valueOf(index++), task.getId());
+        }
+
+        // Store the mapping in the SessionMappingService
+        sessionMappingService.storeMapping(chatId, taskIdMapping);
+
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
 
@@ -131,20 +145,24 @@ public class TelegramBotHandler {
         keyboard.add(mainScreen);
 
         //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
-        for(Task task : tasks){
-            KeyboardRow currentRow = new KeyboardRow();
-            currentRow.add(task.getName());
-
-            if(task.getStatus().equals("Not-started")){
-                currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.START_TASK.getLabel());
-                currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
-            } else if (task.getStatus().equals("Started")){
-                currentRow.add(task.getId() + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
-            } else {
-                currentRow.add(BotLabels.IS_COMPLETED.getLabel());
+        for (Map.Entry<String, Integer> entry : taskIdMapping.entrySet()) {
+            String shortId = entry.getKey();
+            Task task = tasks.stream().filter(t -> t.getId() == entry.getValue()).findFirst().orElse(null);
+            if (task != null) {
+                KeyboardRow currentRow = new KeyboardRow();
+                currentRow.add(shortId + BotLabels.DASH.getLabel() + task.getName());
+    
+                if (task.getStatus().equals("Not-started")) {
+                    currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.START_TASK.getLabel());
+                    currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
+                } else if (task.getStatus().equals("Started")) {
+                    currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
+                } else {
+                    currentRow.add(BotLabels.IS_COMPLETED.getLabel());
+                }
+    
+                keyboard.add(currentRow);
             }
-
-            keyboard.add(currentRow); 
         }
 
         //Setear teclado
@@ -160,7 +178,9 @@ public class TelegramBotHandler {
     }
 
     public SendMessage sendStartTaskMessage(long chatId, int taskId) {
-        taskService.putTaskStatus(taskId, "Started");
+        Integer originalTaskId = sessionMappingService.getOriginalId(chatId, String.valueOf(taskId));
+
+        taskService.putTaskStatus(originalTaskId, "Started");
         
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
