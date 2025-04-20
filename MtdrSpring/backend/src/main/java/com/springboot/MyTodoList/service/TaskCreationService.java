@@ -20,6 +20,7 @@ import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.model.User;
 import com.springboot.MyTodoList.service.UserService;
 import com.springboot.MyTodoList.util.UserState;
+import com.springboot.MyTodoList.service.SessionMappingService;
 
 import oracle.net.aso.b;
 
@@ -32,13 +33,15 @@ public class TaskCreationService {
     private TaskService taskService;
     private SprintService sprintService;
     private UserService userService;
+    private SessionMappingService sessionMappingService;
     private int userId;
 
-    public TaskCreationService(Logger logger, TaskService taskService, SprintService sprintService, UserService userService) {
+    public TaskCreationService(Logger logger, TaskService taskService, SprintService sprintService, UserService userService, SessionMappingService sessionMappingService) {
         this.logger = logger;
         this.taskService = taskService;
         this.sprintService = sprintService;
         this.userService = userService;
+        this.sessionMappingService = sessionMappingService;
     }
  
     // Pasos para la creación de tareas
@@ -83,21 +86,28 @@ public class TaskCreationService {
         if(isManager) {
             message.setText(BotMessages.ENTER_TASK_ASSIGNEE.getMessage());
             state.setCurrentStep(TaskStep.ASSIGNEE);
+    
+            // Generate and store user mappings
             List<User> managedUsers = userService.getUserByManagerId(userId);
-
+            Map<Integer, String> userMap = new HashMap<>();
+            for (User user : managedUsers) {
+                userMap.put(user.getId(), user.getName());
+            }
+            Map<String, Integer> userIdMapping = sessionMappingService.generateMapping(userMap);
+            sessionMappingService.storeMapping(chatId, "users", userIdMapping);
+    
+            // Create keyboard for users
             ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboard = new ArrayList<>();
-            
-            
-            for(User user : managedUsers) {
+            for (Map.Entry<String, Integer> entry : userIdMapping.entrySet()) {
                 KeyboardRow row = new KeyboardRow();
-                row.add(user.getId() + BotLabels.DASH.getLabel() + user.getName());
+                row.add(entry.getKey() + BotLabels.DASH.getLabel() + userMap.get(entry.getValue()));
                 keyboard.add(row);
-            }  
-
+            }
+    
             keyboardMarkup.setKeyboard(keyboard);
             message.setReplyMarkup(keyboardMarkup);
-
+    
             return message;
         } else {
             message.setText(BotMessages.ENTER_TASK_NAME.getMessage());
@@ -125,7 +135,7 @@ public class TaskCreationService {
     
         switch (currentStep) {
             case ASSIGNEE:
-                int assigneeId = Integer.parseInt(userInput.split(BotLabels.DASH.getLabel())[0]);
+                int assigneeId = sessionMappingService.getOriginalId(chatId, "users", userInput.split(BotLabels.DASH.getLabel())[0]);
                 this.userId = assigneeId;
                 state.setCurrentStep(TaskStep.NAME);
                 message = sendMessage(chatId, BotMessages.ENTER_TASK_NAME.getMessage());
@@ -157,32 +167,37 @@ public class TaskCreationService {
                 try {
                     int estimatedHours = Integer.parseInt(userInput);
                     if (estimatedHours > 4) {
-                        // Reject input and repeat the step
                         message = sendMessage(chatId, "Estimated hours cannot exceed 4. Please enter a valid number (1-4).");
                         return message;
                     }
                     task.setEstimatedHours(estimatedHours);
                     state.setCurrentStep(TaskStep.SPRINT);
-                    
+            
+                    // Generate and store sprint mappings
+                    List<Sprint> activeSprints = sprintService.getActiveSprints();
+                    Map<Integer, String> sprintMap = new HashMap<>();
+                    for (Sprint sprint : activeSprints) {
+                        sprintMap.put(sprint.getId(), sprint.getName());
+                    }
+                    Map<String, Integer> sprintIdMapping = sessionMappingService.generateMapping(sprintMap);
+                    sessionMappingService.storeMapping(chatId, "sprints", sprintIdMapping);
+            
+                    // Create keyboard for sprints
                     message = new SendMessage();
                     message.setChatId(chatId);
                     message.setText(BotMessages.ENTER_SPRINT.getMessage());
-
-                    List<Sprint> activeSprints = sprintService.getActiveSprints();
+            
                     ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-
                     List<KeyboardRow> keyboard = new ArrayList<>();
-
-                    for (Sprint sprint : activeSprints) {
+                    for (Map.Entry<String, Integer> entry : sprintIdMapping.entrySet()) {
                         KeyboardRow row = new KeyboardRow();
-                        row.add(String.valueOf(sprint.getId()) + ".-" + sprint.getName());
+                        row.add(entry.getKey() + BotLabels.DASH.getLabel() + sprintMap.get(entry.getValue()));
                         keyboard.add(row);
                     }
-
+            
                     keyboardMarkup.setKeyboard(keyboard);
-
                     message.setReplyMarkup(keyboardMarkup);
-
+            
                     return message;
 
                 } catch (NumberFormatException e) {
@@ -193,14 +208,20 @@ public class TaskCreationService {
 
             case SPRINT:
                 try {
-                    int sprintId = Integer.parseInt(userInput.split("\\.")[0]);
+                    String shortId = userInput.split(BotLabels.DASH.getLabel())[0];
+                    Integer sprintId = sessionMappingService.getOriginalId(chatId, "sprints", shortId);
+            
+                    if (sprintId == null) {
+                        message = sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
+                        return message;
+                    }
+            
                     Sprint selectedSprint = sprintService.getSprintById(sprintId).orElse(null);
-    
+            
                     if (selectedSprint != null) {
                         task.setSprint(selectedSprint);
                         state.setCurrentStep(TaskStep.COMPLETED);
                         message = saveTask(chatId, task);
-                        
                         return message;
                     } else {
                         message = sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");

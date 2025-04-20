@@ -70,11 +70,11 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.userService = userService;
         this.managerService = managerService;
         this.botName = botName;
-        this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService);
         this.taskCompletionService = new TaskCompletionService(taskService);
         this.userStateService = new UserStateService();
         this.sessionMappingService = new SessionMappingService();
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, sessionMappingService);
+        this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService, sessionMappingService);
 
         //Creamos los distintos command registry.
         //Esta clase se encarga de registrar los comandos y sus respectivas clases que manejan la logica de cada comando.
@@ -104,7 +104,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         commandRegistry.registerCommand(BotLabels.START_TASK.getLabel(), new StartTaskCommand(telegramBotHandler));
 
         //Mark task as Done
-        commandRegistry.registerCommand(BotLabels.DONE.getLabel(), new CompleteTaskCommand(taskCompletionService, userStateService));
+        commandRegistry.registerCommand(BotLabels.DONE.getLabel(), new CompleteTaskCommand(taskCompletionService, userStateService, sessionMappingService));
 
         //Logout
         commandRegistry.registerCommand(BotCommands.LOGOUT.getCommand(), new LogoutCommand(userStateService));

@@ -5,21 +5,25 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import com.springboot.MyTodoList.service.TaskCompletionService;
 import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.util.UserState;
+import com.springboot.MyTodoList.service.SessionMappingService;
 
 import com.springboot.MyTodoList.util.BotLabels;
 
 public class CompleteTaskCommand implements Command{
     private final TaskCompletionService taskCompletionService;
     private final UserStateService userStateService;
+    private final SessionMappingService sessionMappingService;
 
-    public CompleteTaskCommand(TaskCompletionService taskCompletionService, UserStateService userStateService) {
+    public CompleteTaskCommand(TaskCompletionService taskCompletionService, UserStateService userStateService, SessionMappingService sessionMappingService) {
         this.taskCompletionService = taskCompletionService;
         this.userStateService = userStateService;
+        this.sessionMappingService = sessionMappingService;
     }
 
     @Override
     public SendMessage execute(long chatId, String messageText, int userId) {
-        int taskId = Integer.parseInt(messageText.split(BotLabels.DASH.getLabel())[0]);
+        String shortId = messageText.split(BotLabels.DASH.getLabel())[0];
+        Integer taskId = sessionMappingService.getOriginalId(chatId, "tasks", shortId);
         
         System.out.println("Task ID in registry: " + taskId);
 

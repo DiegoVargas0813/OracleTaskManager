@@ -135,7 +135,7 @@ public class TelegramBotHandler {
         }
 
         // Store the mapping in the SessionMappingService
-        sessionMappingService.storeMapping(chatId, taskIdMapping);
+        sessionMappingService.storeMapping(chatId, "tasks", taskIdMapping);
 
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -178,7 +178,7 @@ public class TelegramBotHandler {
     }
 
     public SendMessage sendStartTaskMessage(long chatId, int taskId) {
-        Integer originalTaskId = sessionMappingService.getOriginalId(chatId, String.valueOf(taskId));
+        Integer originalTaskId = sessionMappingService.getOriginalId(chatId, "tasks", String.valueOf(taskId));
 
         taskService.putTaskStatus(originalTaskId, "Started");
         
