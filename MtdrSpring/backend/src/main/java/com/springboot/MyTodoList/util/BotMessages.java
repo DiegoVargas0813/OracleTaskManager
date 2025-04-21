@@ -16,14 +16,14 @@ public enum BotMessages {
 	TYPE_NEW_TASK("Escribe la nueva tarea a crear y presiona el boton de enviar (flecha azul) en la parte derecha."),
 
 	// Mensajes de login
-	LOGIN_SUCCESS("Email verified successfully. You can now use the bot. \nUse /start to see the main menu."),
+	LOGIN_SUCCESS("Email verified successfully . You can now use the bot. \nUse /start to see the main menu."),
 	LOGIN_FAILURE("Email not found. Please try again."),
 	LOGIN_INVALID_FORMAT("Invalid email format. Please enter a valid email."),
 	
 	LOGOUT_SUCCESS("Logout successful."),
 
 	// Mensajes de creacion de tareas
-	ENTER_TASK_ASSIGNEE("Please enter the task assignee: "),
+	ENTER_TASK_ASSIGNEE("Please enter the task assignee "),
 	ENTER_TASK_NAME("Please enter the task name:"),
 	ENTER_TASK_DESCRIPTION("Now enter the task description:"),
 	ENTER_STORY_POINTS("Enter the story points (a number):"),
