@@ -125,6 +125,7 @@ public class TelegramBotHandler {
         keyboardMarkup.setKeyboard(keyboard);
 
         SendMessage messageToTelegram = new SendMessage();
+        messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
         messageToTelegram.setChatId(chatId);
         messageToTelegram.setReplyMarkup(keyboardMarkup);
 

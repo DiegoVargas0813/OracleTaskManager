@@ -57,6 +57,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private CommandRegistry commandRegistry;
     private StateHandlerRegistry stateHandlerRegistry;
 
+    private UserCommandRegistry userCommandRegistry;
+    private ManagerCommandRegistry managerCommandRegistry;
+
     // Variables para manejar IDs de base de datos a IDs mas cortos.
     private SessionMappingService sessionMappingService;
 
@@ -79,35 +82,10 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         //Creamos los distintos command registry.
         //Esta clase se encarga de registrar los comandos y sus respectivas clases que manejan la logica de cada comando.
 
-        //Command registry
-        this.commandRegistry = new CommandRegistry();
-        commandRegistry.registerCommand(BotCommands.START_COMMAND.getCommand(), new StartCommand(telegramBotHandler));
-        commandRegistry.registerCommand(BotLabels.SHOW_MAIN_SCREEN.getLabel(), new StartCommand(telegramBotHandler));
-
-        //List All
-        commandRegistry.registerCommand(BotCommands.LIST_ALL.getCommand(), new ListAllCommand(telegramBotHandler));
-        commandRegistry.registerCommand(BotLabels.LIST_ALL_TASKS.getLabel(), new ListAllCommand(telegramBotHandler));
-
-        //Create Task
-        commandRegistry.registerCommand(BotCommands.CREATE_TASK.getCommand(), new CreateTaskCommand(taskCreationService, userStateService));
-        commandRegistry.registerCommand(BotLabels.CREATE_NEW_TASK.getLabel(), new CreateTaskCommand(taskCreationService, userStateService));
-
-        //Current Sprint
-        commandRegistry.registerCommand(BotCommands.CURRENT_SPRINT.getCommand(), new CurrentSprintCommand(telegramBotHandler));
-        commandRegistry.registerCommand(BotLabels.CURRENT_SPRINT.getLabel(), new CurrentSprintCommand(telegramBotHandler));
-
-        //Backlog
-        commandRegistry.registerCommand(BotLabels.BACKLOG.getLabel(), new BacklogCommand(telegramBotHandler));
-        //commandRegistry.registerCommand(BotCommands.BACKLOG.getCommand(), new BacklogCommand(telegramBotHandler));
-
-        //Mark task as Started
-        commandRegistry.registerCommand(BotLabels.START_TASK.getLabel(), new StartTaskCommand(telegramBotHandler));
-
-        //Mark task as Done
-        commandRegistry.registerCommand(BotLabels.DONE.getLabel(), new CompleteTaskCommand(taskCompletionService, userStateService, sessionMappingService));
-
-        //Logout
-        commandRegistry.registerCommand(BotCommands.LOGOUT.getCommand(), new LogoutCommand(userStateService));
+        // Esta clase da de alta los comandos que no involucren estados de usuario, de un usuario bajo el mando de un manager.
+        this.userCommandRegistry = new UserCommandRegistry(telegramBotHandler, taskCreationService, taskCompletionService, userStateService, sessionMappingService);
+        // Esta clase da de alta los comandos que no involucren estados de usuario, de un usuario manager.
+        this.managerCommandRegistry = new ManagerCommandRegistry(telegramBotHandler, taskCreationService, taskCompletionService, userStateService, sessionMappingService);
 
         //State handler registry
         this.stateHandlerRegistry = new StateHandlerRegistry();
@@ -134,6 +112,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
             //Recuperamos si hay un estado de usuario
             UserState userState = userStateService.getUserState(chatId);
+            UserState.Role role = userState.getRole();
             userStateService.updateUserState(chatId, userState);
             StateHandler handler = stateHandlerRegistry.getHandler(userState.getCurrentProcess());
 
@@ -152,25 +131,39 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                 // Verficiamos si el comando es un mensaje compusto por un argumento y un comando. EJ: 12-DASH-START
                 // Si el mensaje contiene un guion, lo separamos en dos partes
                 if(messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()) != -1){
-                    filteredCommand = messageTextFromTelegram.split(BotLabels.DASH.getLabel())[1];
+                    String[] parts = messageTextFromTelegram.split(BotLabels.DASH.getLabel());
+                    // El comando siempre va a estar en la ultima parte del mensaje
+                    filteredCommand = parts[parts.length - 1].trim();
+
+                    System.out.println("Comando filtrado: " + filteredCommand);
                 } else {
                     // Si no es un comando compuesto, lo dejamos como esta
                     filteredCommand = messageTextFromTelegram;
                 }
                 
-                Command command = commandRegistry.getCommand(filteredCommand);
+                if(role == UserState.Role.MANAGER){
+                    Command command = managerCommandRegistry.getCommand(filteredCommand);
 
-                // Ahora que determinamos el tipo de comando, delegamos la logica a la clase correspondiente
-                // Por ejemplo, START y DONE deben partir el comando en la taskId y el comando
-                // y luego ejecutar la logica correspondiente
-                if(command != null) {
-                    message = command.execute(chatId, messageTextFromTelegram, userId);
-                    trySendMessage(message);
-                } else {
-                    sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                    if(command != null) {
+                        message = command.execute(chatId, messageTextFromTelegram, userId);
+                        trySendMessage(message);
+                    } else {
+                        sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                    }
+                } else if (role == UserState.Role.USER) {
+                    Command command = userCommandRegistry.getCommand(filteredCommand);
+
+                    // Ahora que determinamos el tipo de comando, delegamos la logica a la clase correspondiente
+                    // Por ejemplo, START y DONE deben partir el comando en la taskId y el comando
+                    // y luego ejecutar la logica correspondiente
+                    if(command != null) {
+                        message = command.execute(chatId, messageTextFromTelegram, userId);
+                        trySendMessage(message);
+                    } else {
+                        sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                    }
                 }
             }
-
         } 
     }
     

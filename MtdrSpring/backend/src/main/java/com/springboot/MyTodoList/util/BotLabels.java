@@ -14,7 +14,8 @@ public enum BotLabels {
 	CREATE_NEW_TASK("Create New Task"),
 
 	//Labels de menu de manager
-	LIST_USER_TASKS("List User Tasks"),
+	LIST_USERS("Check Users"),
+	LIST_USER_TASKS("List Tasks"),
 
 	// Obsoleto
 	ADD_NEW_ITEM("Add New Item"),
@@ -32,7 +33,8 @@ public enum BotLabels {
 	SPRINT("SPRINT"),
 
 	// Labels de utilidad
-	DASH("-");
+	DASH("-"),
+	SPACE(" ");
 
 
 
