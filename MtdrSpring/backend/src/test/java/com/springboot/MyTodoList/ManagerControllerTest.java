@@ -34,6 +34,7 @@ public class ManagerControllerTest {
     }
 
     // Tests for GET /api/managers/{id} endpoint
+    
     @Test
     public void testGetManagerById() {
         // Assuming you have a manager with ID 1 in your database
