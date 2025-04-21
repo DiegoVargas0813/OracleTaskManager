@@ -13,6 +13,9 @@ public enum BotLabels {
 	LIST_ALL_TASKS("List All Tasks"),
 	CREATE_NEW_TASK("Create New Task"),
 
+	//Labels de menu de manager
+	LIST_USER_TASKS("List User Tasks"),
+
 	// Obsoleto
 	ADD_NEW_ITEM("Add New Item"),
 	START_TASK("Mark as started"),

@@ -4,6 +4,8 @@ import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
 
+import oracle.net.aso.c;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,17 +17,21 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.model.Task;
+import com.springboot.MyTodoList.model.User;
 import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.UserService;
 import com.springboot.MyTodoList.service.SessionMappingService;
 
 public class TelegramBotHandler {
     private final TaskService taskService;
     private final SprintService sprintService;
+    private final UserService userService;
     private final SessionMappingService sessionMappingService;
 
-    public TelegramBotHandler(TaskService taskService, SprintService sprintService, SessionMappingService sessionMappingService) {
+    public TelegramBotHandler(TaskService taskService, SprintService sprintService, UserService userService,SessionMappingService sessionMappingService) {
         this.taskService = taskService;
         this.sprintService = sprintService;
+        this.userService = userService;
         this.sessionMappingService = sessionMappingService;
     }
 
@@ -82,6 +88,44 @@ public class TelegramBotHandler {
         SendMessage messageToTelegram = new SendMessage();
         messageToTelegram.setChatId(chatId);
         messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
+        messageToTelegram.setReplyMarkup(keyboardMarkup);
+
+        return messageToTelegram;
+    }
+
+    public SendMessage sendListAllTasksManagerMenu(long chatId, int managerId){
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboard = new ArrayList<>();
+
+        //Boton de menu
+        KeyboardRow mainScreen = new KeyboardRow();
+        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+        keyboard.add(mainScreen);
+
+        List<User> managedUsers = userService.getUserByManagerId(managerId);
+        Map<String, Integer> userIdMapping = new HashMap<>();
+        int index = 1;
+        for(User user : managedUsers){
+            userIdMapping.put(String.valueOf(index++), user.getId());
+        }
+
+        // Store the mapping in the SessionMappingService
+        sessionMappingService.storeMapping(chatId, "users", userIdMapping);
+        
+        for(Map.Entry<String, Integer> entry : userIdMapping.entrySet()) {
+            String shortId = entry.getKey();
+            User user = managedUsers.stream().filter(u -> u.getId() == entry.getValue()).findFirst().orElse(null);
+            if(user != null){
+                KeyboardRow currentRow = new KeyboardRow();
+                currentRow.add(shortId + BotLabels.DASH.getLabel() + user.getName() + BotLabels.DASH.getLabel() + BotLabels.LIST_USER_TASKS.getLabel());
+                keyboard.add(currentRow);
+            }
+        }
+
+        keyboardMarkup.setKeyboard(keyboard);
+
+        SendMessage messageToTelegram = new SendMessage();
+        messageToTelegram.setChatId(chatId);
         messageToTelegram.setReplyMarkup(keyboardMarkup);
 
         return messageToTelegram;
