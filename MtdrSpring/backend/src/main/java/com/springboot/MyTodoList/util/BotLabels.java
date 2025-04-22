@@ -29,12 +29,15 @@ public enum BotLabels {
 	
 	//Sprint labels
 	BACKLOG("Backlog"),
-	CURRENT_SPRINT("Current Sprint"),
+	CURRENT_SPRINT("Current Sprint 🕑"),
 	SPRINT("SPRINT"),
 
 	// Labels de utilidad
 	DASH("-"),
-	SPACE(" ");
+	SPACE(" "),
+
+	// Labals de servicio de KPIs
+	CHECK_KPIS("Check KPIs");
 
 
 

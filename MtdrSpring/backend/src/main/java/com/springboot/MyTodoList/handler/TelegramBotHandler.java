@@ -60,6 +60,30 @@ public class TelegramBotHandler {
         return message;
     }
 
+    public SendMessage sendMainMenuManager(long chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("Main Menu:");
+    
+        // Create keyboard
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboard = new ArrayList<>();
+    
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(BotLabels.LIST_USERS.getLabel());
+    
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(BotLabels.CREATE_NEW_TASK.getLabel());
+    
+        keyboard.add(row1);
+        keyboard.add(row2);
+    
+        keyboardMarkup.setKeyboard(keyboard);
+        message.setReplyMarkup(keyboardMarkup);
+    
+        return message;
+    }
+
     public SendMessage sendListAllTasksMenu(long chatId){
         //Obtenemos la lista de tareas
         //List<Task> tasks = getTasksByUserId(1);
@@ -117,7 +141,9 @@ public class TelegramBotHandler {
             User user = managedUsers.stream().filter(u -> u.getId() == entry.getValue()).findFirst().orElse(null);
             if(user != null){
                 KeyboardRow currentRow = new KeyboardRow();
-                currentRow.add(shortId + BotLabels.DASH.getLabel() + user.getName() + BotLabels.DASH.getLabel() + BotLabels.LIST_USER_TASKS.getLabel());
+                currentRow.add(shortId + BotLabels.DASH.getLabel() + user.getName());
+                currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.LIST_USER_TASKS.getLabel());
+                currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.CHECK_KPIS.getLabel());
                 keyboard.add(currentRow);
             }
         }
@@ -170,7 +196,7 @@ public class TelegramBotHandler {
 
     public SendMessage sendCurrentSprintMenu(long chatId, int userId){
         //userId sera el id del usuario que ha iniciado sesion
-        Sprint currentSprint = sprintService.getActiveSprints().get(0);
+        Sprint currentSprint = sprintService.getActiveSprintsByUserId(userId).get(0);
         List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
 
         Map<String, Integer> taskIdMapping = new HashMap<>();

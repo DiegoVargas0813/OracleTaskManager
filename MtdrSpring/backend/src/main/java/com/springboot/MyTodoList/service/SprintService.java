@@ -34,4 +34,14 @@ public class SprintService {
     public List<Sprint> getSprintsByDateRange(OffsetDateTime startDate, OffsetDateTime endDate) {
         return sprintRepository.findByStartDateBeforeAndEndDateAfter(startDate, endDate);
     }
+
+    public List<Sprint> getActiveSprintsByUserId(int userId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        return sprintRepository.findActiveSprintsByUserId(userId, now);
+    }
+
+    public List<Sprint> getActiveSprintsByManagerId(int managerId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        return sprintRepository.findActiveSprintsByManagerId(managerId, now);
+    }
 }

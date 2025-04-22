@@ -21,6 +21,7 @@ public class CurrentSprintManagerCommand implements Command{
     public SendMessage execute(long chatId, String messageText, int userId) {
         String extractedId = messageText.split(BotLabels.DASH.getLabel())[0];
         int databaseId = sessionMappingService.getOriginalId(chatId, "users", extractedId);
+        System.out.println("DATABASE ID: " + databaseId);
 
         return botHandler.sendCurrentSprintMenu(chatId, databaseId);
     }

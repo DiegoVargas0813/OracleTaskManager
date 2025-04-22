@@ -25,17 +25,23 @@ public class ManagerCommandRegistry extends CommandRegistry {
         this.sessionMappingService = sessionMappingService;
 
         // Menu principal
-        registerCommand(BotCommands.START_COMMAND.getCommand(), new StartCommand(telegramBotHandler));
-        registerCommand(BotLabels.SHOW_MAIN_SCREEN.getLabel(), new StartCommand(telegramBotHandler));
+        registerCommand(BotCommands.START_COMMAND.getCommand(), new StartCommandManager(telegramBotHandler));
+        registerCommand(BotLabels.SHOW_MAIN_SCREEN.getLabel(), new StartCommandManager(telegramBotHandler));
 
         // List All
-        registerCommand(BotLabels.LIST_ALL_TASKS.getLabel(), new ListAllManagerCommand(telegramBotHandler));
+        registerCommand(BotLabels.LIST_USERS.getLabel(), new ListAllManagerCommand(telegramBotHandler));
 
         // List User Tasks
         registerCommand(BotLabels.LIST_USER_TASKS.getLabel(), new CurrentSprintManagerCommand(telegramBotHandler, sessionMappingService));
         //Create Task
         registerCommand(BotCommands.CREATE_TASK.getCommand(), new CreateTaskCommand(taskCreationService, userStateService));
         registerCommand(BotLabels.CREATE_NEW_TASK.getLabel(), new CreateTaskCommand(taskCreationService, userStateService));
+
+         //Mark task as Started
+         registerCommand(BotLabels.START_TASK.getLabel(), new StartTaskCommand(telegramBotHandler));
+
+         //Mark task as Done
+         registerCommand(BotLabels.DONE.getLabel(), new CompleteTaskCommand(taskCompletionService, userStateService, sessionMappingService));
 
         //Logout
         registerCommand(BotCommands.LOGOUT.getCommand(), new LogoutCommand(userStateService));

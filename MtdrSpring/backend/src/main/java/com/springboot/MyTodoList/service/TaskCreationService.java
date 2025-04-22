@@ -174,7 +174,7 @@ public class TaskCreationService {
                     state.setCurrentStep(TaskStep.SPRINT);
             
                     // Generate and store sprint mappings
-                    List<Sprint> activeSprints = sprintService.getActiveSprints();
+                    List<Sprint> activeSprints = sprintService.getActiveSprintsByUserId(userId);
                     Map<Integer, String> sprintMap = new HashMap<>();
                     for (Sprint sprint : activeSprints) {
                         sprintMap.put(sprint.getId(), sprint.getName());

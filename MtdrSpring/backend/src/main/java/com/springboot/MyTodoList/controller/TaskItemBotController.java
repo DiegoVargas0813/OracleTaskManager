@@ -54,7 +54,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private Integer userId;
 
     // Variables para el manejo de estados de usuario
-    private CommandRegistry commandRegistry;
     private StateHandlerRegistry stateHandlerRegistry;
 
     private UserCommandRegistry userCommandRegistry;
