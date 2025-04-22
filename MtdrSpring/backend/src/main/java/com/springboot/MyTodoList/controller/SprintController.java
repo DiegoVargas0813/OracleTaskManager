@@ -41,4 +41,24 @@ public class SprintController {
     public List<Sprint> getActiveSprints() {
         return sprintService.getActiveSprints();
     }
+
+    @GetMapping("/manager/{id}")
+    public List<Sprint> getSprintsByManagerId(@PathVariable int id) {
+        return sprintService.getSprintsByManagerId(id);
+    }
+
+    @GetMapping("/user/{id}")
+    public List<Sprint> getSprintsByUserId(@PathVariable int id) {
+        return sprintService.getSprintsByUserId(id);
+    }
+
+    @GetMapping("/active/user/{id}")
+    public List<Sprint> getActiveSprintsByUserId(@PathVariable int id) {
+        return sprintService.getActiveSprintsByUserId(id);
+    }
+
+    @GetMapping("/active/manager/{id}")
+    public List<Sprint> getActiveSprintsByManagerId(@PathVariable int id) {
+        return sprintService.getActiveSprintsByManagerId(id);
+    }
 }

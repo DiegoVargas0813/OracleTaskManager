@@ -23,4 +23,12 @@ public interface SprintRepository extends JpaRepository<Sprint,Integer> {
 
     @Query("SELECT s FROM Sprint s WHERE s.project.manager.id = :managerId AND s.startDate <= :now AND s.endDate >= :now")
     List<Sprint> findActiveSprintsByManagerId(@Param("managerId") int managerId, @Param("now") OffsetDateTime now);
+
+    //Query para buscar todos los sprints en un proyecto por medio de un usuario especifico.
+    @Query("SELECT s From Sprint s WHERE s.project.id = (SELECT u.manager.projects.id FROM User u WHERE u.id = :userID)")
+    List<Sprint> findSprintsByUserId(@Param("userID") int userID);
+
+    //Query para buscar todos los sprints en un proyecto por medio de un manager especifico.
+    @Query("SELECT s FROM Sprint s WHERE s.project.manager.id = :managerID")
+    List<Sprint> findSprintsByManagerId(@Param("managerID") int managerID);
 }

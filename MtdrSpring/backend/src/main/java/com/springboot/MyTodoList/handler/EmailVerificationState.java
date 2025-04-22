@@ -7,6 +7,9 @@ import com.springboot.MyTodoList.service.ManagerService;
 import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.util.BotMessages;
 import com.springboot.MyTodoList.util.UserState;
+import com.springboot.MyTodoList.model.Manager;
+import com.springboot.MyTodoList.model.User;
+import java.util.Optional;
 
 public class EmailVerificationState implements StateHandler {
     private final UserService userService;
@@ -28,7 +31,8 @@ public class EmailVerificationState implements StateHandler {
         // Validate email format
         if (isValidEmail(messageText)) {  
             Integer retrievedUserId = userService.getUserIdByEmail(messageText);
-            Integer retrievedManagerId = managerService.getManagerIdByEmail(messageText);
+            Optional<Manager> retrievedManager = managerService.getManagerIdByEmail(messageText);
+            Integer retrievedManagerId = retrievedManager.map(Manager::getId).orElse(null);
             
             if (retrievedUserId != null) {
                 // Update user state
