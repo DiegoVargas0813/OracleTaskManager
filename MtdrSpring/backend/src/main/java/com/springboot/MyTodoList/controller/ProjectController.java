@@ -18,12 +18,18 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity createProject(@RequestBody Project project) throws Exception {
-        Project newProject = projectService.createProject(project);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("location",""+newProject.getId());
-        responseHeaders.set("Access-Control-Expose-Headers","location");
-        return ResponseEntity.ok()
-            .headers(responseHeaders).build();
+        try {
+            Project newProject = projectService.createProject(project);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location",""+newProject.getId());
+            responseHeaders.set("Access-Control-Expose-Headers","location");
+            return ResponseEntity.ok().headers(responseHeaders).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid project data: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred while creating the project.");
+        }
+       
     }
 
     @GetMapping
