@@ -19,6 +19,7 @@ import com.springboot.MyTodoList.service.SessionMappingService;
 import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
+import com.springboot.MyTodoList.service.KPIService;
 
 import com.springboot.MyTodoList.handler.*;
 import com.springboot.MyTodoList.command.*;
@@ -59,6 +60,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private UserCommandRegistry userCommandRegistry;
     private ManagerCommandRegistry managerCommandRegistry;
 
+    //Servicio de KPIs
+    private KPIService kpiService;
+
     // Variables para manejar IDs de base de datos a IDs mas cortos.
     private SessionMappingService sessionMappingService;
 
@@ -77,6 +81,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.sessionMappingService = new SessionMappingService();
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, userService, sessionMappingService);
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService, sessionMappingService);
+        this.kpiService = new KPIService(taskService, userService);
 
         //Creamos los distintos command registry.
         //Esta clase se encarga de registrar los comandos y sus respectivas clases que manejan la logica de cada comando.
@@ -84,7 +89,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         // Esta clase da de alta los comandos que no involucren estados de usuario, de un usuario bajo el mando de un manager.
         this.userCommandRegistry = new UserCommandRegistry(telegramBotHandler, taskCreationService, taskCompletionService, userStateService, sessionMappingService);
         // Esta clase da de alta los comandos que no involucren estados de usuario, de un usuario manager.
-        this.managerCommandRegistry = new ManagerCommandRegistry(telegramBotHandler, taskCreationService, taskCompletionService, userStateService, sessionMappingService);
+        this.managerCommandRegistry = new ManagerCommandRegistry(telegramBotHandler, taskCreationService, taskCompletionService, userStateService, sessionMappingService, kpiService);
 
         //State handler registry
         this.stateHandlerRegistry = new StateHandlerRegistry();
