@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/managers")
@@ -35,5 +36,19 @@ public class ManagerController {
     public ResponseEntity<Manager> getManagerById(@PathVariable int id){
         Optional<Manager> manager = managerService.getManagerById(id);
         return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/email")
+    public ResponseEntity<Manager> getManagerIdByEmail(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<Manager> manager = managerService.getManagerIdByEmail(email);
+        if (manager != null) {
+            return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
