@@ -1,4 +1,4 @@
-package com.springboot.MyTodoList.security;
+/* package com.springboot.MyTodoList.security;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,8 +18,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 }
 
+ */
 
-/*
 package com.springboot.MyTodoList.security;
 
 import org.springframework.context.annotation.Bean;
@@ -34,9 +34,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().disable();
-        httpSecurity.authorizeRequests().anyRequest().authenticated().and().
-                formLogin().and().logout().permitAll();
+        httpSecurity
+        .csrf(csrf -> csrf.disable())
+        .authorizeRequests(requests -> requests
+        .antMatchers("/**").permitAll());
     }
 }
-*/
+
+
