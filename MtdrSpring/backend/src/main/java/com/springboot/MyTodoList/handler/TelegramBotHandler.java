@@ -127,6 +127,7 @@ public class TelegramBotHandler {
         keyboard.add(mainScreen);
 
         List<User> managedUsers = userService.getUserByManagerId(managerId);
+        managedUsers.sort((u1, u2) -> Integer.compare(u1.getId(), u2.getId()));
         Map<String, Integer> userIdMapping = new HashMap<>();
         int index = 1;
         for(User user : managedUsers){

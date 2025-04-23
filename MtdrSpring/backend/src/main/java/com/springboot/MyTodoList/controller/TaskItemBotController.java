@@ -81,7 +81,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         this.sessionMappingService = new SessionMappingService();
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, userService, sessionMappingService);
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService, sessionMappingService);
-        this.kpiService = new KPIService(taskService, userService);
+        this.kpiService = new KPIService(taskService, userService, sprintService);
 
         //Creamos los distintos command registry.
         //Esta clase se encarga de registrar los comandos y sus respectivas clases que manejan la logica de cada comando.
