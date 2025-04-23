@@ -6,9 +6,6 @@ public enum BotLabels {
 	SHOW_MAIN_SCREEN("Show Main Screen"), 
 	HIDE_MAIN_SCREEN("Hide Main Screen"),
 
-	// Label Obsoleta
-	LIST_ALL_ITEMS("List All Items"), 
-
 	// Labels de menu principal
 	LIST_ALL_TASKS("List All Tasks"),
 	CREATE_NEW_TASK("Create New Task 📝"),
@@ -17,15 +14,11 @@ public enum BotLabels {
 	LIST_USERS("Check Users"),
 	LIST_USER_TASKS("List Tasks"),
 
-	// Obsoleto
-	ADD_NEW_ITEM("Add New Item"),
+	//Labeles de menu de tareas
 	START_TASK("Mark as started"),
 	DONE("Mark as done"),
 	IS_COMPLETED("Task is complete"),
 	CONFIRM("CONFIRM"),
-	UNDO("UNDO"),
-	DELETE("DELETE"),
-	MY_TODO_LIST("MY TODO LIST"),
 	
 	//Sprint labels
 	BACKLOG("Backlog"),

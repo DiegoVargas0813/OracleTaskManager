@@ -52,11 +52,10 @@ public class KPIService {
             "- Not Started: %d\n" +
             "- In Progress: %d\n" +
             "- Completed: %d\n" +
-            "- Worked Hours: %.2f%\n" +
             "- Task Completion Ratio: %.2f%%\n" +
             "- Efficiency (Real vs Estimated Hours): %.2f%%",
             userId, totalTasks, notStartedTasks, inProgressTasks, completedTasks,
-            totalRealHours,taskCompletionRatio, efficiency
+            taskCompletionRatio, efficiency
         );
     }
 }

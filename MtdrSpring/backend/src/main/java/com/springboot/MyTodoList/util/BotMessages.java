@@ -6,15 +6,6 @@ public enum BotMessages {
 	"Hi! I'm the Oracle Task Manager!\n Select any of the menu options to continue!:"),
 	BOT_REGISTERED_STARTED("Bot registered and started succesfully!"),
 
-	// Mensajes obsoletos
-	ITEM_DONE("Item done! Select /todolist to return to the list of todo items, or /start to go to the main screen."), 
-	ITEM_UNDONE("Item undone! Select /todolist to return to the list of todo items, or /start to go to the main screen."), 
-	ITEM_DELETED("Item deleted! Select /todolist to return to the list of todo items, or /start to go to the main screen."),
-	TYPE_NEW_TODO_ITEM("Type a new todo item below and press the send button (blue arrow) on the rigth-hand side."),
-	NEW_ITEM_ADDED("New item added! Select /todolist to return to the list of todo items, or /start to go to the main screen."),
-	BYE("Bye! Select /start to resume!"),
-	TYPE_NEW_TASK("Escribe la nueva tarea a crear y presiona el boton de enviar (flecha azul) en la parte derecha."),
-
 	// Mensajes de login
 	LOGIN_SUCCESS("Email verified successfully ✅. You can now use the bot. \nUse /start to see the main menu."),
 	LOGIN_FAILURE("Hi! I'm the Oracle Task Manager! Before you start using me, please enter your email address to verify your identity."),
