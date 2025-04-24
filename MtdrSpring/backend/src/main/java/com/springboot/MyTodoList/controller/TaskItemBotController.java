@@ -71,16 +71,22 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         super(botToken);
         logger.info("Bot Token: " + botToken);
         logger.info("Bot Name: " + botName);
+        //Servicios de acceso a la base de datos
         this.taskService = taskService;
         this.sprintService = sprintService;
         this.userService = userService;
         this.managerService = managerService;
         this.botName = botName;
-        this.taskCompletionService = new TaskCompletionService(taskService);
+        //Servicio para manejar el estado de los usuarios
         this.userStateService = new UserStateService();
+        //Servicio para mapear IDs de base de datos a IDs cortos
         this.sessionMappingService = new SessionMappingService();
+        //Handler con los comandos que no involucran estados de usuario
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, userService, sessionMappingService);
+        //Servicios de procesos que requieran mas de un mensaje para completarse
+        this.taskCompletionService = new TaskCompletionService(taskService);
         this.taskCreationService = new TaskCreationService(logger, taskService, sprintService, userService, sessionMappingService);
+        //Servicio para calcular KPIs
         this.kpiService = new KPIService(taskService, userService, sprintService);
 
         //Creamos los distintos command registry.
@@ -110,7 +116,10 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         if(update.hasMessage() && update.getMessage().hasText()){
             //Recuperamos el texto del mensaje y el id del chat
             String messageTextFromTelegram = update.getMessage().getText();
+            
+            //Variable para recuperar comandos compuestos como "12-START"
             String filteredCommand = null;
+            
             long chatId = update.getMessage().getChatId();
             SendMessage message = new SendMessage();
 
@@ -118,6 +127,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
             UserState userState = userStateService.getUserState(chatId);
             UserState.Role role = userState.getRole();
             userStateService.updateUserState(chatId, userState);
+
+            //Recuperamos si hay un proceso en curso
             StateHandler handler = stateHandlerRegistry.getHandler(userState.getCurrentProcess());
 
 
@@ -152,7 +163,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         message = command.execute(chatId, messageTextFromTelegram, userId);
                         trySendMessage(message);
                     } else {
-                        sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                        message = BotHelper.createMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                        trySendMessage(message);
                     }
                 } else if (role == UserState.Role.USER) {
                     Command command = userCommandRegistry.getCommand(filteredCommand);
@@ -164,25 +176,14 @@ public class TaskItemBotController extends TelegramLongPollingBot {
                         message = command.execute(chatId, messageTextFromTelegram, userId);
                         trySendMessage(message);
                     } else {
-                        sendMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                        message = BotHelper.createMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
+                        trySendMessage(message);
                     }
                 }
             }
         } 
     }
-    
-    private void sendMessage(long chatId, String text) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(text);
-    
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
-    
+        
     private void trySendMessage(SendMessage message) {
         try {
             execute(message);
