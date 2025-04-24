@@ -20,6 +20,7 @@ import com.springboot.MyTodoList.service.UserStateService;
 import com.springboot.MyTodoList.service.TaskCreationService;
 import com.springboot.MyTodoList.service.TaskCompletionService;
 import com.springboot.MyTodoList.service.KPIService;
+import com.springboot.MyTodoList.service.MessagingService;
 
 import com.springboot.MyTodoList.handler.*;
 import com.springboot.MyTodoList.command.*;
@@ -46,6 +47,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
     private UserService userService;
     private ManagerService managerService;
     private UserStateService userStateService;
+    
 
     // Handlers para el bot
     private TelegramBotHandler telegramBotHandler;
@@ -59,6 +61,9 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 
     private UserCommandRegistry userCommandRegistry;
     private ManagerCommandRegistry managerCommandRegistry;
+
+    //Servicio de mensajes
+    private MessagingService messagingService;
 
     //Servicio de KPIs
     private KPIService kpiService;
@@ -80,7 +85,8 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         //Servicio para manejar el estado de los usuarios
         this.userStateService = new UserStateService();
         //Servicio para mapear IDs de base de datos a IDs cortos
-        this.sessionMappingService = new SessionMappingService(this);
+        this.messagingService = new MessagingService(this);
+        this.sessionMappingService = new SessionMappingService(messagingService);
         //Handler con los comandos que no involucran estados de usuario
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, userService, sessionMappingService);
         //Servicios de procesos que requieran mas de un mensaje para completarse

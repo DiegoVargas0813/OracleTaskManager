@@ -22,10 +22,11 @@ public class SessionMappingService {
     // String shortId -> Integer dbId
     private final Map<Long, SessionData> sessionMappings = new HashMap<>();
     private static final long EXPIRATION_TIME_MS = 1000 * 60 * 30; // Media hora (30 minutos)
-    private final TelegramLongPollingBot bot;
+    private final MessagingService messagingService;
     
-    public SessionMappingService(TelegramLongPollingBot bot) {
-        this.bot = bot;
+    public SessionMappingService(MessagingService messagingService) {
+        this.messagingService = messagingService;
+
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         // Schedule a task to clean up expired sessions every 10 minutes
         scheduler.scheduleAtFixedRate(this::cleanupExpiredSessions, 10L, 10L, TimeUnit.MINUTES);
@@ -104,12 +105,7 @@ public class SessionMappingService {
     private void notifyUser(long chatId) {
         // Logica para notificar al usuario de una sesion de mapeos expirada
         SendMessage message = BotHelper.createMessageRemoveKeyboard(chatId, BotMessages.SESSION_EXPIRED.getMessage());
-        try {
-            bot.execute(message);
-        } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(SessionMappingService.class);
-            logger.error("Error sending message to user: " + e.getMessage(), e);
-        }
+        messagingService.sendMessage(message);
     }
 
      // Inner class to store session data and last access time
