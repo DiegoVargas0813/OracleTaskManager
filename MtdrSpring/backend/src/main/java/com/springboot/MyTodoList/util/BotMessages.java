@@ -34,7 +34,10 @@ public enum BotMessages {
 
 	TASK_NOT_FOUND("Task not found."),
 	// Mensajes de error
-	UNKOWN_COMMAND("Unknown command. Please use the /start command to access the main menu.");
+	UNKOWN_COMMAND("Unknown command. Please use the /start command to access the main menu."),
+
+	//Mensajes de sesion de mapeos
+	SESSION_EXPIRED("The current session and its related listing have expired, please use the /start command to access the main menu."),;
 
 	private String message;
 

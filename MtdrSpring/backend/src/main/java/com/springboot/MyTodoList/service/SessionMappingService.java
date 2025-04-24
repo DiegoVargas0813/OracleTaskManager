@@ -1,11 +1,35 @@
 package com.springboot.MyTodoList.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
+import com.springboot.MyTodoList.util.BotMessages;
+import com.springboot.MyTodoList.util.BotHelper;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class SessionMappingService {
-    // Map to store session-specific mappings for each chat and type
-    private final Map<Long, Map<String, Map<String, Integer>>> sessionMappings = new HashMap<>();
+    // Mapeo de distintos tipos de ID a IDs de base de datos
+    // Long chatId -> Map<String, Map<String, Integer>>
+    // String type -> Map<String, Integer> (shortId -> dbId)
+    // String shortId -> Integer dbId
+    private final Map<Long, SessionData> sessionMappings = new HashMap<>();
+    private static final long EXPIRATION_TIME_MS = 1000 * 60 * 30; // Media hora (30 minutos)
+    private final TelegramLongPollingBot bot;
+    
+    public SessionMappingService(TelegramLongPollingBot bot) {
+        this.bot = bot;
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        // Schedule a task to clean up expired sessions every 10 minutes
+        scheduler.scheduleAtFixedRate(this::cleanupExpiredSessions, 10L, 10L, TimeUnit.MINUTES);
+    }
 
     /**
      * Store a mapping for a specific type (e.g., tasks, users, sprints) in a chat session.
@@ -14,8 +38,10 @@ public class SessionMappingService {
      * @param items A map of short IDs to database IDs.
      */
     public void storeMapping(long chatId, String type, Map<String, Integer> items) {
-        sessionMappings.putIfAbsent(chatId, new HashMap<>());
-        sessionMappings.get(chatId).put(type, items);
+        sessionMappings.putIfAbsent(chatId, new SessionData());
+        SessionData sessionData = sessionMappings.get(chatId);
+        sessionData.getMappings().put(type, items);
+        sessionData.updateLastAccessTime();
     }
 
     /**
@@ -26,9 +52,10 @@ public class SessionMappingService {
      * @return The original database ID, or null if not found.
      */
     public Integer getOriginalId(long chatId, String type, String shortId) {
-        Map<String, Map<String, Integer>> typeMappings = sessionMappings.get(chatId);
-        if (typeMappings != null) {
-            Map<String, Integer> mapping = typeMappings.get(type);
+        SessionData sessionData = sessionMappings.get(chatId);
+        if (sessionData != null) {
+            sessionData.updateLastAccessTime();
+            Map<String, Integer> mapping = sessionData.getMappings().get(type);
             return (mapping != null) ? mapping.get(shortId) : null;
         }
         return null;
@@ -43,6 +70,24 @@ public class SessionMappingService {
     }
 
     /**
+     * Periodically clean up expired sessions.
+     */
+    private void cleanupExpiredSessions() {
+        long currentTime = System.currentTimeMillis();
+        Iterator<Map.Entry<Long, SessionData>> iterator = sessionMappings.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, SessionData> entry = iterator.next();
+            if (currentTime - entry.getValue().getLastAccessTime() > EXPIRATION_TIME_MS) {
+                iterator.remove();
+
+                long chatId = entry.getKey();
+                // Notify the user about the expired session
+                notifyUser(chatId);
+            }
+        }
+    }
+
+    /**
      * Generate a mapping of short IDs to database IDs.
      * @param items A map of database IDs to names (or other descriptive values).
      * @return A map of short IDs to database IDs.
@@ -54,5 +99,38 @@ public class SessionMappingService {
             mapping.put(String.valueOf(index++), entry.getKey());
         }
         return mapping;
+    }
+
+    private void notifyUser(long chatId) {
+        // Logica para notificar al usuario de una sesion de mapeos expirada
+        SendMessage message = BotHelper.createMessageRemoveKeyboard(chatId, BotMessages.SESSION_EXPIRED.getMessage());
+        try {
+            bot.execute(message);
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(SessionMappingService.class);
+            logger.error("Error sending message to user: " + e.getMessage(), e);
+        }
+    }
+
+     // Inner class to store session data and last access time
+     private static class SessionData {
+        private final Map<String, Map<String, Integer>> mappings = new HashMap<>();
+        private long lastAccessTime;
+
+        public SessionData() {
+            updateLastAccessTime();
+        }
+
+        public Map<String, Map<String, Integer>> getMappings() {
+            return mappings;
+        }
+
+        public long getLastAccessTime() {
+            return lastAccessTime;
+        }
+
+        public void updateLastAccessTime() {
+            this.lastAccessTime = System.currentTimeMillis();
+        }
     }
 }

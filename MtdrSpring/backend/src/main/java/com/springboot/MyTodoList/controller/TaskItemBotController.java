@@ -80,7 +80,7 @@ public class TaskItemBotController extends TelegramLongPollingBot {
         //Servicio para manejar el estado de los usuarios
         this.userStateService = new UserStateService();
         //Servicio para mapear IDs de base de datos a IDs cortos
-        this.sessionMappingService = new SessionMappingService();
+        this.sessionMappingService = new SessionMappingService(this);
         //Handler con los comandos que no involucran estados de usuario
         this.telegramBotHandler = new TelegramBotHandler(taskService, sprintService, userService, sessionMappingService);
         //Servicios de procesos que requieran mas de un mensaje para completarse

@@ -51,7 +51,7 @@ public class UserCommandRegistry extends CommandRegistry {
         registerCommand(BotLabels.DONE.getLabel(), new CompleteTaskCommand(taskCompletionService, userStateService, sessionMappingService));
 
         //Logout
-        registerCommand(BotCommands.LOGOUT.getCommand(), new LogoutCommand(userStateService));
+        registerCommand(BotCommands.LOGOUT.getCommand(), new LogoutCommand(userStateService, sessionMappingService));
     }
 }
 
