@@ -36,11 +36,8 @@ public class TaskService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        // 2. Handle sprint assignment - if no sprint is set, use sprint_id=21 as fallback
         if (task.getSprint() == null) {
-            Sprint defaultSprint = sprintRepository.findById(21)
-                    .orElseThrow(() -> new RuntimeException("Default sprint not found with ID: 21"));
-            task.setSprint(defaultSprint);
+            RuntimeException sprintNotFoundException = new RuntimeException("Sprint not found");
         }
 
         // 3. Save the Task
