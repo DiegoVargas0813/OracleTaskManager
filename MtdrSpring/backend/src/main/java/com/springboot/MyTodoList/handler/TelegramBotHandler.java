@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -21,6 +24,8 @@ import com.springboot.MyTodoList.model.User;
 import com.springboot.MyTodoList.service.SprintService;
 import com.springboot.MyTodoList.service.UserService;
 import com.springboot.MyTodoList.service.SessionMappingService;
+
+import com.springboot.MyTodoList.util.BotHelper;
 
 public class TelegramBotHandler {
     private final TaskService taskService;
@@ -37,97 +42,67 @@ public class TelegramBotHandler {
 
     // Add methods to handle Telegram bot commands and interactions here
     public SendMessage sendMainMenu(long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Main Menu:");
-    
-        // Create keyboard
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+
+        // Creamos las filas del teclado
         List<KeyboardRow> keyboard = new ArrayList<>();
     
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(BotLabels.LIST_ALL_TASKS.getLabel());
-    
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(BotLabels.CREATE_NEW_TASK.getLabel());
-    
+        // Llamada a BotHelper para crear las filas del teclado
+        KeyboardRow row1 = BotHelper.createKeyboardRow(BotLabels.LIST_ALL_TASKS.getLabel());
+        KeyboardRow row2 = BotHelper.createKeyboardRow(BotLabels.CREATE_NEW_TASK.getLabel());
         keyboard.add(row1);
         keyboard.add(row2);
-    
-        keyboardMarkup.setKeyboard(keyboard);
-        message.setReplyMarkup(keyboardMarkup);
+
+        ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+
+        SendMessage message = BotHelper.createMessage(chatId, BotLabels.SHOW_MAIN_SCREEN.getLabel(), keyboardMarkup);
     
         return message;
     }
 
     public SendMessage sendMainMenuManager(long chatId) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Main Menu:");
-    
+
         // Create keyboard
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
     
-        KeyboardRow row1 = new KeyboardRow();
-        row1.add(BotLabels.LIST_USERS.getLabel());
-    
-        KeyboardRow row2 = new KeyboardRow();
-        row2.add(BotLabels.CREATE_NEW_TASK.getLabel());
-    
+        // Llamada a BotHelper para crear las filas del teclado
+        KeyboardRow row1 = BotHelper.createKeyboardRow(BotLabels.LIST_USERS.getLabel());
+        KeyboardRow row2 = BotHelper.createKeyboardRow(BotLabels.CREATE_NEW_TASK.getLabel());
         keyboard.add(row1);
         keyboard.add(row2);
     
-        keyboardMarkup.setKeyboard(keyboard);
-        message.setReplyMarkup(keyboardMarkup);
+        ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+        SendMessage message = BotHelper.createMessage(chatId, BotLabels.SHOW_MAIN_SCREEN.getLabel(), keyboardMarkup);
     
         return message;
     }
 
     public SendMessage sendListAllTasksMenu(long chatId){
-        //Obtenemos la lista de tareas
-        //List<Task> tasks = getTasksByUserId(1);
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        // Preparacion del teclado
         List<KeyboardRow> keyboard = new ArrayList<>();
 
         //Boton de menu
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
+        keyboard.add(BotHelper.createKeyboardRow(BotLabels.SHOW_MAIN_SCREEN.getLabel()));
 
         //Backlog
-        KeyboardRow backlog = new KeyboardRow();
-        backlog.add(BotLabels.BACKLOG.getLabel());
-        keyboard.add(backlog);
+        keyboard.add(BotHelper.createKeyboardRow(BotLabels.BACKLOG.getLabel()));
 
         //Sprint activo
-        KeyboardRow currentSprint = new KeyboardRow();
-        currentSprint.add(BotLabels.CURRENT_SPRINT.getLabel());
-        keyboard.add(currentSprint);
+        keyboard.add(BotHelper.createKeyboardRow(BotLabels.CURRENT_SPRINT.getLabel()));
 
-        //Setear teclado
-        keyboardMarkup.setKeyboard(keyboard);
+        ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+        SendMessage message = BotHelper.createMessage(chatId, BotLabels.LIST_ALL_TASKS.getLabel(), keyboardMarkup);
 
-        //Crear mensaje
-        SendMessage messageToTelegram = new SendMessage();
-        messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
-        messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-        return messageToTelegram;
+        return message;
     }
 
     public SendMessage sendListAllTasksManagerMenu(long chatId, int managerId){
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
 
-        //Boton de menu
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(BotHelper.createKeyboardRow(BotLabels.SHOW_MAIN_SCREEN.getLabel()));
 
         List<User> managedUsers = userService.getUserByManagerId(managerId);
         managedUsers.sort((u1, u2) -> Integer.compare(u1.getId(), u2.getId()));
+
         Map<String, Integer> userIdMapping = new HashMap<>();
         int index = 1;
         for(User user : managedUsers){
@@ -140,86 +115,93 @@ public class TelegramBotHandler {
         for(Map.Entry<String, Integer> entry : userIdMapping.entrySet()) {
             String shortId = entry.getKey();
             User user = managedUsers.stream().filter(u -> u.getId() == entry.getValue()).findFirst().orElse(null);
+            
             if(user != null){
-                KeyboardRow currentRow = new KeyboardRow();
-                currentRow.add(shortId + BotLabels.DASH.getLabel() + user.getName());
-                currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.LIST_USER_TASKS.getLabel());
-                currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.CHECK_KPIS.getLabel());
+                KeyboardRow currentRow = BotHelper.createKeyboardRow(
+                    shortId + BotLabels.DASH.getLabel() + user.getName(),
+                    shortId + BotLabels.DASH.getLabel() + BotLabels.LIST_USER_TASKS.getLabel(),
+                    shortId + BotLabels.DASH.getLabel() + BotLabels.CHECK_KPIS.getLabel()
+
+                );
                 keyboard.add(currentRow);
             }
         }
 
-        keyboardMarkup.setKeyboard(keyboard);
-
-        SendMessage messageToTelegram = new SendMessage();
-        messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
-        messageToTelegram.setChatId(chatId);
-        messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-        return messageToTelegram;
-    }
-
-    public SendMessage sendBacklogMenu(long chatId, int userId){
-        List<Task> tasks = taskService.getTasksByUserId(userId);
-
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(BotMessages.BACKLOG_NOTICE.getMessage());
-
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboard = new ArrayList<>();
-
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
-
-        //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
-        for(Task task : tasks){
-            KeyboardRow currentRow = new KeyboardRow();
-            currentRow.add(task.getId() + BotLabels.DASH.getLabel() + task.getName());
-            
-            
-            if (task.getStatus() != null){
-                currentRow.add("Status: " + task.getStatus());
-            } else {
-                currentRow.add("Status: No status");
-            }
-
-            keyboard.add(currentRow); 
-        }
-
-        //Setear teclado
-        keyboardMarkup.setKeyboard(keyboard);
-        message.setReplyMarkup(keyboardMarkup);
+        ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+        SendMessage message = BotHelper.createMessage(chatId, BotLabels.LIST_ALL_TASKS.getLabel(), keyboardMarkup);
 
         return message;
     }
 
-    public SendMessage sendCurrentSprintMenu(long chatId, int userId){
-        //userId sera el id del usuario que ha iniciado sesion
-        Sprint currentSprint = sprintService.getActiveSprintsByUserId(userId).get(0);
-        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
+    public SendMessage sendBacklogMenu(long chatId, int userId){
+        List<Task> tasks = taskService.getTasksByUserId(userId);
+        tasks.sort((t1, t2) -> Integer.compare(t1.getId(), t2.getId()));
 
-        Map<String, Integer> taskIdMapping = new HashMap<>();
+        Map<String, Integer> taskIdMapping = new LinkedHashMap<>();
         int index = 1;
         for (Task task : tasks) {
             taskIdMapping.put(String.valueOf(index++), task.getId());
         }
 
-        // Store the mapping in the SessionMappingService
+        // Guardamos el mapeo
         sessionMappingService.storeMapping(chatId, "tasks", taskIdMapping);
 
-        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(BotHelper.createKeyboardRow(BotLabels.SHOW_MAIN_SCREEN.getLabel()));
 
-        KeyboardRow mainScreen = new KeyboardRow();
-        mainScreen.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-        keyboard.add(mainScreen);
+        Map<Integer, Task> taskMap = tasks.stream()
+            .collect(Collectors.toMap(Task::getId, task -> task));
+
+        //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
+        for(Map.Entry<String,Integer> entry : taskIdMapping.entrySet()){
+            String shortId = entry.getKey();
+            Task task = taskMap.get(entry.getValue());
+
+            
+            if (task != null) {
+                KeyboardRow row = BotHelper.createKeyboardRow(
+                    shortId + BotLabels.DASH.getLabel() + task.getName(),
+                    "Status: " + (task.getStatus() != null ? task.getStatus() : "No status")
+                );
+                keyboard.add(row);
+            }
+        }
+
+        ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+        SendMessage message = BotHelper.createMessage(chatId, BotMessages.BACKLOG_NOTICE.getMessage(), keyboardMarkup);
+
+        return message;
+    }
+
+    public SendMessage sendCurrentSprintMenu(long chatId, int userId){
+        //Recuperamos las tareas de un usuario en un sprint activo
+        Sprint currentSprint = sprintService.getActiveSprintsByUserId(userId).get(0);
+        List<Task> tasks = taskService.getTasksByUserIdAndSprintId(userId, currentSprint.getId());
+        tasks.sort((t1, t2) -> Integer.compare(t1.getId(), t2.getId()));
+
+        //Generamos un mapeo de IDs cortas
+        Map<String, Integer> taskIdMapping = new LinkedHashMap<>();
+        int index = 1;
+        for (Task task : tasks) {
+            taskIdMapping.put(String.valueOf(index++), task.getId());
+        }
+
+        // Guardamos en el mapping service
+        sessionMappingService.storeMapping(chatId, "tasks", taskIdMapping);
+
+        // Creamos el teclado
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(BotHelper.createKeyboardRow(BotLabels.SHOW_MAIN_SCREEN.getLabel()));
+
+        // Mapa de tareas con IDs originales
+        Map<Integer, Task> taskMap = tasks.stream()
+            .collect(Collectors.toMap(Task::getId, task -> task));
 
         //Iteramos sobre la lista de tareas y creamos un teclado para cada tarea
         for (Map.Entry<String, Integer> entry : taskIdMapping.entrySet()) {
             String shortId = entry.getKey();
-            Task task = tasks.stream().filter(t -> t.getId() == entry.getValue()).findFirst().orElse(null);
+            Task task = taskMap.get(entry.getValue());
+            
             if (task != null) {
                 KeyboardRow currentRow = new KeyboardRow();
                 currentRow.add(shortId + BotLabels.DASH.getLabel() + task.getName());
@@ -228,6 +210,7 @@ public class TelegramBotHandler {
                     currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.START_TASK.getLabel());
                     currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
                 } else if (task.getStatus().equals("Started")) {
+                    
                     currentRow.add(shortId + BotLabels.DASH.getLabel() + BotLabels.DONE.getLabel());
                 } else {
                     currentRow.add(BotLabels.IS_COMPLETED.getLabel());
@@ -237,16 +220,11 @@ public class TelegramBotHandler {
             }
         }
 
-        //Setear teclado
-        keyboardMarkup.setKeyboard(keyboard);
+        // Create the keyboard markup and message
+        ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+        SendMessage message = BotHelper.createMessage(chatId, BotLabels.LIST_ALL_TASKS.getLabel(), keyboardMarkup);
 
-        //Crear mensaje
-        SendMessage messageToTelegram = new SendMessage();
-        messageToTelegram.setChatId(chatId);
-        messageToTelegram.setText(BotLabels.LIST_ALL_TASKS.getLabel());
-        messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-        return messageToTelegram;
+        return message;
     }
 
     public SendMessage sendStartTaskMessage(long chatId, int taskId) {
@@ -254,9 +232,7 @@ public class TelegramBotHandler {
 
         taskService.putTaskStatus(originalTaskId, "Started");
         
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText("Task #" + taskId + " started successfully.");
+        SendMessage message = BotHelper.createMessageRemoveKeyboard(chatId, "Task #" + taskId + " started successfully.");
 
         return message;
     }
