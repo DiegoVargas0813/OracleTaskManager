@@ -14,10 +14,47 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-public class SprintControllerTest {
 
+
+import java.util.List;
+import java.util.Optional;
+
+@SpringBootTest
+@AutoConfigureMockMvc 
+public class SprintControllerTest {
+ 
     @Autowired
-    private MockMvc mockMvc;
+        private MockMvc mockMvc;
+        
+    public void testCreateSprint() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/sprints")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Test Sprint\", \"description\": \"This is a sprint .\"}"))
+                .andReturn();
+
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus(), "Validate endpoint return 200 OK status" );
+    } 
+
+    public void testGetAllSprints() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/sprints")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus(), "Validate endpoint return 200 OK status" );
+    }
+    public void testGetSprintById() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/sprints/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus(), "Validate endpoint return 200 OK status" );
+    }
+    public void testGetActiveSprints() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/sprints/active")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus(), "Validate endpoint return 200 OK status" );
+    }
+
 }
