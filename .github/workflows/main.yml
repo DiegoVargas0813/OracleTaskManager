@@ -18,5 +18,6 @@ jobs:
           
       - name: Run Tests in MyTodoList Package
         run: |
-          cd MtdrSpring\backend
+          ls
+          cd MtdrSpring/backend
           /mvnw clean test -Dtest=com.springboot.MyTodoList.*
