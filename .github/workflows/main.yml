@@ -20,4 +20,4 @@ jobs:
         run: |
           ls
           cd MtdrSpring/backend
-          /mvnw clean test -Dtest=com.springboot.MyTodoList.*
+          ./mvnw clean test -Dtest=com.springboot.MyTodoList.*
