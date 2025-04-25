@@ -1,9 +1,14 @@
 package com.springboot.MyTodoList.security;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.Collections;
 
 
 @Configuration
@@ -12,9 +17,23 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-            .csrf(csrf -> csrf.disable())
-            .authorizeRequests(requests -> requests
-                .antMatchers("/**").permitAll()); // This allows all requests without authentication
+            .cors().and() // Enable CORS
+            .csrf().disable() // Disable CSRF for simplicity
+            .authorizeRequests()
+            .antMatchers("/**").permitAll(); // Allow all requests without authentication
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList("*")); // Allow all origins
+        configuration.setAllowedMethods(Collections.singletonList("*")); // Allow all HTTP methods
+        configuration.setAllowedHeaders(Collections.singletonList("*")); // Allow all headers
+        configuration.setAllowCredentials(true); // Allow credentials (optional)
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Apply CORS settings to all endpoints
+        return source;
     }
 }
 
