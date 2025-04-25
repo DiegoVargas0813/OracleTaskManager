@@ -183,6 +183,29 @@ function App() {
         }
       );
     }
+    function testNewAPI() {
+      console.log("testNewAPI()")
+      fetch(API_LIST +  "/users")
+        .then(response => {
+          if (response.ok) {
+            console.log(response);
+            console.log();
+            console.log(response.headers.location);
+            return response.json();
+          } else {
+            throw new Error('Something went wrong ...');
+          }
+        })
+        .then(
+          (result) => {
+            console.log(result);
+          },
+          (error) => {
+            setError(error);
+          });
+
+    }
+
     return (
       <div className="App">
         <h1>MY TODO LIST</h1>
@@ -233,7 +256,13 @@ function App() {
         </table>
         </div>
         }
-
+        <div id="testNewAPI">
+          <h2>Test the new API</h2>
+          <p>Click the button below to test the new API</p>
+          <Button variant="contained" className="TestNewAPIButton" onClick={() => testNewAPI()} size="small">
+            Test New API
+          </Button>
+        </div>
       </div>
     );
 }
