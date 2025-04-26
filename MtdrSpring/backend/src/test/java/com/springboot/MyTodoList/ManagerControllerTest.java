@@ -16,6 +16,7 @@ import com.springboot.MyTodoList.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +32,8 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Optional;
 
 @WebMvcTest(ManagerController.class)
 class ManagerControllerTest {
@@ -57,31 +60,82 @@ class ManagerControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    Manager createMockManager() {
+        Manager mockManager = new Manager();
+        mockManager.setId(1);
+        mockManager.setName("Julieta Carolina Arteaga Legorreta");
+        mockManager.setRole("Manager");
+        mockManager.setEmail("A01637444@tec.mx");
+        mockManager.setPassword("somepassword");
+        mockManager.setCreationTs(OffsetDateTime.now());
+        mockManager.setUsers(null);
+        mockManager.setProjects(null);
+        return mockManager;
+    }
+
     @Test
     void testCreateManager() throws Exception {
-        OffsetDateTime now = OffsetDateTime.now();
+        Manager mockManager = createMockManager();
 
-        Manager inputManager = new Manager();
-        inputManager.setName("Test Manager");
-        inputManager.setRole("admin");
-        inputManager.setPassword("123");
-        inputManager.setEmail("roberto@gmail.com");
-        inputManager.setCreationTs(now);
-        inputManager.setUsers(null);
-        inputManager.setProjects(null);
-
-        Manager savedManager = new Manager();
-        savedManager.setId(1);
-
-        Mockito.when(managerService.createManager(any(Manager.class)))
-                .thenReturn(savedManager);
+        Mockito.when(managerService.createManager(any(Manager.class))).thenReturn(mockManager);
 
         mockMvc.perform(post("/api/managers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inputManager)))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(mockManager)))
+                .andExpect(status().isCreated())
                 .andExpect(header().string("location", "1"))
-                .andExpect(header().string("Access-Control-Expose-Headers", "location"));
+                .andExpect(header().string("Access-Control-Expose-Headers", "location"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Julieta Carolina Arteaga Legorreta"))
+                .andExpect(jsonPath("$.role").value("Manager"))
+                .andExpect(jsonPath("$.email").value("A01637444@tec.mx"))
+                .andExpect(jsonPath("$.password").value("somepassword"))
+                .andExpect(jsonPath("$.creationTs").exists());
+    }
+
+    @Test
+    void testGetManagerById() throws Exception {
+        // Mock a Manager object    
+        Manager mockManager = createMockManager();
+    
+        Mockito.when(managerService.getManagerById(1)).thenReturn(java.util.Optional.of(mockManager));
+    
+        // Successful retrieval of manager by ID
+        mockMvc.perform(get("/api/managers/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Julieta Carolina Arteaga Legorreta"))
+                .andExpect(jsonPath("$.role").value("Manager"))
+                .andExpect(jsonPath("$.email").value("A01637444@tec.mx"))
+                .andExpect(jsonPath("$.password").value("somepassword"))
+                .andExpect(jsonPath("$.creationTs").exists());
+
+        // Unsuccessful retrieval of manager by ID (not found)
+        mockMvc.perform(get("/api/managers/2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testGetManagerIdByEmail() throws Exception {
+        Manager mockManager = createMockManager();
+    
+        // Mock the service to return the Manager when the email is found
+        Mockito.when(managerService.getManagerIdByEmail("A01637444@tec.mx")).thenReturn(Optional.of(mockManager));
+    
+        // Perform the POST request and validate the response
+        mockMvc.perform(post("/api/managers/email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"A01637444@tec.mx\"}")) // Pass the email in the request body
+                .andExpect(status().isOk()) // Expect HTTP 200 OK
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Julieta Carolina Arteaga Legorreta"))
+                .andExpect(jsonPath("$.role").value("Manager"))
+                .andExpect(jsonPath("$.email").value("A01637444@tec.mx"))
+                .andExpect(jsonPath("$.password").value("somepassword"))
+                .andExpect(jsonPath("$.creationTs").exists());
     }
 
     @Test
@@ -110,41 +164,5 @@ class ManagerControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").value("Manager 1"))
                 .andExpect(jsonPath("$[1].name").value("Manager 2"));
-    }
-
-    @Test
-    void testGetManagerById() throws Exception {
-        OffsetDateTime now = OffsetDateTime.now();
-    
-        Manager manager = new Manager();
-        manager.setId(1);
-        manager.setName("Manager 1");
-        manager.setEmail("manager1@tec.com");
-        manager.setRole("admin");
-        manager.setCreationTs(now);
-        manager.setUsers(null);
-        manager.setProjects(null);
-    
-        Mockito.when(managerService.getManagerById(1)).thenReturn(java.util.Optional.of(manager));
-    
-        mockMvc.perform(get("/api/managers/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").exists())
-                .andExpect(jsonPath("$.email").exists())
-                .andExpect(jsonPath("$.role").exists())
-                .andExpect(jsonPath("$.creationTs").exists());
-    }
-
-    @Test
-    void testGetManagerIdByEmail() throws Exception {
-        Mockito.when(managerService.getManagerIdByEmail("manager1@tec.com")).thenReturn(1);
-    
-        mockMvc.perform(get("/api/managers/email")
-                        .param("email", "manager1@tec.com") // Add the query parameter
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("1")); // Expect the response to contain the manager ID
     }
 }
