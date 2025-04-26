@@ -18,6 +18,7 @@ import com.springboot.MyTodoList.util.BotMessages;
 import com.springboot.MyTodoList.controller.TaskItemBotController;
 import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.KPIService;
 
 @SpringBootApplication
 public class MyTodoListApplication implements CommandLineRunner {

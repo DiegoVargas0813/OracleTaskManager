@@ -35,9 +35,9 @@ public class Task {
     @Column(name = "REAL_HOURS")
     int realHours;
     
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "SPRINT_ID")
-    @JsonIgnore
+    @JsonBackReference
     private Sprint sprint;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

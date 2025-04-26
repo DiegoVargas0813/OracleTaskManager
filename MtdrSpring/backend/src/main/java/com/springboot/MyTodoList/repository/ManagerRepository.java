@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 
 @Repository
@@ -15,7 +17,7 @@ import javax.transaction.Transactional;
 public interface ManagerRepository extends JpaRepository<Manager,Integer> {
 
 
-    @Query("SELECT m.id FROM Manager m WHERE m.email = :email")
-    Integer findManagerIdByEmail(@Param("email") String email);
+    @Query("SELECT m FROM Manager m WHERE m.email = :email")
+    Optional<Manager> findManagerIdByEmail(@Param("email") String email);
 
 }

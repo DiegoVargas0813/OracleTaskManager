@@ -35,6 +35,14 @@ public class SprintService {
         return sprintRepository.findByStartDateBeforeAndEndDateAfter(startDate, endDate);
     }
 
+    public List<Sprint> getSprintsByUserId(int userId) {
+        return sprintRepository.findSprintsByUserId(userId);
+    }
+
+    public List<Sprint> getSprintsByManagerId(int managerId) {
+        return sprintRepository.findSprintsByManagerId(managerId);
+    }
+
     public List<Sprint> getActiveSprintsByUserId(int userId) {
         OffsetDateTime now = OffsetDateTime.now();
         return sprintRepository.findActiveSprintsByUserId(userId, now);
