@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@WebMvcTest(ToDoItemController.class)
 public class ToDoItemControllerTest {
     @Mock
     private ToDoItemService toDoItemService;

@@ -2,6 +2,9 @@ package com.springboot.MyTodoList;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.MyTodoList.model.User;
+import com.springboot.MyTodoList.service.ManagerService;
+import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import com.springboot.MyTodoList.controller.UserController;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserControllerTest.class)
+@WebMvcTest(UserController.class)
 public class UserControllerTest {
 
     @Autowired
@@ -27,6 +31,15 @@ public class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private SprintService sprintService; // Mock SprintService to resolve the dependency issue
+
+    @MockBean
+    private ManagerService managerService; // Mock ManagerService to resolve the dependency issue
+
+    @MockBean
+    private TaskService taskService; // Mock TaskService to resolve the dependency issue
 
     @Autowired
     private ObjectMapper objectMapper;

@@ -37,26 +37,11 @@ public class ManagerController {
         return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-<<<<<<< Updated upstream
     @GetMapping("/email/")
     public ResponseEntity<Integer> getManagerIdByEmail(@RequestParam String email) {
         Integer managerId = managerService.getManagerIdByEmail(email);
         if (managerId != null) {
             return ResponseEntity.ok(managerId);
-=======
-    @PostMapping("/email")
-    public ResponseEntity<Manager> getManagerIdByEmail(@RequestBody Map<String, String> requestBody) {
-        String email = requestBody.get("email");
-
-        if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Optional<Manager> manager = managerService.getManagerIdByEmail(email);
-        
-        if (manager != null) {
-            return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
->>>>>>> Stashed changes
         } else {
             return ResponseEntity.notFound().build();
         }

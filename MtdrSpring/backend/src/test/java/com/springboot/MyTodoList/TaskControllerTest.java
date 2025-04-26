@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.springboot.MyTodoList.controller.ManagerController;
+import com.springboot.MyTodoList.controller.TaskController;
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.ManagerService;
 import com.springboot.MyTodoList.service.TaskService;
@@ -28,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ManagerController.class)
+@WebMvcTest(TaskController.class)
 class TaskControllerTest{
 
     @Autowired

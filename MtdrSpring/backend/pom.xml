@@ -85,6 +85,16 @@
 			<artifactId>telegrambots</artifactId>
 			<version>6.5.0</version>
 		</dependency>		
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.14.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<version>1.14.5</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
