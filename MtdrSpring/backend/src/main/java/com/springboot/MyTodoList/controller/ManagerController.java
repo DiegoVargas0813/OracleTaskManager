@@ -37,7 +37,7 @@ public class ManagerController {
         return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/email/")
+    @GetMapping("/email")
     public ResponseEntity<Integer> getManagerIdByEmail(@RequestParam String email) {
         Integer managerId = managerService.getManagerIdByEmail(email);
         if (managerId != null) {

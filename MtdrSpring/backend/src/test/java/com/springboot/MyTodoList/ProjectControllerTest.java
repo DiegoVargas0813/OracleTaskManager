@@ -66,7 +66,7 @@ class ProjectControllerTest {
         inputProject.setmanager(new Manager());
         inputProject.setSprints(new ArrayList<>());
 
-        Mockito.when(projectService.createProject(inputProject))
+        Mockito.when(projectService.createProject(any(Project.class)))
                 .thenReturn(inputProject);
         mockMvc.perform(post("/api/projects")
                 .contentType(MediaType.APPLICATION_JSON)
