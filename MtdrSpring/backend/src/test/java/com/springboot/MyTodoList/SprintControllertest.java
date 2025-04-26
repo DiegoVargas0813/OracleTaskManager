@@ -7,6 +7,7 @@ import java.util.List;
 import com.springboot.MyTodoList.controller.SprintController;
 import com.springboot.MyTodoList.model.Manager;
 import com.springboot.MyTodoList.model.Sprint;
+import com.springboot.MyTodoList.model.Project;
 import com.springboot.MyTodoList.service.ManagerService;
 import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.service.UserService;
@@ -52,26 +53,43 @@ class SprintControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    Sprint createMockSprint() {
+        // Create a mock sprint object with sample data
+        Sprint sprint = new Sprint();
+
+        Project project = new Project();
+        project.setId(1);
+
+
+        sprint.setId(1);
+        sprint.setName("Basic Infraestructure");
+        sprint.setstartDate(OffsetDateTime.now().minusDays(7));
+        sprint.setendDate(OffsetDateTime.now().plusDays(7));
+        sprint.setProject(project);
+        sprint.setTasks(new ArrayList<>());
+        sprint.setIssues(new ArrayList<>());
+        return sprint;
+    }
+
     @Test 
     void  testCreateSprint()throws Exception {
-        Sprint inputSprint = new Sprint();
-        inputSprint.setName("Test Sprint");
-        inputSprint.setstartDate(OffsetDateTime.now());
-        inputSprint.setendDate(OffsetDateTime.now().plusDays(7));
-        inputSprint.setProject(null);
-        inputSprint.setTasks(new ArrayList<>());
-        inputSprint.setIssues(new ArrayList<>());
-        Sprint savedSprint = new Sprint();
-        savedSprint.setId(1);
+        Sprint mockSprint = createMockSprint();
 
-        Mockito.when(sprintService.createSprint(any(Sprint.class)))
-                .thenReturn(savedSprint);
+        Mockito.when(sprintService.createSprint(any(Sprint.class))).thenReturn(mockSprint);
         mockMvc.perform(post("/api/sprints")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(inputSprint)))
-                .andExpect(status().isOk())
-                .andExpect(header().string("location", "1"));   
-
+                .content(objectMapper.writeValueAsString(mockSprint)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("location", "1"))
+                .andExpect(header().string("Access-Control-Expose-Headers", "location"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Basic Infraestructure"))
+                .andExpect(jsonPath("$.startDate").exists())
+                .andExpect(jsonPath("$.endDate").exists())
+                .andExpect(jsonPath("$.tasks").isArray())
+                .andExpect(jsonPath("$.tasks").isEmpty())
+                .andExpect(jsonPath("$.issues").isArray())
+                .andExpect(jsonPath("$.issues").isEmpty());
     }
 
     @Test 
@@ -100,27 +118,34 @@ class SprintControllerTest {
 
     @Test 
     void testGetSprintById() throws Exception {
-        Sprint sprint = new Sprint();
-        sprint.setId(1);
-        sprint.setName("Sprint 1");
+        Sprint mockSprint = createMockSprint();
 
-        Mockito.when(sprintService.getSprintById(1)).thenReturn(java.util.Optional.of(sprint));
+        Mockito.when(sprintService.getSprintById(eq(1))).thenReturn(java.util.Optional.of(mockSprint));
 
         mockMvc.perform(get("/api/sprints/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.name", is("Sprint 1")));
+                .andExpect(jsonPath("$.name", is("Basic Infraestructure")))
+                .andExpect(jsonPath("$.startDate").exists())
+                .andExpect(jsonPath("$.endDate").exists())
+                .andExpect(jsonPath("$.tasks").isArray())
+                .andExpect(jsonPath("$.tasks").isEmpty())
+                .andExpect(jsonPath("$.issues").isArray())
+                .andExpect(jsonPath("$.issues").isEmpty());
+
+        // Not found case
+        mockMvc.perform(get("/api/sprints/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test 
     void testGetActiveSprints() throws Exception {
         List<Sprint> activeSprints = new ArrayList<>();
-        Sprint sprint1 = new Sprint();
-        sprint1.setId(1);
-        sprint1.setName("Active Sprint 1");
+        Sprint sprint1 = createMockSprint();
         activeSprints.add(sprint1);
 
-        Sprint sprint2 = new Sprint();
+        Sprint sprint2 = createMockSprint();
         sprint2.setId(2);
         sprint2.setName("Active Sprint 2");
         activeSprints.add(sprint2);
@@ -131,10 +156,19 @@ class SprintControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[0].name", is("Active Sprint 1")))
+                .andExpect(jsonPath("$[0].name", is("Basic Infraestructure")))
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[1].name", is("Active Sprint 2")));
+
+        //Not found case
+
+        activeSprints = new ArrayList<>();
+
+        Mockito.when(sprintService.getActiveSprints()).thenReturn(activeSprints);
+
+        mockMvc.perform(get("/api/sprints/active"))
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$").doesNotExist());
     }
-    
 }
 
