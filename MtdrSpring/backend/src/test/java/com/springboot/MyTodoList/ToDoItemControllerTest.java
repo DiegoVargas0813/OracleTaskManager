@@ -2,7 +2,12 @@
 package com.springboot.MyTodoList;
 import com.springboot.MyTodoList.controller.ToDoItemController;
 import com.springboot.MyTodoList.model.ToDoItem;
+import com.springboot.MyTodoList.service.ManagerService;
+import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.service.ToDoItemService;
+import com.springboot.MyTodoList.service.UserService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -10,9 +15,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -21,13 +28,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @WebMvcTest(ToDoItemController.class)
 public class ToDoItemControllerTest {
     @Mock
     private ToDoItemService toDoItemService;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private SprintService sprintService; // Mock SprintService to resolve the dependency issue
+
+    @MockBean
+    private ManagerService managerService; // Mock ManagerService to resolve the dependency issue
+
+    @MockBean
+    private TaskService taskService; // Mock TaskService to resolve the dependency issue
 
     @InjectMocks
     private ToDoItemController toDoItemController;

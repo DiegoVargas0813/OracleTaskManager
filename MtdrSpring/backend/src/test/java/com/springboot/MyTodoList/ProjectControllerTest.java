@@ -9,6 +9,9 @@ import com.springboot.MyTodoList.model.Manager;
 import com.springboot.MyTodoList.model.Project;
 import com.springboot.MyTodoList.service.ManagerService;
 import com.springboot.MyTodoList.service.ProjectService;
+import com.springboot.MyTodoList.service.SprintService;
+import com.springboot.MyTodoList.service.TaskService;
+import com.springboot.MyTodoList.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
@@ -36,6 +39,19 @@ class ProjectControllerTest {
 
     @MockBean
     private ProjectService projectService;
+
+       @MockBean
+    private UserService userService;
+
+    @MockBean
+    private SprintService sprintService; // Mock SprintService to resolve the dependency issue
+
+    @MockBean
+    private ManagerService managerService; // Mock ManagerService to resolve the dependency issue
+
+    @MockBean
+    private TaskService taskService; // Mock TaskService to resolve the dependency issue
+
 
     @Autowired
     private ObjectMapper objectMapper;

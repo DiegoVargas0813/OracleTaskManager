@@ -8,6 +8,9 @@ import com.springboot.MyTodoList.controller.SprintController;
 import com.springboot.MyTodoList.model.Manager;
 import com.springboot.MyTodoList.model.Sprint;
 import com.springboot.MyTodoList.service.ManagerService;
+import com.springboot.MyTodoList.service.TaskService;
+import com.springboot.MyTodoList.service.UserService;
+
 import com.springboot.MyTodoList.service.SprintService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,9 +36,18 @@ class SprintControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @MockBean
+    private UserService userService;
 
     @MockBean
-    private SprintService sprintService;
+    private SprintService sprintService; // Mock SprintService to resolve the dependency issue
+
+    @MockBean
+    private ManagerService managerService; // Mock ManagerService to resolve the dependency issue
+
+    @MockBean
+    private TaskService taskService; // Mock TaskService to resolve the dependency issue
+
 
     @Autowired
     private ObjectMapper objectMapper;
