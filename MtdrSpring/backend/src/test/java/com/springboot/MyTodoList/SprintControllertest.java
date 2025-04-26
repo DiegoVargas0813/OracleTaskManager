@@ -4,7 +4,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.springboot.MyTodoList.controller.ManagerController;
 import com.springboot.MyTodoList.controller.SprintController;
 import com.springboot.MyTodoList.model.Manager;
 import com.springboot.MyTodoList.model.Sprint;
@@ -30,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SprintController.class)
-class ManagerControllerTest {
+class SprintControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
