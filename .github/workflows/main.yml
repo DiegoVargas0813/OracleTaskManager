@@ -20,6 +20,4 @@ jobs:
           
       - name: Run Tests in MyTodoList Package
         run: |
-          cd MtdrSpring/backend
-          chmod +x mvnw # Ensure the Maven wrapper is executable
-          ./mvnw clean test -Dtest=com.springboot.MyTodoList.*
+          mvn test -X
