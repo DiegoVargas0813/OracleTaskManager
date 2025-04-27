@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.net.URI;
 
 import java.util.Map;
 
@@ -24,22 +25,35 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/user/{UserId}")
-    public ResponseEntity createTask(@PathVariable Integer UserId, @RequestBody Task task) throws Exception {
-        logger.info("Received task creation request for user ID: {}", UserId);
-        logger.info("Task data received: {}", task.toString());
-        logger.info("Task sprint: {}", task.getSprint() != null ? task.getSprint().toString() : "null");
-        
-        Task newTask = taskService.createTask(UserId, task);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("location",""+newTask.getId());
-        responseHeaders.set("Access-Control-Expose-Headers","location");
-        return ResponseEntity.ok()
-            .headers(responseHeaders).build();
+    public ResponseEntity<Task> createTask(@PathVariable Integer UserId, @RequestBody Task task) throws Exception {
+        if (task.getName() == null || task.getName().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try{
+            Task newTask = taskService.createTask(UserId, task);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location",""+newTask.getId());
+            responseHeaders.set("Access-Control-Expose-Headers","location");
+            return ResponseEntity.created(URI.create("/api/tasks/" + newTask.getId()))
+                    .headers(responseHeaders)
+                    .body(newTask);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            logger.error("Error creating task: ", e);
+            return ResponseEntity.internalServerError().build();
+        }
+
+
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<Task>> getAllTasks() {
+        List<Task> tasks = taskService.getAllTasks();
+        if (tasks == null || tasks.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/{id}")
@@ -70,8 +84,13 @@ public class TaskController {
 
     @PutMapping("/{id}/update-status")
     public ResponseEntity<String> updateTaskStatus(@PathVariable int id, @RequestBody Map<String, String> requestBody) {
+        String status = requestBody.get("status");
+
+        if (status == null || status.isEmpty()) {
+            return ResponseEntity.badRequest().body("Status cannot be null or empty.");
+        }
+
         try {
-            String status = requestBody.get("status");
             taskService.putTaskStatus(id, status);
             return ResponseEntity.ok("Task status updated successfully.");
         } catch (Exception e) {
