@@ -9,7 +9,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import org.telegram.telegrambots.abilitybots.api.sender.SilentSender;
 
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
@@ -39,8 +38,6 @@ import com.springboot.MyTodoList.util.UserState;
 public class TaskItemBotController extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TaskItemBotController.class);
 
-    // Silent sender solo es necesario para el manejo de mensajes en testeo
-    private SilentSender silentSender;
 
     // Servicios para manejo de multiples mensajes
     private TaskCreationService taskCreationService;
@@ -209,9 +206,6 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 		return botName;
 	}
 
-    public void setSilentSender(SilentSender silentSender) {
-        this.silentSender = silentSender;
-    }
 
     public void setManagerCommandRegistry(ManagerCommandRegistry managerCommandRegistry) {
         this.managerCommandRegistry = managerCommandRegistry;

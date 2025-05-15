@@ -12,9 +12,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 
-import org.telegram.telegrambots.abilitybots.api.objects.MessageContext;
-import org.telegram.telegrambots.abilitybots.api.sender.SilentSender;
-import org.telegram.telegrambots.abilitybots.api.bot.BaseAbilityBot;
+
 
 import com.springboot.MyTodoList.command.ManagerCommandRegistry;
 import com.springboot.MyTodoList.command.UserCommandRegistry;
@@ -51,7 +49,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-import org.eclipse.jetty.server.session.Session;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,7 +66,6 @@ public class TaskItemBotControllerTest {
     public static final long CHAT_ID = 987654321L;
 
     private TaskItemBotController taskItemBotController;
-    private SilentSender silentSender;
 
     @Mock
     private Update mockUpdate;
