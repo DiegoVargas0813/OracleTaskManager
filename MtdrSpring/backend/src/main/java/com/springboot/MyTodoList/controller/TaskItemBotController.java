@@ -9,6 +9,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import org.telegram.telegrambots.abilitybots.api.sender.SilentSender;
+
 import com.springboot.MyTodoList.model.Task;
 import com.springboot.MyTodoList.service.TaskService;
 import com.springboot.MyTodoList.model.Sprint;
@@ -36,6 +38,9 @@ import com.springboot.MyTodoList.util.UserState;
 //y contiene métodos para enviar mensajes y manejar comandos de los usuarios.
 public class TaskItemBotController extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(TaskItemBotController.class);
+
+    // Silent sender solo es necesario para el manejo de mensajes en testeo
+    private SilentSender silentSender;
 
     // Servicios para manejo de multiples mensajes
     private TaskCreationService taskCreationService;
@@ -203,4 +208,72 @@ public class TaskItemBotController extends TelegramLongPollingBot {
 	public String getBotUsername() {		
 		return botName;
 	}
+
+    public void setSilentSender(SilentSender silentSender) {
+        this.silentSender = silentSender;
+    }
+
+    public void setManagerCommandRegistry(ManagerCommandRegistry managerCommandRegistry) {
+        this.managerCommandRegistry = managerCommandRegistry;
+    }
+
+    public void setUserCommandRegistry(UserCommandRegistry userCommandRegistry) {
+        this.userCommandRegistry = userCommandRegistry;
+    }
+
+    public void setTaskService(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    public void setSprintService(SprintService sprintService) {
+        this.sprintService = sprintService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public void setManagerService(ManagerService managerService) {
+        this.managerService = managerService;
+    }
+
+    public void setUserStateService(UserStateService userStateService) {
+        this.userStateService = userStateService;
+    }
+
+    public void setTaskCreationService(TaskCreationService taskCreationService) {
+        this.taskCreationService = taskCreationService;
+    }
+
+    public void setTaskCompletionService(TaskCompletionService taskCompletionService) {
+        this.taskCompletionService = taskCompletionService;
+    }
+
+    public void setKpiService(KPIService kpiService) {
+        this.kpiService = kpiService;
+    }
+
+    public void setSessionMappingService(SessionMappingService sessionMappingService) {
+        this.sessionMappingService = sessionMappingService;
+    }
+
+    public void setMessagingService(MessagingService messagingService) {
+        this.messagingService = messagingService;
+    }
+
+    public void setTelegramBotHandler(TelegramBotHandler telegramBotHandler) {
+        this.telegramBotHandler = telegramBotHandler;
+    }
+
+    public void setStateHandlerRegistry(StateHandlerRegistry stateHandlerRegistry) {
+        this.stateHandlerRegistry = stateHandlerRegistry;
+    }
+
+    public void setBotName(String botName) {
+        this.botName = botName;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 }
