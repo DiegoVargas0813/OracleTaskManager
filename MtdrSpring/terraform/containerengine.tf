@@ -18,7 +18,7 @@ locals {
     for source in local.all_sources : source if (
       source.source_name != null &&
       length(regexall("Oracle-Linux-[0-9]*.[0-9]*-20[0-9]*", source.source_name)) > 0 &&
-      source.source_kubernetes_version == local.latest
+      source.kubernetes_version == local.latest
     )
   ]
 }
