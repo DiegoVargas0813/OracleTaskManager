@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -18,13 +19,21 @@ public class ManagerController {
     private ManagerService managerService;
 
     @PostMapping
-    public ResponseEntity createManager(@RequestBody Manager manager) throws Exception {
-        Manager newManager = managerService.createManager(manager);
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("location",""+newManager.getId());
-        responseHeaders.set("Access-Control-Expose-Headers","location");
-        return ResponseEntity.ok()
-            .headers(responseHeaders).build();
+    public ResponseEntity<Manager> createManager(@RequestBody Manager manager) throws Exception {
+        try {
+            Manager newManager = managerService.createManager(manager);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location",""+newManager.getId());
+            responseHeaders.set("Access-Control-Expose-Headers","location");
+            return ResponseEntity.created(URI.create("/api/managers/" + newManager.getId()))
+                .headers(responseHeaders)
+                .body(newManager);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
     }
 
     @GetMapping
@@ -35,6 +44,9 @@ public class ManagerController {
     @GetMapping("/{id}")
     public ResponseEntity<Manager> getManagerById(@PathVariable int id){
         Optional<Manager> manager = managerService.getManagerById(id);
+        if (manager == null) {
+            return ResponseEntity.notFound().build();
+        }
         return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

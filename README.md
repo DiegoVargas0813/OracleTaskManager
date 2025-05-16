@@ -1,5 +1,5 @@
-# oci-react-samples
-A repository for full stack Cloud Native applications with a React JS frontend and various backends (Java, Python, DotNet, and so on) on the Oracle Cloud Infrastructure.
+# Oracle Task Manager
+A cloned repository that acts as a backend service for a Sprint Based Task Manager that can be accesed via a web portal or a telegram bot.
 
 ![image](https://user-images.githubusercontent.com/7783295/116454396-cbfb7a00-a814-11eb-8196-ba2113858e8b.png)
   
