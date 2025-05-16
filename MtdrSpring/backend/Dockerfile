@@ -1,7 +1,12 @@
-FROM openjdk:22
-#COPY pom.xml /tmp/
-#COPY src /tmp/src/
-WORKDIR /tmp/
+# Etapa 2: Imagen final
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+COPY target/MyTodoList-0.0.1-SNAPSHOT.jar /app/MyTodoList.jar
+
+COPY src/main/resources/Wallet_javadev /app/wallet
+
 EXPOSE 8080
-COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
-ENTRYPOINT ["java","-jar","MyTodoList.jar"]
+
+ENTRYPOINT ["java", "-jar", "MyTodoList.jar"]
