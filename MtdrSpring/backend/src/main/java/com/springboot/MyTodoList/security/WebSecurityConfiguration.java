@@ -9,6 +9,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Collections;
+import java.util.List;
 
 
 @Configuration
@@ -26,13 +27,16 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*")); // Allow all origins
-        configuration.setAllowedMethods(Collections.singletonList("*")); // Allow all HTTP methods
-        configuration.setAllowedHeaders(Collections.singletonList("*")); // Allow all headers
-        configuration.setAllowCredentials(true); // Allow credentials (optional)
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:8080",
+            "https://cracle.prometrics.mx"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Apply CORS settings to all endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

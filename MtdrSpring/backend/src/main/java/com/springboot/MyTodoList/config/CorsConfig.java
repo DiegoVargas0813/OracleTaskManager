@@ -22,16 +22,18 @@ public class CorsConfig {
     Logger logger = LoggerFactory.getLogger(CorsConfig.class);
     public CorsFilter corsFilter(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000","https://objectstorage.us-phoenix-1.oraclecloud.com",
-                "https://petstore.swagger.io"));
-        config.setAllowedMethods(List.of("GET","POST","PUT","OPTIONS","DELETE","PATCH"));
-        config.setAllowedOrigins(Collections.singletonList("*"));
-        config.addAllowedHeader("*");
+        config.setAllowedOrigins(List.of(
+            "http://localhost:8080",
+            "https://cracle.prometrics.mx"
+        ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+        config.setAllowedHeaders(Collections.singletonList("*"));
         config.addExposedHeader("location");
+        config.setAllowCredentials(true);
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-        CorsFilter filter = new CorsFilter(source);
-        return filter;
+        return new CorsFilter(source);
     }
 
 }
