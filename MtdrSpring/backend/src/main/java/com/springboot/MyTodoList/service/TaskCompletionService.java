@@ -142,9 +142,7 @@ public class TaskCompletionService {
                     message = BotHelper.createMessage(chatId, BotMessages.CANCEL_COMPLETION.getMessage());
                     return message;
                 }
-            case COMPLETED:
-                message = BotHelper.createMessage(chatId, "Task completion finished.");
-                return message;
+            //Removed COMPLETED case as it is not reached in the current flow
             default:
                 message = BotHelper.createMessage(chatId, BotMessages.UNKOWN_COMMAND.getMessage());
                 return message;

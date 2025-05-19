@@ -99,6 +99,8 @@ public class TaskCreationService {
             for (User user : managedUsers) {
                 userMap.put(user.getId(), user.getName());
             }
+
+            // Generate mapping for users
             Map<String, Integer> userIdMapping = sessionMappingService.generateMapping(userMap);
             sessionMappingService.storeMapping(chatId, "users", userIdMapping);
     
@@ -106,8 +108,7 @@ public class TaskCreationService {
             ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
             List<KeyboardRow> keyboard = new ArrayList<>();
             for (Map.Entry<String, Integer> entry : userIdMapping.entrySet()) {
-                KeyboardRow row = new KeyboardRow();
-                row.add(entry.getKey() + BotLabels.DASH.getLabel() + userMap.get(entry.getValue()));
+                KeyboardRow row = BotHelper.createKeyboardRow(entry.getKey() + BotLabels.DASH.getLabel() + userMap.get(entry.getValue()));
                 keyboard.add(row);
             }
     
@@ -133,7 +134,7 @@ public class TaskCreationService {
         SendMessage message = new SendMessage();
     
         if (state == null) {
-            message = sendMessage(chatId, "No task creation in progress. Use /create to start.");
+            message = BotHelper.createMessage(chatId, "No task creation in progress. Use /create to start.");
             return message;
         }
         Task task = state.getTask();
@@ -144,28 +145,28 @@ public class TaskCreationService {
                 int assigneeId = sessionMappingService.getOriginalId(chatId, "users", userInput.split(BotLabels.DASH.getLabel())[0]);
                 this.userId = assigneeId;
                 state.setCurrentStep(TaskStep.NAME);
-                message = sendMessage(chatId, BotMessages.ENTER_TASK_NAME.getMessage());
+                message = BotHelper.createMessage(chatId, BotMessages.ENTER_TASK_NAME.getMessage());
                 return message;
             case NAME:
                 task.setName(userInput);
                 state.setCurrentStep(TaskStep.DESCRIPTION);
-                message = sendMessage(chatId, BotMessages.ENTER_TASK_DESCRIPTION.getMessage());
+                message = BotHelper.createMessage(chatId, BotMessages.ENTER_TASK_DESCRIPTION.getMessage());
                 return message;
     
             case DESCRIPTION:
                 task.setDescription(userInput);
                 state.setCurrentStep(TaskStep.STORY_POINTS);
-                message = sendMessage(chatId, BotMessages.ENTER_STORY_POINTS.getMessage());
+                message = BotHelper.createMessage(chatId, BotMessages.ENTER_STORY_POINTS.getMessage());
                 return message;
     
             case STORY_POINTS:
                 try {
                     task.setStoryPoints(Integer.parseInt(userInput));
                     state.setCurrentStep(TaskStep.ESTIMATED_HOURS);
-                    message = sendMessage(chatId, BotMessages.ENTER_ESTIMATED_HOURS.getMessage());
+                    message = BotHelper.createMessage(chatId, BotMessages.ENTER_ESTIMATED_HOURS.getMessage());
                     return message;
                 } catch (NumberFormatException e) {
-                    message = sendMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
+                    message = BotHelper.createMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
                     return message;
                 }
     
@@ -173,7 +174,7 @@ public class TaskCreationService {
                 try {
                     int estimatedHours = Integer.parseInt(userInput);
                     if (estimatedHours > 4) {
-                        message = sendMessage(chatId, "Estimated hours cannot exceed 4. Please enter a valid number (1-4).");
+                        message = BotHelper.createMessage(chatId, "Estimated hours cannot exceed 4. Please enter a valid number (1-4).");
                         return message;
                     }
                     task.setEstimatedHours(estimatedHours);
@@ -182,6 +183,8 @@ public class TaskCreationService {
                     // Generate and store sprint mappings
                     List<Sprint> activeSprints = sprintService.getActiveSprintsByUserId(userId);
                     Map<Integer, String> sprintMap = new HashMap<>();
+
+                    
                     for (Sprint sprint : activeSprints) {
                         sprintMap.put(sprint.getId(), sprint.getName());
                     }
@@ -189,25 +192,23 @@ public class TaskCreationService {
                     sessionMappingService.storeMapping(chatId, "sprints", sprintIdMapping);
             
                     // Create keyboard for sprints
-                    message = new SendMessage();
-                    message.setChatId(chatId);
-                    message.setText(BotMessages.ENTER_SPRINT.getMessage());
-            
-                    ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+                    message = BotHelper.createMessage(chatId, BotMessages.ENTER_SPRINT.getMessage());
+
+
                     List<KeyboardRow> keyboard = new ArrayList<>();
                     for (Map.Entry<String, Integer> entry : sprintIdMapping.entrySet()) {
-                        KeyboardRow row = new KeyboardRow();
-                        row.add(entry.getKey() + BotLabels.DASH.getLabel() + sprintMap.get(entry.getValue()));
+                        KeyboardRow row = BotHelper.createKeyboardRow(entry.getKey() + BotLabels.DASH.getLabel() + sprintMap.get(entry.getValue()));
                         keyboard.add(row);
                     }
-            
-                    keyboardMarkup.setKeyboard(keyboard);
-                    message.setReplyMarkup(keyboardMarkup);
+                    
+                    ReplyKeyboardMarkup keyboardMarkup = BotHelper.createKeyboard(keyboard);
+
+                    message = BotHelper.createMessage(chatId, BotMessages.ENTER_SPRINT.getMessage(), keyboardMarkup);
             
                     return message;
 
                 } catch (NumberFormatException e) {
-                    message = sendMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
+                    message = BotHelper.createMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
                     return message;
                 }
 
@@ -218,7 +219,7 @@ public class TaskCreationService {
                     Integer sprintId = sessionMappingService.getOriginalId(chatId, "sprints", shortId);
             
                     if (sprintId == null) {
-                        message = sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
+                        message = BotHelper.createMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
                         return message;
                     }
             
@@ -230,52 +231,34 @@ public class TaskCreationService {
                         message = saveTask(chatId, task);
                         return message;
                     } else {
-                        message = sendMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
+                        message = BotHelper.createMessage(chatId, "Invalid sprint selection. Please select a valid sprint.");
                         return message;
                     }
                 } catch (NumberFormatException e) {
-                    message = sendMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
+                    message = BotHelper.createMessage(chatId, BotMessages.ERROR_INVALID_NUMBER.getMessage());
                     return message;
                 }
-    
-            case COMPLETED:
-                message = sendMessage(chatId, "Task creation is already completed. Use the menu to create another.");
-                return message;
+            //Removed case COMPLETED as it is never reached in the current flow
             default:
-                message = sendMessage(chatId, "Unknown step. Please start over.");
+                message = BotHelper.createMessage(chatId, "Unknown step. Please start over.");
                 return message;
         }
     }
 
 
     private SendMessage saveTask(long chatId, Task task) {
-        // Simulate saving task to DB
+        // Saving task to the database
         task.setStatus("Not-started");
 
         //Cambiar user id por una variable de constructor
         taskService.createTask(userId,task);
 
-        SendMessage message = sendMessage(chatId, BotMessages.FINISH_TASK_CREATION.getMessage());
-    
-        // Remueve el teclado
-        ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
-        keyboardRemove.setRemoveKeyboard(true);
-        message.setReplyMarkup(keyboardRemove);
+        SendMessage message = BotHelper.createMessage(chatId, BotMessages.FINISH_TASK_CREATION.getMessage());
+        message = BotHelper.removeKeyboard(message);
 
         // Remove from tracking map
         userTaskStates.remove(chatId);
 
-        return message;
-    
-        // Show main menu again
-        //sendMainMenu(chatId);
-    }
-    
-
-    private SendMessage sendMessage(long chatId, String text) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-        message.setText(text);
         return message;
     }
 }

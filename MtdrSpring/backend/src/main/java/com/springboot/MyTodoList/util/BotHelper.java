@@ -76,4 +76,11 @@ public class BotHelper {
 		
 		return message;
 	}
+
+	public static SendMessage removeKeyboard (SendMessage message) {
+		ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
+		message.setReplyMarkup(keyboardMarkup);
+		
+		return message;
+	}
 }
