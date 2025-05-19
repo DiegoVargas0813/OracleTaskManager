@@ -66,17 +66,6 @@ public class BotHelper {
         return message;
     }
 
-	public static SendMessage createMessageRemoveKeyboard(long chatId, String text) {
-		SendMessage message = new SendMessage();
-		message.setChatId(chatId);
-		message.setText(text);
-		
-		ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
-		message.setReplyMarkup(keyboardMarkup);
-		
-		return message;
-	}
-
 	public static SendMessage removeKeyboard (SendMessage message) {
 		ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove(true);
 		message.setReplyMarkup(keyboardMarkup);

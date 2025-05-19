@@ -82,7 +82,8 @@ public class TaskCompletionService {
         SendMessage message;
 
         if (taskOptional.isPresent()) {
-            message = BotHelper.createMessageRemoveKeyboard(chatId, BotMessages.ENTER_REAL_HOURS.getMessage());
+            message = BotHelper.createMessage(chatId, BotMessages.ENTER_REAL_HOURS.getMessage());
+            message = BotHelper.removeKeyboard(message);
             return message;
         } else {
             message = BotHelper.createMessage(chatId, BotMessages.TASK_NOT_FOUND.getMessage());
@@ -134,7 +135,8 @@ public class TaskCompletionService {
                     
                     state.setCurrentStep(TaskStep.COMPLETED);
 
-                    message = BotHelper.createMessageRemoveKeyboard(chatId, BotMessages.FINISH_COMPLETION.getMessage());
+                    message = BotHelper.createMessage(chatId, BotMessages.FINISH_COMPLETION.getMessage());
+                    message = BotHelper.removeKeyboard(message);
 
                     return message;
                 } else {
