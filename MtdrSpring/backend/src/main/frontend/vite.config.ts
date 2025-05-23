@@ -15,12 +15,6 @@ export default defineConfig(({ mode }) => ({
         secure: false,
         //rewrite: (path) => path.replace(/^\/api/, '')
       },
-      '/auth': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false,
-        //rewrite: (path) => path.replace(/^\/auth/, '')
-      },
     }
   } : undefined,
   plugins: [

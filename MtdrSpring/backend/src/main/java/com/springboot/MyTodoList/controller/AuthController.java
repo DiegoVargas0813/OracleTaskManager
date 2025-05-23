@@ -21,7 +21,8 @@ import com.springboot.MyTodoList.repository.UserRepository;
 import com.springboot.MyTodoList.security.JwtUtil;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
+//TODO: Puede que el cross origin no sea necesario, ya que el backend y frontend están en el mismo dominio.
 @CrossOrigin(origins = "http://localhost:8080") // 🛠️ it has to be the same what's in the backend, no the frontend.
 public class AuthController {
 

@@ -15,7 +15,7 @@ export default function GoogleLoginButton() {
     }
 
     try {
-      const res = await axios.post("http://localhost:8081/auth/google", {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/google`, {
         idToken,
       });
 
