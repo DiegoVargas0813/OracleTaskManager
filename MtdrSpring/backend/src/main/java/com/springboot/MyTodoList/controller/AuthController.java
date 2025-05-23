@@ -21,8 +21,8 @@ import com.springboot.MyTodoList.repository.UserRepository;
 import com.springboot.MyTodoList.security.JwtUtil;
 
 @RestController
-@RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:8080") // 🛠️ Debe coincidir con el frontend, no el backend
+@RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:8080") // 🛠️ it has to be the same what's in the backend, no the frontend.
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -31,6 +31,30 @@ public class AuthController {
     public AuthController(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String password = payload.get("password");
+
+        Optional<User> optionalUser = userRepository.findByEmailAndPassword(email,password);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            
+            String jwt = jwtUtil.generateToken(user.getEmail());
+
+            // Retornar token y datos del usuario (sin contraseña)
+            return ResponseEntity.ok(Map.of(
+                "jwt", jwt,
+                "email", user.getEmail(),
+                "name", user.getName(),
+                "role", user.getRole()
+            ));
+
+        } else {
+            return ResponseEntity.status(404).body("User not found");
+        }
     }
 
     @PostMapping("/google")
