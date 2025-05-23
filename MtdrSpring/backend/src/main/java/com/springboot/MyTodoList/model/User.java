@@ -27,7 +27,7 @@ public class User {
     String password;
     @Column(name = "CREATION_TS")
     OffsetDateTime creationTs;
-    
+        
     @ManyToOne
     @JoinColumn(name = "MANAGER_ID")
     @JsonBackReference
