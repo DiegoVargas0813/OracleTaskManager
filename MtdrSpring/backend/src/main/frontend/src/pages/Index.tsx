@@ -1,4 +1,4 @@
-
+import GoogleLoginButton from '@/components/ui/loginButtonGoogle';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,42 +15,56 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { LockKeyhole, Mail } from 'lucide-react';
 
-// Mock user data
-const MOCK_USERS = {
-  'july.arteaga@gmail.com': { role: 'manager', name: 'July Arteaga' },
-  'achavez@gmail.com': { role: 'developer', name: 'Abraham Chávez' }
-};
-
 const Index = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate a login delay
-    setTimeout(() => {
-      const user = MOCK_USERS[email as keyof typeof MOCK_USERS];
-      
-      if (user && password.length > 0) {
-        // Store user info in localStorage for persistence
-        localStorage.setItem('user', JSON.stringify({ email, ...user }));
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error en la solicitud');
+      }
+  
+      const data = await response.json();
+
+      if (data && data.jwt && data.role) {
+        localStorage.setItem('jwt', data.jwt);
+        localStorage.setItem('user', JSON.stringify({
+          email,
+          name: data.name,
+          role: data.role
+        }));
         toast.success('Inicio de sesión exitoso');
-        
-        // Redirect based on role
-        if (user.role === 'manager') {
+
+        // Redirección basada en rol
+        if (data.role === 'manager') {
           navigate('/dashboard');
         } else {
           navigate('/developer-dashboard');
         }
       } else {
-        toast.error('Credenciales inválidas');
+        toast.error('Respuesta inválida del servidor');
       }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Error al iniciar sesión. Intenta de nuevo.');
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -108,7 +122,7 @@ const Index = () => {
               </div>
             </CardContent>
             
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
               <Button 
                 type="submit" 
                 className="w-full bg-primary hover:bg-primary/90"
@@ -116,6 +130,7 @@ const Index = () => {
               >
                 {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Button>
+              <GoogleLoginButton />
             </CardFooter>
           </form>
         </Card>
