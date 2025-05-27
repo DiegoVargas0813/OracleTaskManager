@@ -17,10 +17,19 @@
 		<java.version>11</java.version>
 		<version.lib.ojdbc>21.1.0.0</version.lib.ojdbc>
 		<frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
-		<node.version>v16.13.2</node.version>
-		<npm.version>8.1.2</npm.version>
+		<node.version>v18.18.2</node.version>
+		<npm.version>9.9.2</npm.version>
 	</properties>
 		<dependencies>
+		<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
 			<dependency>
 				<groupId>com.google.api-client</groupId>
 				<artifactId>google-api-client</artifactId>
@@ -200,7 +209,7 @@
 							<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${frontend-src-dir}/build</directory>
+									<directory>${frontend-src-dir}/dist</directory>
 									<filtering>false</filtering>
 								</resource>
 							</resources>
