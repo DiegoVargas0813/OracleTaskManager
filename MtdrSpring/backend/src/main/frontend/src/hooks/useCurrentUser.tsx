@@ -5,7 +5,7 @@ import { User } from '@/types/models';
 
 // Mock current user for development
 const mockCurrentUser: User = {
-  id: 1,
+  id: 109,
   name: "Abraham Chávez",
   role: "Project Manager",
   email: "abraham.chavez@company.com",

@@ -14,8 +14,8 @@ import { useTasksStoryPointsKPI } from '@/hooks/useTasksStoryPointsKPI';
 
 const DeveloperDashboard = () => {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
-  const { data: tasks, isLoading: tasksLoading } = useUserTasks(currentUser?.id || 1);
-  const { data: storyPointsKPI } = useTasksStoryPointsKPI(currentUser?.id || 1);
+  const { data: tasks, isLoading: tasksLoading } = useUserTasks(currentUser?.id || 109);
+  const { data: storyPointsKPI } = useTasksStoryPointsKPI(currentUser?.id || 109);
 
   // Helper function to check if a task is complete
   const isTaskComplete = (status: boolean | string): boolean => {
