@@ -5,6 +5,7 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class User {
     @Column(name = "EMAIL", unique = true)
     String email;
     @Column(name = "PASSWORD")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String password;
     @Column(name = "CREATION_TS")
     OffsetDateTime creationTs;
