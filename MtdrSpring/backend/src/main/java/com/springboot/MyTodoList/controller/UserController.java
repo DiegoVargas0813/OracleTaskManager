@@ -35,19 +35,10 @@ public class UserController {
     }
 
     @GetMapping
-        public UsersAndManagers getAllUsersAndManagers() {
-        List<User> users = userService.getAllUsers();
-        List<Manager> managers = managerService.getAllManagers();
-        return new UsersAndManagers(users, managers);
-    }
-
-
-/* 
-    @GetMapping
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
-     */
+    
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable int id){
         Optional<User> user = userService.getUserById(id);
