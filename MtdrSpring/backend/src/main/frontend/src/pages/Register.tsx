@@ -4,7 +4,8 @@ function RegisterForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    role:''
   });
 
   const [message, setMessage] = useState('');
@@ -19,7 +20,7 @@ function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email || !formData.password) {
+    if (!formData.name || !formData.email || !formData.password || !formData.role) {
       setMessage('Please fill in all fields.');
       return;
     }
@@ -33,7 +34,7 @@ function RegisterForm() {
 
       if (res.ok) {
         setMessage('Registered successfully!');
-        setFormData({ name: '', email: '', password: '' });
+        setFormData({ name: '', email: '', password: '', role: '' });
       } else {
         setMessage('Registration failed.');
       }
@@ -70,6 +71,17 @@ function RegisterForm() {
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <option value="">Selecciona un rol</option>
+          <option value="manager">Manager</option>
+          <option value="user">User</option>
+        </select>
+
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
