@@ -10,6 +10,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import Reports from "./pages/Reports";
+import Register from "./pages/Register";
 
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ function App() {
             <Route path="/sprints" element={<Navigate to="/sprints/active" />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
           <Toaster />
           <Sonner />

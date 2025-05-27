@@ -19,6 +19,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.springboot.MyTodoList.model.User;
 import com.springboot.MyTodoList.repository.UserRepository;
 import com.springboot.MyTodoList.security.JwtUtil;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,6 +34,20 @@ public class AuthController {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body("El correo ya está registrado");
+        }
+
+        // ⚠️ En producción deberías encriptar la contraseña
+        userRepository.save(user);
+        return ResponseEntity.ok("Usuario registrado correctamente");
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {

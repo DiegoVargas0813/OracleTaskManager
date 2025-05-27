@@ -2,6 +2,7 @@ import GoogleLoginButton from '@/components/ui/loginButtonGoogle';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import RegisterButton from '@/components/ui/RegisterButton';
 import { 
   Card, 
   CardHeader, 
@@ -131,6 +132,10 @@ const Index = () => {
                 {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Button>
               <GoogleLoginButton />
+              <RegisterButton 
+                onClick={() => navigate('/register')}
+                disabled={isLoading}
+              />
             </CardFooter>
           </form>
         </Card>

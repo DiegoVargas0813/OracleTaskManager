@@ -17,6 +17,7 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User,Integer> {
     List<User> findUserByManagerId(int id);
     
+    boolean existsByEmail(String email);
 
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Integer findUserIdByEmail(@Param("email") String email);
