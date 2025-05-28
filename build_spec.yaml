@@ -1,0 +1,50 @@
+version: 0.1
+component: build
+timeoutInSeconds: 3600
+
+shell: bash
+
+env:
+  variables:
+    MTDRWORKSHOP_LOCATION: $(pwd)/MtdrSpring
+    OCI_TENANCY: ${OCI_TENANCY}
+    OCI_REGION: ${OCI_REGION}
+    OCI_USER_OCID: ${OCI_USER_OCID}
+    COMPARTMENT_OCID: ${COMPARTMENT_OCID}
+    RUN_NAME: ${RUN_NAME}
+    MTDR_DB_NAME: ${MTDR_DB_NAME}
+    MTDR_KEY: ${MTDR_KEY}
+    DB_PASSWORD: ${DB_PASSWORD}
+    UI_USERNAME: ${UI_USERNAME}
+    UI_PASSWORD: ${UI_PASSWORD}
+    DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+    OKE_OCID: ${OKE_OCID}
+    MTDR_DB_OCID: ${MTDR_DB_OCID}
+    NAMESPACE: ${NAMESPACE}
+    TODO_PDB_NAME: ${TODO_PDB_NAME}
+
+steps:
+  - type: Command
+    name: "Source env.sh"
+    command: |
+      source ./MtdrSpring/env.sh
+
+  - type: Command
+    name: "OKE Setup"
+    command: |
+      bash ./MtdrSpring/utils/oke-setup.sh
+
+  - type: Command
+    name: "DB Setup"
+    command: |
+      bash ./MtdrSpring/utils/db-setup.sh
+
+  - type: Command
+    name: "Java Build"
+    command: |
+      bash ./MtdrSpring/utils/java-builds.sh
+
+  - type: Command
+    name: "Deploy Spring Boot App"
+    command: |
+      bash ./MtdrSpring/backend/deploy.sh
