@@ -42,7 +42,7 @@ done
 while ! state_done CWALLET_SSO_OBJECT; do
   echo "grabbing wallet"
   cd $MTDRWORKSHOP_LOCATION/wallet
-  oci os object put --bucket-name "$(state_get RUN_NAME)-$(state_get MTDR_KEY)" --name "cwallet.sso" --file 'cwallet.sso'
+  oci os object put --bucket-name "$(state_get RUN_NAME)-$(state_get MTDR_KEY)" --name "cwallet.sso" --file 'cwallet.sso' --force
   cd $MTDRWORKSHOP_LOCATION
   state_set_done CWALLET_SSO_OBJECT
   echo "done grabbing wallet"
