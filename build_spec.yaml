@@ -32,7 +32,7 @@ steps:
       echo "==============================="
 
   - type: Command
-    name: "OKE Setup"
+    name: "OKE & DB Setup"
     command: |
       yum install -y dos2unix
       cd MtdrSpring
@@ -43,21 +43,12 @@ steps:
       mkdir -p state
       touch state/K8S_PROVISIONING
       bash utils/oke-setup.sh
-    
-  - type: Command
-    name: "DB Setup"
-    command: |
-      yum install -y dos2unix curl
+
       curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       chmod +x kubectl
       mv kubectl /usr/local/bin/
       kubectl version --client
-      cd MtdrSpring
-      dos2unix utils/*.sh
-      dos2unix backend/*.sh
-      chmod +x utils/*.sh
-      source env.sh
-      mkdir -p state
+
       echo "$RUN_NAME" > state/RUN_NAME
       echo "$MTDR_KEY" > state/MTDR_KEY
       echo "$MTDR_DB_OCID" > state/MTDR_DB_OCID
@@ -66,6 +57,7 @@ steps:
       echo "$REGION" > state/REGION
       echo "$NAMESPACE" > state/NAMESPACE
       echo "$MTDR_DB_NAME" > state/MTDR_DB_NAME
+
       bash utils/db-setup.sh
 
   - type: Command
