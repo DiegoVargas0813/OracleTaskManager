@@ -48,9 +48,14 @@ steps:
       bash utils/java-builds.sh
 
   - type: Command
-    name: "OKE & DB Setup"
+    name: "Upgrade OCI CLI"
     command: |
       bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults --upgrade
+
+
+  - type: Command
+    name: "OKE & DB Setup"
+    command: |
       yum install -y dos2unix
       export PATH=/usr/lib/oracle/21/client64/bin:$PATH
       export LD_LIBRARY_PATH=/usr/lib/oracle/21/client64/lib:$LD_LIBRARY_PATH
