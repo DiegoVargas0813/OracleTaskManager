@@ -61,6 +61,10 @@ steps:
         sleep 5
       done
 
+      kubectl create secret generic dbuser \
+        --from-literal=dbpassword="$DB_PASSWORD" \
+        -n mtdrworkshop || echo "dbuser secret already exists"
+
       echo "$RUN_NAME" > state/RUN_NAME
       echo "$MTDR_KEY" > state/MTDR_KEY
       echo "$MTDR_DB_OCID" > state/MTDR_DB_OCID
