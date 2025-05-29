@@ -108,9 +108,9 @@ steps:
       echo "==== Using MTDR_DB_SVC: $(cat state/MTDR_DB_NAME)_tp ===="
     
   - type: Command
-    name: "Check wallet directory"
+    name: "Check root directory"
     command: |
-      ls -l wallet || echo "wallet directory missing"
+      ls 
       
 outputArtifacts:
   - name: tls-certs
