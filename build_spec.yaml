@@ -79,7 +79,7 @@ steps:
       echo "$COMPARTMENT_OCID" > state/COMPARTMENT_OCID
       echo "$REGION" > state/REGION
       echo "$NAMESPACE" > state/NAMESPACE
-      echo "$MTDR_DB_NAME" > state/MTDR_DB_NAME
+      echo "mtdb" > state/MTDR_DB_NAME
       touch state/MTDR_DB_PASSWORD_SET
 
       bash utils/db-setup.sh
