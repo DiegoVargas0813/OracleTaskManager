@@ -54,6 +54,8 @@ steps:
       kubectl config current-context
       kubectl get nodes
 
+      kubectl create namespace mtdrworkshop || echo "Namespace already exists"
+
       until kubectl get namespace mtdrworkshop; do
         echo "Waiting for mtdrworkshop namespace to be created..."
         sleep 5
