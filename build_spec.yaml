@@ -110,7 +110,10 @@ steps:
   - type: Command
     name: "Check root directory"
     command: |
-      ls 
+        ls -l
+        ls -l MtdrSpring
+        ls -l MtdrSpring/wallet
+        ls -l MtdrSpring/tls
       
 outputArtifacts:
   - name: tls-certs
