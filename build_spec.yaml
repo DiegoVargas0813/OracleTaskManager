@@ -128,6 +128,30 @@ outputArtifacts:
   - name: tls-key
     type: BINARY
     location: MtdrSpring/tls/tls.key
+  - name: db-wallet-cwallet
+    type: BINARY
+    location: MtdrSpring/wallet/cwallet.sso
+  - name: db-wallet-ewallet
+    type: BINARY
+    location: MtdrSpring/wallet/ewallet.p12
+  - name: db-wallet-ewallet-pem
+    type: BINARY
+    location: MtdrSpring/wallet/ewallet.pem
+  - name: db-wallet-keystore
+    type: BINARY
+    location: MtdrSpring/wallet/keystore.jks
+  - name: db-wallet-ojdbc
+    type: BINARY
+    location: MtdrSpring/wallet/ojdbc.properties
+  - name: db-wallet-sqlnet
+    type: BINARY
+    location: MtdrSpring/wallet/sqlnet.ora
+  - name: db-wallet-tnsnames
+    type: BINARY
+    location: MtdrSpring/wallet/tnsnames.ora
+  - name: db-wallet-truststore
+    type: BINARY
+    location: MtdrSpring/wallet/truststore.jks
   - name: db-wallet-zip
     type: BINARY
     location: MtdrSpring/wallet/wallet.zip
