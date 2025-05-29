@@ -114,11 +114,20 @@ steps:
         ls -l MtdrSpring
         ls -l MtdrSpring/wallet
         ls -l MtdrSpring/tls
+
+  - type: Command
+    name: "Fix permissions"
+    command: |
+      chmod -R a+r MtdrSpring/wallet
+      chmod -R a+r MtdrSpring/tls
       
 outputArtifacts:
-  - name: tls-certs
+  - name: tls-crt
     type: BINARY
-    location: MtdrSpring/tls
-  - name: db-wallet
+    location: MtdrSpring/tls/tls.crt
+  - name: tls-key
     type: BINARY
-    location: MtdrSpring/wallet
+    location: MtdrSpring/tls/tls.key
+  - name: db-wallet-zip
+    type: BINARY
+    location: MtdrSpring/wallet/wallet.zip
