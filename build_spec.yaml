@@ -25,26 +25,25 @@ env:
 
 steps:
   - type: Command
-    name: "Source env.sh"
-    command: |
-      source ./MtdrSpring/env.sh
-
-  - type: Command
     name: "OKE Setup"
     command: |
+      source ./MtdrSpring/env.sh
       bash ./MtdrSpring/utils/oke-setup.sh
 
   - type: Command
     name: "DB Setup"
     command: |
+      source ./MtdrSpring/env.sh
       bash ./MtdrSpring/utils/db-setup.sh
 
   - type: Command
     name: "Java Build"
     command: |
+      source ./MtdrSpring/env.sh
       bash ./MtdrSpring/utils/java-builds.sh
 
   - type: Command
     name: "Deploy Spring Boot App"
     command: |
+      source ./MtdrSpring/env.sh
       bash ./MtdrSpring/backend/deploy.sh
