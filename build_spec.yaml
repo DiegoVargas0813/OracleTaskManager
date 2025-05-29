@@ -42,7 +42,7 @@ steps:
 
       export PATH=/usr/lib/oracle/21/client64/bin:$PATH
       export LD_LIBRARY_PATH=/usr/lib/oracle/21/client64/lib:$LD_LIBRARY_PATH
-      
+
       cd $MTDRWORKSHOP_LOCATION
       dos2unix utils/*.sh
       dos2unix backend/*.sh
@@ -83,6 +83,7 @@ steps:
       echo "$MTDR_DB_NAME" > state/MTDR_DB_NAME
       touch state/MTDR_DB_PASSWORD_SET
 
+      cd $MTDRWORKSHOP_LOCATION
       bash utils/db-setup.sh
 
   - type: Command
