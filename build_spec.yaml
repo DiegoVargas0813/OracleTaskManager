@@ -35,9 +35,15 @@ steps:
     name: "OKE & DB Setup"
     command: |
       yum install -y dos2unix
-      yum install -y oracle-instantclient-release-el8
-      yum install -y oracle-instantclient-basic oracle-instantclient-sqlplus
-      cd MtdrSpring
+      cd /tmp
+      curl -O https://download.oracle.com/otn_software/linux/instantclient/211000/oracle-instantclient-basic-21.1.0.0.0-1.x86_64.rpm
+      curl -O https://download.oracle.com/otn_software/linux/instantclient/211000/oracle-instantclient-sqlplus-21.1.0.0.0-1.x86_64.rpm
+      yum localinstall -y oracle-instantclient-*.rpm
+
+      export PATH=/usr/lib/oracle/21/client64/bin:$PATH
+      export LD_LIBRARY_PATH=/usr/lib/oracle/21/client64/lib:$LD_LIBRARY_PATH
+      
+      cd $MTDRWORKSHOP_LOCATION
       dos2unix utils/*.sh
       dos2unix backend/*.sh
       chmod +x utils/*.sh
