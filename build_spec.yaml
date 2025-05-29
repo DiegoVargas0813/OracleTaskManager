@@ -57,6 +57,11 @@ steps:
       echo "$RUN_NAME" > state/RUN_NAME
       echo "$MTDR_KEY" > state/MTDR_KEY
       echo "$MTDR_DB_OCID" > state/MTDR_DB_OCID
+      echo "$DB_PASSWORD" > state/DB_PASSWORD
+      echo "$COMPARTMENT_OCID" > state/COMPARTMENT_OCID
+      echo "$REGION" > state/REGION
+      echo "$NAMESPACE" > state/NAMESPACE
+      echo "$MTDR_DB_NAME" > state/MTDR_DB_NAME
       bash utils/db-setup.sh
 
   - type: Command
@@ -72,6 +77,7 @@ steps:
       echo "$RUN_NAME" > state/RUN_NAME
       echo "$MTDR_KEY" > state/MTDR_KEY
       echo "$COMPARTMENT_OCID" > state/COMPARTMENT_OCID
+      echo "$DOCKER_REGISTRY" > state/DOCKER_REGISTRY
       bash utils/java-builds.sh
       
 outputArtifacts:
