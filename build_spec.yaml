@@ -11,9 +11,9 @@ env:
     OCI_REGION: mx-queretaro-1
     OCI_USER_OCID: ocid1.user.oc1..aaaaaaaaztkzhjc6hp7knyg2h4ekwseaxhyzp6bsjp524cjrmnrf3l23lk4a
     COMPARTMENT_OCID: ocid1.compartment.oc1..aaaaaaaaxh5feklm6f3uqj4st22zz6w4p4xnyktq4b33umn342cczr2q6cz
-    RUN_NAME: myworkshop
+    RUN_NAME: hellodevops
     MTDR_DB_NAME: MTDRDB
-    MTDR_KEY: ${MTDR_KEY}
+    MTDR_KEY: deploy1
     DB_PASSWORD: Springboot-101
     UI_USERNAME: TODOUSER
     UI_PASSWORD: Springboot-101
