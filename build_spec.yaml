@@ -48,13 +48,6 @@ steps:
       bash utils/java-builds.sh
 
   - type: Command
-    name: "Upgrade OCI CLI"
-    command: |
-      rm -rf /root/lib/oracle-cli
-      bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
-
-
-  - type: Command
     name: "OKE & DB Setup"
     command: |
       yum install -y dos2unix
@@ -126,7 +119,7 @@ steps:
 
       for file in "${ARTIFACTS[@]}"; do
         echo "Uploading $file to OCI Artifact Registry..."
-        oci artifacts generic-artifact upload \
+        oci artifacts generic upload \
           --artifact-repository-id "$ARTIFACT_REPO_ID" \
           --content-body "$file" \
           --display-name "$(basename "$file")" \
