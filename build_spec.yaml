@@ -32,13 +32,6 @@ steps:
       echo "==============================="
 
   - type: Command
-    name: "List files"
-    command: |
-      pwd
-      ls -l
-      ls -l MtdrSpring
-
-  - type: Command
     name: "OKE Setup"
     command: |
       yum install -y dos2unix
@@ -82,8 +75,6 @@ steps:
       
 outputArtifacts:
   - name: db-wallet
-    type: DIRECTORY
-    source: MtdrSpring/wallet
+    type: BINARY
   - name: tls-certs
-    type: DIRECTORY
-    source: MtdrSpring/tls
+    type: BINARY
