@@ -54,6 +54,11 @@ steps:
       kubectl config current-context
       kubectl get nodes
 
+      until kubectl get namespace mtdrworkshop; do
+        echo "Waiting for mtdrworkshop namespace to be created..."
+        sleep 5
+      done
+
       echo "$RUN_NAME" > state/RUN_NAME
       echo "$MTDR_KEY" > state/MTDR_KEY
       echo "$MTDR_DB_OCID" > state/MTDR_DB_OCID
