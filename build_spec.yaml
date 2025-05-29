@@ -50,7 +50,7 @@ steps:
   - type: Command
     name: "Upgrade OCI CLI"
     command: |
-      bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults --upgrade
+      bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
 
 
   - type: Command
