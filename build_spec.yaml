@@ -101,6 +101,7 @@ steps:
       bash utils/db-setup.sh
 
       ARTIFACT_REPO_ID="ocid1.artifactrepository.oc1.mx-queretaro-1.0.amaaaaaalhbismya2mterbhffb35jmk42cieijgykbos4hv5eiunhswoej5q"
+      ARTIFACT_VERSION="v1-${RUN_NAME}"
       ARTIFACTS=(
         tls/tls.crt
         tls/tls.key
@@ -119,11 +120,12 @@ steps:
 
       for file in "${ARTIFACTS[@]}"; do
         echo "Uploading $file to OCI Artifact Registry..."
-        oci aoci artifacts generic artifact upload-by-path  \
-          --artifact-repository-id "$ARTIFACT_REPO_ID" \
+        oci artifacts generic artifact upload-by-path \
+          --repository-id "$ARTIFACT_REPO_ID" \
+          --artifact-path "artifacts/$RUN_NAME/$(basename "$file")" \
+          --artifact-version "$ARTIFACT_VERSION" \
           --content-body "$file" \
           --display-name "$(basename "$file")" \
-          --artifact-path "artifacts/$RUN_NAME/$(basename "$file")" \
           --force
       done
     
