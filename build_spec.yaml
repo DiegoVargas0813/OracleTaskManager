@@ -34,23 +34,27 @@ steps:
   - type: Command
     name: "OKE Setup"
     command: |
+      chmod +x MtdrSpring/utils/*.sh
       source MtdrSpring/env.sh
       bash MtdrSpring/utils/oke-setup.sh
 
   - type: Command
     name: "DB Setup"
     command: |
+      chmod +x MtdrSpring/utils/*.sh
       source MtdrSpring/env.sh
       bash MtdrSpring/utils/db-setup.sh
 
   - type: Command
     name: "Java Build"
     command: |
+      chmod +x MtdrSpring/utils/*.sh
       source MtdrSpring/env.sh
       bash MtdrSpring/utils/java-builds.sh
 
   - type: Command
     name: "Deploy Spring Boot App"
     command: |
+      chmod +x MtdrSpring/utils/*.sh
       source MtdrSpring/env.sh
       bash MtdrSpring/backend/deploy.sh
