@@ -32,6 +32,22 @@ steps:
       echo "==============================="
 
   - type: Command
+    name: "Java Build"
+    command: |
+      yum install -y dos2unix
+      cd MtdrSpring
+      dos2unix utils/*.sh
+      dos2unix backend/*.sh
+      chmod +x utils/*.sh
+      source env.sh
+      mkdir -p state
+      echo "$RUN_NAME" > state/RUN_NAME
+      echo "$MTDR_KEY" > state/MTDR_KEY
+      echo "$COMPARTMENT_OCID" > state/COMPARTMENT_OCID
+      echo "$DOCKER_REGISTRY" > state/DOCKER_REGISTRY
+      bash utils/java-builds.sh
+
+  - type: Command
     name: "OKE & DB Setup"
     command: |
       yum install -y dos2unix
@@ -90,22 +106,6 @@ steps:
       echo "==== tnsnames.ora contents ===="
       cat wallet/tnsnames.ora
       echo "==== Using MTDR_DB_SVC: $(cat state/MTDR_DB_NAME)_tp ===="
-
-  - type: Command
-    name: "Java Build"
-    command: |
-      yum install -y dos2unix
-      cd MtdrSpring
-      dos2unix utils/*.sh
-      dos2unix backend/*.sh
-      chmod +x utils/*.sh
-      source env.sh
-      mkdir -p state
-      echo "$RUN_NAME" > state/RUN_NAME
-      echo "$MTDR_KEY" > state/MTDR_KEY
-      echo "$COMPARTMENT_OCID" > state/COMPARTMENT_OCID
-      echo "$DOCKER_REGISTRY" > state/DOCKER_REGISTRY
-      bash utils/java-builds.sh
       
 outputArtifacts:
   - name: db-wallet
