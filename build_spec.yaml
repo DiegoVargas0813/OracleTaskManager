@@ -56,6 +56,7 @@ steps:
       mkdir -p state
       echo "$RUN_NAME" > state/RUN_NAME
       echo "$MTDR_KEY" > state/MTDR_KEY
+      echo "$MTDR_DB_OCID" > state/MTDR_DB_OCID
       bash utils/db-setup.sh
 
   - type: Command
