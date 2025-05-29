@@ -35,15 +35,9 @@ steps:
     name: "OKE & DB Setup"
     command: |
       yum install -y dos2unix
-      cd /tmp
-      curl -O https://download.oracle.com/otn_software/linux/instantclient/211000/oracle-instantclient-basic-21.1.0.0.0-1.x86_64.rpm
-      curl -O https://download.oracle.com/otn_software/linux/instantclient/211000/oracle-instantclient-sqlplus-21.1.0.0.0-1.x86_64.rpm
-      yum localinstall -y oracle-instantclient-*.rpm
-
       export PATH=/usr/lib/oracle/21/client64/bin:$PATH
       export LD_LIBRARY_PATH=/usr/lib/oracle/21/client64/lib:$LD_LIBRARY_PATH
-
-      cd $MTDRWORKSHOP_LOCATION
+      cd MtdrSpring
       dos2unix utils/*.sh
       dos2unix backend/*.sh
       chmod +x utils/*.sh
@@ -56,6 +50,11 @@ steps:
       chmod +x kubectl
       mv kubectl /usr/local/bin/
       kubectl version --client
+
+      curl -O https://download.oracle.com/otn_software/linux/instantclient/211000/oracle-instantclient-basic-21.1.0.0.0-1.x86_64.rpm
+      curl -O https://download.oracle.com/otn_software/linux/instantclient/211000/oracle-instantclient-sqlplus-21.1.0.0.0-1.x86_64.rpm
+      yum localinstall -y oracle-instantclient-*.rpm
+
 
       oci ce cluster create-kubeconfig --cluster-id "$OKE_OCID" --file $HOME/.kube/config --region "$OCI_REGION" --token-version 2.0.0
       export KUBECONFIG=$HOME/.kube/config
@@ -83,7 +82,6 @@ steps:
       echo "$MTDR_DB_NAME" > state/MTDR_DB_NAME
       touch state/MTDR_DB_PASSWORD_SET
 
-      cd $MTDRWORKSHOP_LOCATION
       bash utils/db-setup.sh
 
   - type: Command
