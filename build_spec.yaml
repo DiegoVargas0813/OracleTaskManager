@@ -25,6 +25,13 @@ env:
 
 steps:
   - type: Command
+    name: "Show environment variables"
+    command: |
+      echo "==== ENVIRONMENT VARIABLES ===="
+      printenv | sort
+      echo "==============================="
+
+  - type: Command
     name: "List files"
     command: |
       pwd
