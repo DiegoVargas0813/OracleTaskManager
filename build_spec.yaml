@@ -24,6 +24,14 @@ env:
     TODO_PDB_NAME: ${TODO_PDB_NAME}
 
 steps:
+  steps:
+  - type: Command
+    name: "List files"
+    command: |
+      pwd
+      ls -l
+      ls -l MtdrSpring/utils
+
   - type: Command
     name: "OKE Setup"
     command: |
