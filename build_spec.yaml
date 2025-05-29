@@ -35,6 +35,8 @@ steps:
     name: "OKE & DB Setup"
     command: |
       yum install -y dos2unix
+      yum install -y oracle-instantclient-release-el8
+      yum install -y oracle-instantclient-basic oracle-instantclient-sqlplus
       cd MtdrSpring
       dos2unix utils/*.sh
       dos2unix backend/*.sh
