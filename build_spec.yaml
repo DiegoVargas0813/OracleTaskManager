@@ -82,6 +82,13 @@ steps:
       echo "$MTDR_DB_NAME" > state/MTDR_DB_NAME
       touch state/MTDR_DB_PASSWORD_SET
 
+      echo "==== TNS_ADMIN directory ===="
+      ls -l MtdrSpring/wallet
+      echo "==== tnsnames.ora contents ===="
+      cat MtdrSpring/wallet/tnsnames.ora
+      echo "==== Using MTDR_DB_SVC: $(cat state/MTDR_DB_NAME)_tp ===="
+
+      
       bash utils/db-setup.sh
 
   - type: Command
