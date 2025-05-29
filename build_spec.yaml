@@ -80,7 +80,7 @@ steps:
       echo "$COMPARTMENT_OCID" > state/COMPARTMENT_OCID
       bash utils/java-builds.sh
       
-exportArtifacts:
+outputArtifacts:
   - name: db-wallet
     type: DIRECTORY
     source: MtdrSpring/wallet
