@@ -76,8 +76,14 @@ SSL_SERVER_DN_MATCH=yes
   if kubectl create -f - -n mtdrworkshop; then
     state_set_done DB_WALLET_SECRET
   else
-    echo "Error: Failure to create db-wallet-secret.  Retrying..."
-    sleep 5
+  # Check if the error is "AlreadyExists"
+    if kubectl get secret db-wallet-secret -n mtdrworkshop &>/dev/null; then
+      echo "db-wallet-secret already exists, marking as done."
+      state_set_done DB_WALLET_SECRET
+    else
+      echo "Error: Failure to create db-wallet-secret.  Retrying..."
+      sleep 5
+    fi
   fi <<!
 apiVersion: v1
 data:
