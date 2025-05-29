@@ -47,7 +47,7 @@ steps:
   - type: Command
     name: "DB Setup"
     command: |
-      yum install -y dos2unix
+      yum install -y dos2unix kubectl
       cd MtdrSpring
       dos2unix utils/*.sh
       dos2unix backend/*.sh
