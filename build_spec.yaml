@@ -106,6 +106,22 @@ steps:
       echo "==== tnsnames.ora contents ===="
       cat wallet/tnsnames.ora
       echo "==== Using MTDR_DB_SVC: $(cat state/MTDR_DB_NAME)_tp ===="
+
+      # Move wallet to workspace root if needed
+      if [ -d wallet ]; then
+        mv wallet ../wallet
+      fi
+      if [ -d MtdrSpring/wallet ]; then
+        echo "Wallet directory found at MtdrSpring/wallet"
+        ls -l MtdrSpring/wallet
+      else
+        echo "Wallet directory NOT found at MtdrSpring/wallet"
+      fi
+    
+  - type: Command
+    name: "Check wallet directory"
+    command: |
+      ls -l MtdrSpring/wallet || echo "wallet directory missing"
       
 outputArtifacts:
   - name: db-wallet
