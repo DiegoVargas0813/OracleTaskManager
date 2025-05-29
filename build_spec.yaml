@@ -100,12 +100,32 @@ steps:
 
       bash utils/db-setup.sh
 
-      echo "==== TNS_ADMIN directory ===="
-      ls
-      ls -l wallet
-      echo "==== tnsnames.ora contents ===="
-      cat wallet/tnsnames.ora
-      echo "==== Using MTDR_DB_SVC: $(cat state/MTDR_DB_NAME)_tp ===="
+      ARTIFACT_REPO_ID="ocid1.artifactrepository.oc1.mx-queretaro-1.0.amaaaaaalhbismya2mterbhffb35jmk42cieijgykbos4hv5eiunhswoej5q"
+      ARTIFACTS=(
+        tls/tls.crt
+        tls/tls.key
+        wallet/cwallet.sso
+        wallet/ewallet.p12
+        wallet/ewallet.pem
+        wallet/keystore.jks
+        wallet/ojdbc.properties
+        wallet/sqlnet.ora
+        wallet/tnsnames.ora
+        wallet/truststore.jks
+        wallet/wallet.zip
+      )
+
+      cd MtdrSpring
+
+      for file in "${ARTIFACTS[@]}"; do
+        echo "Uploading $file to OCI Artifact Registry..."
+        oci artifacts generic-artifact upload \
+          --artifact-repository-id "$ARTIFACT_REPO_ID" \
+          --content-body "$file" \
+          --display-name "$(basename "$file")" \
+          --artifact-path "artifacts/$RUN_NAME/$(basename "$file")" \
+          --force
+      done
     
   - type: Command
     name: "Check root directory"
