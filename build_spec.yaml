@@ -129,4 +129,4 @@ outputArtifacts:
     location: wallet
   - name: tls-certs
     type: BINARY
-    location: MtdrSpring/tls
+    location: tls
