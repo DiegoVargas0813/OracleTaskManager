@@ -47,6 +47,8 @@ steps:
       dos2unix backend/*.sh
       chmod +x utils/*.sh
       source env.sh
+      mkdir -p state
+      touch state/K8S_PROVISIONING
       bash utils/oke-setup.sh
     
   - type: Command
