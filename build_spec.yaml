@@ -125,7 +125,6 @@ steps:
           --artifact-path "artifacts/$RUN_NAME/$(basename "$file")" \
           --artifact-version "$ARTIFACT_VERSION" \
           --content-body "$file" \
-          --display-name "$(basename "$file")" \
           --force
       done
     
