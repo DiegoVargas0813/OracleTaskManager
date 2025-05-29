@@ -36,7 +36,7 @@ steps:
     command: |
       pwd
       ls -l
-      ls -l utils
+      ls -l MtdrSpring
 
   - type: Command
     name: "OKE Setup"
