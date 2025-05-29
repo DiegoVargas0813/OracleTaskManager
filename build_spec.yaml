@@ -121,12 +121,12 @@ steps:
   - type: Command
     name: "Check wallet directory"
     command: |
-      ls -l MtdrSpring/wallet || echo "wallet directory missing"
+      ls -l wallet || echo "wallet directory missing"
       
 outputArtifacts:
   - name: db-wallet
     type: BINARY
-    location: wallet
+    location: ${MTDRWORKSHOP_LOCATION}/wallet
   - name: tls-certs
     type: BINARY
-    location: tls
+    location: MtdrSpring/tls
