@@ -126,7 +126,7 @@ steps:
 outputArtifacts:
   - name: db-wallet
     type: BINARY
-    location: MtdrSpring/wallet
+    location: wallet
   - name: tls-certs
     type: BINARY
     location: MtdrSpring/tls
