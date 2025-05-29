@@ -36,44 +36,48 @@ steps:
     command: |
       pwd
       ls -l
-      ls -l MtdrSpring/utils
+      ls -l utils
 
   - type: Command
     name: "OKE Setup"
     command: |
       yum install -y dos2unix
-      dos2unix MtdrSpring/utils/*.sh
-      dos2unix MtdrSpring/backend/*.sh
-      chmod +x MtdrSpring/utils/*.sh
-      source MtdrSpring/env.sh
-      source MtdrSpring/utils/oke-setup.sh
-
+      cd MtdrSpring
+      dos2unix utils/*.sh
+      dos2unix backend/*.sh
+      chmod +x utils/*.sh
+      source env.sh
+      bash utils/oke-setup.sh
+    
   - type: Command
     name: "DB Setup"
     command: |
       yum install -y dos2unix
-      dos2unix MtdrSpring/utils/*.sh
-      dos2unix MtdrSpring/backend/*.sh
-      chmod +x MtdrSpring/utils/*.sh
-      source MtdrSpring/env.sh
-      source MtdrSpring/utils/db-setup.sh
+      cd MtdrSpring
+      dos2unix utils/*.sh
+      dos2unix backend/*.sh
+      chmod +x utils/*.sh
+      source env.sh
+      bash utils/db-setup.sh
 
   - type: Command
     name: "Java Build"
     command: |
       yum install -y dos2unix
-      dos2unix MtdrSpring/utils/*.sh
-      dos2unix MtdrSpring/backend/*.sh
-      chmod +x MtdrSpring/utils/*.sh
-      source MtdrSpring/env.sh
-      source MtdrSpring/utils/java-builds.sh
+      cd MtdrSpring
+      dos2unix utils/*.sh
+      dos2unix backend/*.sh
+      chmod +x utils/*.sh
+      source env.sh
+      bash utils/java-builds.sh
 
   - type: Command
     name: "Deploy Spring Boot App"
     command: |
       yum install -y dos2unix
-      dos2unix MtdrSpring/utils/*.sh
-      dos2unix MtdrSpring/backend/*.sh
-      chmod +x MtdrSpring/utils/*.sh
-      source MtdrSpring/env.sh
-      source MtdrSpring/backend/deploy.sh
+      cd MtdrSpring
+      dos2unix utils/*.sh
+      dos2unix backend/*.sh
+      chmod +x utils/*.sh
+      source env.sh
+      bash backend/deploy.sh
