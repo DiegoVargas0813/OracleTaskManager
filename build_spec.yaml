@@ -14,7 +14,7 @@ env:
     RUN_NAME: hellodevops
     MTDR_DB_NAME: MTDRDB
     MTDR_KEY: deploy1
-    DB_PASSWORD: Springboot-101
+    DB_PASSWORD: Welcome12345
     UI_USERNAME: TODOUSER
     UI_PASSWORD: Springboot-101
     DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axvz6pcfltnr/hellodevops/deploy1/todolistapp-springboot
