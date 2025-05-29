@@ -24,7 +24,6 @@ env:
     TODO_PDB_NAME: ${TODO_PDB_NAME}
 
 steps:
-  steps:
   - type: Command
     name: "List files"
     command: |
