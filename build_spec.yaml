@@ -119,7 +119,7 @@ steps:
 
       for file in "${ARTIFACTS[@]}"; do
         echo "Uploading $file to OCI Artifact Registry..."
-        oci artifacts generic upload \
+        oci aoci artifacts generic artifact upload-by-path  \
           --artifact-repository-id "$ARTIFACT_REPO_ID" \
           --content-body "$file" \
           --display-name "$(basename "$file")" \
