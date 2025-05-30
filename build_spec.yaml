@@ -21,7 +21,7 @@ env:
     OKE_OCID: ocid1.cluster.oc1.mx-queretaro-1.aaaaaaaaon7wgecicsiz6dhlqt2kwivorok4276c64fg74kqgcx6i5y2473a
     MTDR_DB_OCID: ocid1.autonomousdatabase.oc1.mx-queretaro-1.anyxeljrlhbismyagbmfvt4tg4nuq6wo6vlaj2vdzm47otpo2vy6x3aql26q
     NAMESPACE: axvz6pcfltnr
-    TODO_PDB_NAME: MTDRDB
+    TODO_PDB_NAME: mtdb
 
 steps:
   - type: Command
