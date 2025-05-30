@@ -7,6 +7,9 @@ env:
   variables:
     JAVA_HOME: /usr/lib64/graalvm/graalvm22-ee-java17
     DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axvz6pcfltnr/hellodevops/deploy1/todolistapp-springboot
+    OCIR_USERNAME: axvz6pcfltnr/a01635782@tec.mx
+    OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P
+    JAVA_HOME: /usr/lib64/graalvm/graalvm22-ee-java17
     
   exportedVariables:
     - BuildServiceDemoVersion
@@ -53,16 +56,28 @@ steps:
           --file "$local_path"
       done
 
-      
+  - type: Command
+    name: "Create Wallet Secret"
+    command: |
+      kubectl create secret generic db-wallet-secret \
+        --from-file=MtdrSpring/wallet/cwallet.sso \
+        --from-file=MtdrSpring/wallet/ewallet.p12 \
+        --from-file=MtdrSpring/wallet/ewallet.pem \
+        --from-file=MtdrSpring/wallet/keystore.jks \
+        --from-file=MtdrSpring/wallet/ojdbc.properties \
+        --from-file=MtdrSpring/wallet/sqlnet.ora \
+        --from-file=MtdrSpring/wallet/tnsnames.ora \
+        --from-file=MtdrSpring/wallet/truststore.jks \
+        --from-file=MtdrSpring/wallet/wallet.zip \
+        --from-file=MtdrSpring/tls/tls.crt \
+        --from-file=MtdrSpring/tls/tls.key \
+        -n mtdrworkshop --dry-run=client -o yaml | kubectl apply -f -
 
 
   - type: Command
     name: "Docker Login"
-    command:  cd MtdrSpring;
-              oci os object get --bucket-name reacttodo-rolax --name deployment_config.tgz --file deployment_config.tgz;
-              tar -xzvf deployment_config.tgz;
-              source env.sh;
-              cat at.cfg | docker login -u "axzmghqes1gn/adan.ruiz@tec.mx" --password-stdin mx-queretaro-1.ocir.io
+    command: |
+      echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
   - type: Command
     name: "Build"
