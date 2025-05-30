@@ -164,23 +164,33 @@
 				<artifactId>frontend-maven-plugin</artifactId>
 				<version>1.9.1</version>
 				<configuration>
+					<nodeVersion>${node.version}</nodeVersion>
+					<npmVersion>${npm.version}</npmVersion>
 					<workingDirectory>${frontend-src-dir}</workingDirectory>
+					<installDirectory>${project.build.directory}</installDirectory>
+					<downloadRoot></downloadRoot>
 				</configuration>
 				<executions>
 					<execution>
-					<id>npm install</id>
-					<goals>
-						<goal>npm</goal>
-					</goals>
+						<id>install-frontend-tools</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
 					</execution>
 					<execution>
-					<id>npm run build</id>
-					<goals>
-						<goal>npm</goal>
-					</goals>
-					<configuration>
-						<arguments>run build</arguments>
-					</configuration>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>npm run build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
