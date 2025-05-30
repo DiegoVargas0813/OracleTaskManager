@@ -20,13 +20,13 @@ steps:
     name: "Build and Push in Modern Oracle Linux"
     command: |
       docker run --rm \
-        -v /var/run/docker.sock:/var/run/docker.sock \
         -v $PWD:/workspace \
+        -v /var/run/docker.sock:/var/run/docker.sock \
         -w /workspace/MtdrSpring/backend \
         oraclelinux:8 \
         bash -c "
           yum -y install oracle-epel-release-el8 && \
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
-          source /workspace/MtdrSpring/env.sh && \
+          source ../env.sh && \
           ./build.sh
         "
