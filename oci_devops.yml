@@ -18,6 +18,13 @@ steps:
       yum -y install nodejs npm
 
   - type: Command
+    name: "Check Node Version"
+    command: |
+      which node
+      node -v
+      npm -v
+
+  - type: Command
     name: "Docker Login"
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io

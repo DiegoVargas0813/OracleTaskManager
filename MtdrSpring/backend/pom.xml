@@ -165,12 +165,9 @@
 				<version>1.9.1</version>
 				<configuration>
 					<workingDirectory>${frontend-src-dir}</workingDirectory>
-					<installDirectory>${project.build.directory}</installDirectory>
-					<!-- Disable download -->
-					<skip>false</skip>
-					<nodeDownloadRoot></nodeDownloadRoot>
-					<npmDownloadRoot></npmDownloadRoot>
 					<installNodeAndNpm>false</installNodeAndNpm>
+					<nodeExecutable>node</nodeExecutable> <!-- force it to use system node -->
+					<npmExecutable>npm</npmExecutable>
 				</configuration>
 				<executions>
 					<execution>
