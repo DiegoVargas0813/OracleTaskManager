@@ -116,8 +116,6 @@ steps:
         wallet/wallet.zip
       )
 
-      cd MtdrSpring
-
       for file in "${ARTIFACTS[@]}"; do
         echo "Uploading $file to OCI Artifact Registry..."
         oci artifacts generic artifact upload-by-path \
