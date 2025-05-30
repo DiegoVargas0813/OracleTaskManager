@@ -122,7 +122,7 @@ steps:
           --repository-id "$ARTIFACT_REPO_ID" \
           --artifact-path "artifacts/$RUN_NAME/$(basename "$file")" \
           --artifact-version "$ARTIFACT_VERSION" \
-          --content-body "$file" \
+          --content-body "$file"
       done
     
   - type: Command
