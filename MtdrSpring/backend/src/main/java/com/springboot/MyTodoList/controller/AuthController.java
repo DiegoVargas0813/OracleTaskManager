@@ -19,11 +19,16 @@ import com.springboot.MyTodoList.repository.ManagerRepository;
 import com.springboot.MyTodoList.security.JwtUtil;
 import org.springframework.http.HttpStatus;
 
-
 @RestController
 @RequestMapping("/api/auth")
-//TODO: Puede que el cross origin no sea necesario, ya que el backend y frontend están en el mismo dominio.
-@CrossOrigin(origins = "http://localhost:8080") // 🛠️ it has to be the same what's in the backend, no the frontend.
+// TODO: Puede que el cross origin no sea necesario, ya que el backend y
+// frontend están en el mismo dominio.
+
+// @CrossOrigin(origins = "http://localhost:8080") // 🛠️ it has to be the same
+// what's in the backend, no the frontend. (USE IF FRONTEND RUNS FIRST)
+
+@CrossOrigin(origins = "http://localhost:8081") // 🛠️ it has to be the same what's in the backend, no the frontend.
+                                                // (USE IF BACKEND RUNS FIRST)
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -39,23 +44,22 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body("El correo ya está registrado");
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("El correo ya está registrado");
         }
 
         // Validar rol
         if (!user.getRole().equalsIgnoreCase("user") && !user.getRole().equalsIgnoreCase("manager")) {
             return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body("Rol inválido. Debe ser 'user' o 'manager'");
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Rol inválido. Debe ser 'user' o 'manager'");
         }
 
         // ⚠️ En producción deberías encriptar la contraseña
         userRepository.save(user);
         return ResponseEntity.ok("Usuario registrado correctamente");
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
@@ -69,11 +73,10 @@ public class AuthController {
             String jwt = jwtUtil.generateToken(manager.getEmail());
 
             return ResponseEntity.ok(Map.of(
-                "jwt", jwt,
-                "email", manager.getEmail(),
-                "name", manager.getName(),
-                "role", "manager"
-            ));
+                    "jwt", jwt,
+                    "email", manager.getEmail(),
+                    "name", manager.getName(),
+                    "role", "manager"));
         }
 
         // Si no es manager, buscar como usuario normal
@@ -83,18 +86,17 @@ public class AuthController {
             String jwt = jwtUtil.generateToken(user.getEmail());
 
             return ResponseEntity.ok(Map.of(
-                "jwt", jwt,
-                "email", user.getEmail(),
-                "name", user.getName(),
-                "role", user.getRole()
-            ));
+                    "jwt", jwt,
+                    "email", user.getEmail(),
+                    "name", user.getName(),
+                    "role", user.getRole()));
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
-    
+
     }
 
-@PostMapping("/google")
+    @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> payload) {
         String idTokenString = payload.get("idToken");
 
@@ -103,8 +105,7 @@ public class AuthController {
                     GoogleNetHttpTransport.newTrustedTransport(),
                     JacksonFactory.getDefaultInstance())
                     .setAudience(Collections.singletonList(
-                            "620904658382-u0nhrdtispsvvmsdglrfjl3qp92h3m9s.apps.googleusercontent.com"
-                    ))
+                            "620904658382-u0nhrdtispsvvmsdglrfjl3qp92h3m9s.apps.googleusercontent.com"))
                     .build();
 
             GoogleIdToken idToken = verifier.verify(idTokenString);
@@ -128,11 +129,10 @@ public class AuthController {
 
                 String jwt = jwtUtil.generateToken(user.getEmail());
                 return ResponseEntity.ok(Map.of(
-                    "jwt", jwt,
-                    "email", user.getEmail(),
-                    "name", user.getName(),
-                    "role", user.getRole()
-                ));
+                        "jwt", jwt,
+                        "email", user.getEmail(),
+                        "name", user.getName(),
+                        "role", user.getRole()));
             } else {
                 return ResponseEntity.status(401).body("Token de Google inválido");
             }
