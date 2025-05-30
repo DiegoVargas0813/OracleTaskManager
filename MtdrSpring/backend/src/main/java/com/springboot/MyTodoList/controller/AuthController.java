@@ -24,11 +24,7 @@ import org.springframework.http.HttpStatus;
 // TODO: Puede que el cross origin no sea necesario, ya que el backend y
 // frontend están en el mismo dominio.
 
-// @CrossOrigin(origins = "http://localhost:8080") // 🛠️ it has to be the same
-// what's in the backend, no the frontend. (USE IF FRONTEND RUNS FIRST)
-
-@CrossOrigin(origins = "http://localhost:8081") // 🛠️ it has to be the same what's in the backend, no the frontend.
-                                                // (USE IF BACKEND RUNS FIRST)
+@CrossOrigin(origins = "http://localhost:8080") // 🛠️ it has to be the same what's in the backend, no the frontend.
 public class AuthController {
 
     private final UserRepository userRepository;
