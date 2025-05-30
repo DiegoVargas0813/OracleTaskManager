@@ -165,7 +165,7 @@
 				<version>1.9.1</version>
 				<configuration>
 					<workingDirectory>${frontend-src-dir}</workingDirectory>
-					<installDirectory>/usr</installDirectory>
+					<installDirectory>/usr/bin</installDirectory>
 					<skipInstall>true</skipInstall>
 				</configuration>
 				<executions>
