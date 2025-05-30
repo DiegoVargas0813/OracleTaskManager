@@ -12,23 +12,49 @@ env:
 
 steps:
   - type: Command
-    name: "Docker Login"
+    name: "Check Directory Structure"
+    command: |
+      echo "Current directory: $(pwd)"
+      echo "Directory contents:"
+      ls -R
+
+  - type: Command
+    name: "Docker Login to OCIR"
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
   - type: Command
-    name: "Build and Push in Modern Oracle Linux"
+    name: "Run Build in Oracle Linux 8 Container"
     command: |
       docker run --rm \
-        -v /var/run/docker.sock:/var/run/docker.sock \
         -v $PWD:/workspace \
-        -w /workspace \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -w /workspace/MtdrSpring/backend \
         oraclelinux:8 \
         bash -c "
+          set -e
+          echo 'Installing build dependencies...'
           yum -y install oracle-epel-release-el8 && \
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
-          ls \
-          source MtdrSpring/env.sh && \
-          cd MtdrSpring/backend && \
+          echo 'Dependencies installed.'
+
+          echo 'Sourcing environment variables...'
+          if [ ! -f ../env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
+          source ../env.sh
+
+          echo 'Running build script...'
           ./build.sh
         "
+
+  - type: Command
+    name: "Check JAR Exists After Build"
+    command: |
+      echo "Verifying JAR output..."
+      if [ ! -f MtdrSpring/backend/target/MyTodoList-0.0.1-SNAPSHOT.jar ]; then
+        echo "ERROR: JAR file not found!"
+        ls -l MtdrSpring/backend/target
+        exit 1
+      else
+        echo "JAR file found:"
+        ls -lh MtdrSpring/backend/target/*.jar
+      fi
