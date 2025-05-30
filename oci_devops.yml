@@ -12,8 +12,9 @@ env:
 
 steps:
   - type: Command
-    name: "Install Node.js"
+    name: "Enable EPEL and Install Node.js"
     command: |
+      yum -y install oracle-epel-release-el7
       yum -y install nodejs npm
 
   - type: Command
