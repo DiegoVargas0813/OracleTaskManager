@@ -1,0 +1,20 @@
+services:
+  frontend:
+    build:
+      context: ./backend/src/main/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    working_dir: /app
+    volumes:
+      - ./backend/src/main/frontend:/app
+    command: ["npm", "run", "dev", "--", "--host"]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - frontend
