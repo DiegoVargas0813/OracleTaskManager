@@ -165,7 +165,9 @@
 				<version>1.9.1</version>
 				<configuration>
 					<workingDirectory>${frontend-src-dir}</workingDirectory>
-					<skipInstall>true</skipInstall> <!-- This tells it to use system-installed Node/NPM -->
+					<skip>true</skip>
+					<nodeVersion>${node.version}</nodeVersion>
+					<npmVersion>${npm.version}</npmVersion>
 				</configuration>
 				<executions>
 					<execution>
