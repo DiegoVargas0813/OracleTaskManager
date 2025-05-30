@@ -20,13 +20,6 @@ steps:
     command: export PATH=$JAVA_HOME/bin:$PATH
 
   - type: Command
-    name: "Java Build"
-    command: |
-      cd MtdrSpring
-      cd backend
-      ./mvnw clean package
-
-  - type: Command
     name: "Docker Login"
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
