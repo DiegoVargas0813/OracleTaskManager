@@ -1,4 +1,4 @@
-version: 0.1 
+version: 0.1
 component: build
 timeoutInSeconds: 600
 shell: bash
@@ -9,10 +9,6 @@ env:
     DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axvz6pcfltnr/hellodevops/deploy1/todolistapp-springboot
     OCIR_USERNAME: axvz6pcfltnr/a01635782@tec.mx
     OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P
-    JAVA_HOME: /usr/lib64/graalvm/graalvm22-ee-java17
-    
-  exportedVariables:
-    - BuildServiceDemoVersion
 
 steps:
   - type: Command
@@ -24,66 +20,16 @@ steps:
     command: export PATH=$JAVA_HOME/bin:$PATH
 
   - type: Command
-    name: "Download Artifacts"
-    command: |
-      ARTIFACT_REPO_ID="ocid1.artifactrepository.oc1.mx-queretaro-1.0.amaaaaaalhbismya2mterbhffb35jmk42cieijgykbos4hv5eiunhswoej5q"
-      ARTIFACT_VERSION="v1-hellodevops"
-      RUN_NAME="hellodevops"
-      mkdir -p MtdrSpring/wallet
-      mkdir -p MtdrSpring/tls
-
-      declare -A ARTIFACT_PATHS=(
-        [MtdrSpring/tls/tls.crt]="tls/tls.crt"
-        [MtdrSpring/tls/tls.key]="tls/tls.key"
-        [MtdrSpring/wallet/cwallet.sso]="wallet/cwallet.sso"
-        [MtdrSpring/wallet/ewallet.p12]="wallet/ewallet.p12"
-        [MtdrSpring/wallet/ewallet.pem]="wallet/ewallet.pem"
-        [MtdrSpring/wallet/keystore.jks]="wallet/keystore.jks"
-        [MtdrSpring/wallet/ojdbc.properties]="wallet/ojdbc.properties"
-        [MtdrSpring/wallet/sqlnet.ora]="wallet/sqlnet.ora"
-        [MtdrSpring/wallet/tnsnames.ora]="wallet/tnsnames.ora"
-        [MtdrSpring/wallet/truststore.jks]="wallet/truststore.jks"
-        [MtdrSpring/wallet/wallet.zip]="wallet/wallet.zip"
-      )
-
-      for local_path in "${!ARTIFACT_PATHS[@]}"; do
-        artifact_path="artifacts/${RUN_NAME}/$(basename "${ARTIFACT_PATHS[$local_path]}")"
-        echo "Downloading $artifact_path to $local_path"
-        oci artifacts generic artifact download-by-path \
-          --repository-id "$ARTIFACT_REPO_ID" \
-          --artifact-path "$artifact_path" \
-          --artifact-version "$ARTIFACT_VERSION" \
-          --file "$local_path"
-      done
-
-  - type: Command
-    name: "Create Wallet Secret"
-    command: |
-      kubectl create secret generic db-wallet-secret \
-        --from-file=MtdrSpring/wallet/cwallet.sso \
-        --from-file=MtdrSpring/wallet/ewallet.p12 \
-        --from-file=MtdrSpring/wallet/ewallet.pem \
-        --from-file=MtdrSpring/wallet/keystore.jks \
-        --from-file=MtdrSpring/wallet/ojdbc.properties \
-        --from-file=MtdrSpring/wallet/sqlnet.ora \
-        --from-file=MtdrSpring/wallet/tnsnames.ora \
-        --from-file=MtdrSpring/wallet/truststore.jks \
-        --from-file=MtdrSpring/wallet/wallet.zip \
-        --from-file=MtdrSpring/tls/tls.crt \
-        --from-file=MtdrSpring/tls/tls.key \
-        -n mtdrworkshop --dry-run=client -o yaml | kubectl apply -f -
-
-
-  - type: Command
     name: "Docker Login"
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
   - type: Command
-    name: "Build"
-    command:  cd MtdrSpring;
-              source env.sh;
-              (cd backend;source build.sh)
+    name: "Build and Push Docker Image"
+    command: |
+      cd MtdrSpring
+      source env.sh
+      (cd backend; source build.sh)
 
 
 
