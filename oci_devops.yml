@@ -27,8 +27,7 @@ steps:
         bash -c "
           yum -y install oracle-epel-release-el8 && \
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
-          ls -l /workspace && \
-          ls -l /workspace/MtdrSpring && \
+          ls -l \
           source MtdrSpring/env.sh && \
           cd MtdrSpring/backend && \
           ./build.sh
