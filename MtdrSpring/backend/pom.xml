@@ -164,8 +164,8 @@
 				<artifactId>frontend-maven-plugin</artifactId>
 				<version>1.9.1</version>
 				<configuration>
-					<nodeVersion>v12.22.12</nodeVersion> <!-- or v10.24.1 if that fails -->
-    				<npmVersion>6.14.16</npmVersion>     <!-- Last compatible npm for Node 12 -->
+					<nodeVersion>v16.20.2</nodeVersion> <!-- or v10.24.1 if that fails -->
+    				<npmVersion>8.19.4</npmVersion>     <!-- Last compatible npm for Node 12 -->
 					<workingDirectory>${frontend-src-dir}</workingDirectory>
 					<installDirectory>${project.build.directory}</installDirectory>
 					<downloadRoot></downloadRoot>
