@@ -14,8 +14,10 @@ steps:
   - type: Command
     name: "Java Build"
     command: |
+      cd MtdrSpring
       cd backend
       ./mvnw clean package
+
 
   - type: Command
     name: "Install GraalVM Enterprise 22.x Native Image for Java17"
