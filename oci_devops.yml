@@ -6,7 +6,8 @@ shell: bash
 env:
   variables:
     JAVA_HOME: /usr/lib64/graalvm/graalvm22-ee-java17
-
+    DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axvz6pcfltnr/hellodevops/deploy1/todolistapp-springboot
+    
   exportedVariables:
     - BuildServiceDemoVersion
 
@@ -18,6 +19,42 @@ steps:
   - type: Command
     name: "Set PATH Variable"
     command: export PATH=$JAVA_HOME/bin:$PATH
+
+  - type: Command
+    name: "Download Artifacts"
+    command: |
+      ARTIFACT_REPO_ID="ocid1.artifactrepository.oc1.mx-queretaro-1.0.amaaaaaalhbismya2mterbhffb35jmk42cieijgykbos4hv5eiunhswoej5q"
+      ARTIFACT_VERSION="v1-hellodevops"
+      RUN_NAME="hellodevops"
+      mkdir -p MtdrSpring/wallet
+      mkdir -p MtdrSpring/tls
+
+      declare -A ARTIFACT_PATHS=(
+        [MtdrSpring/tls/tls.crt]="tls/tls.crt"
+        [MtdrSpring/tls/tls.key]="tls/tls.key"
+        [MtdrSpring/wallet/cwallet.sso]="wallet/cwallet.sso"
+        [MtdrSpring/wallet/ewallet.p12]="wallet/ewallet.p12"
+        [MtdrSpring/wallet/ewallet.pem]="wallet/ewallet.pem"
+        [MtdrSpring/wallet/keystore.jks]="wallet/keystore.jks"
+        [MtdrSpring/wallet/ojdbc.properties]="wallet/ojdbc.properties"
+        [MtdrSpring/wallet/sqlnet.ora]="wallet/sqlnet.ora"
+        [MtdrSpring/wallet/tnsnames.ora]="wallet/tnsnames.ora"
+        [MtdrSpring/wallet/truststore.jks]="wallet/truststore.jks"
+        [MtdrSpring/wallet/wallet.zip]="wallet/wallet.zip"
+      )
+
+      for local_path in "${!ARTIFACT_PATHS[@]}"; do
+        artifact_path="artifacts/${RUN_NAME}/$(basename "${ARTIFACT_PATHS[$local_path]}")"
+        echo "Downloading $artifact_path to $local_path"
+        oci artifacts generic artifact download-by-path \
+          --repository-id "$ARTIFACT_REPO_ID" \
+          --artifact-path "$artifact_path" \
+          --artifact-version "$ARTIFACT_VERSION" \
+          --file "$local_path"
+      done
+
+      
+
 
   - type: Command
     name: "Docker Login"
