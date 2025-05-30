@@ -38,6 +38,10 @@ steps:
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
           echo 'Dependencies installed.'
 
+          echo 'Check the working directory...'
+          ls -l
+          pwd
+
           echo 'Sourcing environment variables...'
           if [ ! -f ../env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
           source ../env.sh
