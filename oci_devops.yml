@@ -38,5 +38,14 @@ steps:
       source env.sh
       (cd backend; source build.sh)
 
+    - type: Command
+    name: "Check JAR Exists"
+    command: |
+      if [ ! -f MtdrSpring/backend/target/MyTodoList-0.0.1-SNAPSHOT.jar ]; then
+        echo "ERROR: JAR file not found!"
+        ls -l MtdrSpring/backend/target
+        exit 1
+      fi
+
 
 
