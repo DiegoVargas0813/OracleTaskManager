@@ -1,6 +1,6 @@
 version: 0.1
 component: build
-timeoutInSeconds: 600
+timeoutInSeconds: 1200
 shell: bash
 
 env:
@@ -12,31 +12,31 @@ env:
 
 steps:
   - type: Command
-    name: "Enable EPEL and Install Node.js"
-    command: |
-      yum -y install oracle-epel-release-el7
-      yum -y install nodejs npm
-
-  - type: Command
-    name: "Check Node Version"
-    command: |
-      which node
-      node -v
-      npm -v
-
-  - type: Command
     name: "Docker Login"
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
+  - type: Command
+    name: "Build with Modern Oracle Linux in Docker"
+    command: |
+      docker run --rm \
+        -v $PWD/MtdrSpring:/workspace \
+        -w /workspace/backend \
+        oraclelinux:8 \
+        bash -c "
+          yum -y install oracle-epel-release-el8 && \
+          yum -y install nodejs npm maven java-17-openjdk-devel && \
+          mvn clean package spring-boot:repackage -DskipTests
+        "
 
   - type: Command
-    name: "Install GraalVM Enterprise 22.x Native Image for Java17"
-    command: yum -y install graalvm22-ee-17-native-image
-
-  - type: Command
-    name: "Set PATH Variable"
-    command: export PATH=$JAVA_HOME/bin:$PATH
+    name: "Check JAR Exists"
+    command: |
+      if [ ! -f MtdrSpring/backend/target/MyTodoList-0.0.1-SNAPSHOT.jar ]; then
+        echo 'ERROR: JAR file not found!'
+        ls -l MtdrSpring/backend/target
+        exit 1
+      fi
 
   - type: Command
     name: "Build and Push Docker Image"
@@ -44,15 +44,3 @@ steps:
       cd MtdrSpring
       source env.sh
       (cd backend; source build.sh)
-
-  - type: Command
-    name: "Check JAR Exists"
-    command: |
-      if [ ! -f MtdrSpring/backend/target/MyTodoList-0.0.1-SNAPSHOT.jar ]; then
-        echo "ERROR: JAR file not found!"
-        ls -l MtdrSpring/backend/target
-        exit 1
-      fi
-
-
-
