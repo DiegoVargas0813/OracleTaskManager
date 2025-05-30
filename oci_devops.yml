@@ -26,6 +26,7 @@ steps:
   - type: Command
     name: "Run Build in Oracle Linux 8 Container"
     command: |
+      echo "📦 Mounting workspace: $(pwd)"
       docker run --rm \
         -v $PWD:/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -33,20 +34,24 @@ steps:
         oraclelinux:8 \
         bash -c "
           set -e
-          echo 'Installing build dependencies...'
+
+          echo '🧰 Installing build dependencies...'
           yum -y install oracle-epel-release-el8 && \
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
-          echo 'Dependencies installed.'
+          echo '✅ Dependencies installed.'
 
-          echo 'Check the working directory...'
-          ls -l
-          pwd
+          echo '📁 Checking contents of /workspace:'
+          ls -l /workspace
+          echo '📁 Checking contents of /workspace/MtdrSpring:'
+          ls -l /workspace/MtdrSpring
+          echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
+          ls -l /workspace/MtdrSpring/backend
 
-          echo 'Sourcing environment variables...'
-          if [ ! -f ../env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
-          source ../env.sh
+          echo '📜 Sourcing environment variables...'
+          if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
+          source /workspace/MtdrSpring/env.sh
 
-          echo 'Running build script...'
+          echo '🚀 Running build script...'
           ./build.sh
         "
 
