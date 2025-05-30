@@ -2,9 +2,18 @@ package com.springboot.MyTodoList.model;
 
 import javax.persistence.*;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
+
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -12,7 +21,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "USERS")
-public class User {
+public class User implements UserDetails{
     @Id
     @Column(name = "USER_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +33,11 @@ public class User {
     @Column(name = "EMAIL", unique = true)
     String email;
     @Column(name = "PASSWORD")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String password;
     @Column(name = "CREATION_TS")
     OffsetDateTime creationTs;
-    
+        
     @ManyToOne
     @JoinColumn(name = "MANAGER_ID")
     @JsonBackReference
@@ -132,6 +142,38 @@ public class User {
         this.issues = issues;
     }
 
+     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + this.role.toUpperCase()));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+public String getUsername() {
+    return this.email; // o name si prefieres
+}
+
+
+
     @Override
     public String toString() {
         return "User{" +
@@ -146,4 +188,7 @@ public class User {
                 ", issues=" + issues +
                 '}';
     }
+
+
 }
+

@@ -232,7 +232,8 @@ public class TelegramBotHandler {
 
         taskService.putTaskStatus(originalTaskId, "Started");
         
-        SendMessage message = BotHelper.createMessageRemoveKeyboard(chatId, "Task #" + taskId + " started successfully.");
+        SendMessage message = BotHelper.createMessage(chatId, "Task #" + taskId + " started successfully.");
+        message = BotHelper.removeKeyboard(message);
 
         return message;
     }

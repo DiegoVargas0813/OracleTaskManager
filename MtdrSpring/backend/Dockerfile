@@ -1,4 +1,4 @@
-FROM openjdk:22
+FROM openjdk:17
 #COPY pom.xml /tmp/
 #COPY src /tmp/src/
 WORKDIR /tmp/

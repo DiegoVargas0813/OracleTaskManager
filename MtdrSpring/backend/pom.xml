@@ -17,10 +17,65 @@
 		<java.version>11</java.version>
 		<version.lib.ojdbc>21.1.0.0</version.lib.ojdbc>
 		<frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
-		<node.version>v16.13.2</node.version>
-		<npm.version>8.1.2</npm.version>
+		<node.version>v18.18.2</node.version>
+		<npm.version>9.9.2</npm.version>
 	</properties>
 		<dependencies>
+		<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+			<dependency>
+				<groupId>com.google.api-client</groupId>
+				<artifactId>google-api-client</artifactId>
+				<version>2.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.oauth-client</groupId>
+				<artifactId>google-oauth-client-jetty</artifactId>
+				<version>1.34.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.http-client</groupId>
+				<artifactId>google-http-client-jackson2</artifactId>
+				<version>1.39.2</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt</artifactId>
+				<version>0.9.1</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>com.google.api-client</groupId>
+				<artifactId>google-api-client</artifactId>
+				<version>2.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-data-jpa</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId> <!-- o mysql -->
+				<artifactId>postgresql</artifactId>
+				<version>42.2.27</version>
+			</dependency>
+
 			<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
@@ -154,7 +209,7 @@
 							<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${frontend-src-dir}/build</directory>
+									<directory>${frontend-src-dir}/dist</directory>
 									<filtering>false</filtering>
 								</resource>
 							</resources>

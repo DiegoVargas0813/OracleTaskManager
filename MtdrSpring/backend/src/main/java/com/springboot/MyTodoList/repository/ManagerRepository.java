@@ -20,4 +20,12 @@ public interface ManagerRepository extends JpaRepository<Manager,Integer> {
     @Query("SELECT m FROM Manager m WHERE m.email = :email")
     Optional<Manager> findManagerIdByEmail(@Param("email") String email);
 
+     
+    @Query("SELECT u.id FROM Manager u WHERE u.email = :email AND u.password = :password")
+    Integer findUserIdByEmailAndPassword(@Param("email") String email, @Param("password") String password);
+
+
+    Optional<Manager> findByEmailAndPassword(String email,String password);
+    Optional<Manager> findByEmail(String email);
+
 }

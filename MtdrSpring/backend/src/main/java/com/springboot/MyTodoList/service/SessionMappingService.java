@@ -104,7 +104,9 @@ public class SessionMappingService {
 
     private void notifyUser(long chatId) {
         // Logica para notificar al usuario de una sesion de mapeos expirada
-        SendMessage message = BotHelper.createMessageRemoveKeyboard(chatId, BotMessages.SESSION_EXPIRED.getMessage());
+
+        SendMessage message = BotHelper.createMessage(chatId, BotMessages.SESSION_EXPIRED.getMessage());
+        message = BotHelper.removeKeyboard(message);
         messagingService.sendMessage(message);
     }
 

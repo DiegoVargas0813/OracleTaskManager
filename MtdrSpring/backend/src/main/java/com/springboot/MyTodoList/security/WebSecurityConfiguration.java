@@ -28,7 +28,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
-            "http://localhost:8080",
+            "http://localhost:8081",
             "https://cracle.prometrics.mx"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
