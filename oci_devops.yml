@@ -14,13 +14,19 @@ steps:
   - type: Command
     name: "Check Directory Structure and Run Build"
     command: |
-      echo "Current directory: $(pwd)"
-      echo "Directory contents:"
+      echo "🔍 Host: Current directory: $(pwd)"
+      echo "🔍 Host: Directory contents:"
       ls -l
-      echo "Contents of MtdrSpring:"
+      echo "🔍 Host: Contents of MtdrSpring:"
       ls -l MtdrSpring
-      echo "Contents of MtdrSpring/backend:"
+      echo "🔍 Host: Contents of MtdrSpring/backend:"
       ls -l MtdrSpring/backend
+      echo "🔍 Host: Contents of MtdrSpring/utils:"
+      ls -l MtdrSpring/utils || echo "No utils dir"
+      echo "🔍 Host: env.sh exists?"
+      [ -f MtdrSpring/env.sh ] && echo "env.sh found" || echo "env.sh NOT found"
+      echo "🔍 Host: build.sh exists?"
+      [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
 
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
@@ -36,19 +42,25 @@ steps:
         bash -c "
           set -e
 
+          echo '🔍 Container: Checking /workspace'
+          ls -l /workspace
+          echo '🔍 Container: Checking /workspace/MtdrSpring'
+          ls -l /workspace/MtdrSpring
+          echo '🔍 Container: Checking /workspace/MtdrSpring/backend'
+          ls -l /workspace/MtdrSpring/backend
+          echo '🔍 Container: Checking /workspace/MtdrSpring/utils'
+          ls -l /workspace/MtdrSpring/utils || echo 'No utils dir'
+          echo '🔍 Container: env.sh exists?'
+          [ -f /workspace/MtdrSpring/env.sh ] && echo 'env.sh found' || echo 'env.sh NOT found'
+          echo '🔍 Container: build.sh exists?'
+          [ -f /workspace/MtdrSpring/backend/build.sh ] && echo 'build.sh found' || echo 'build.sh NOT found'
+
+          echo \"🔎 Current working directory: \$(pwd)\"
+
           echo '🧰 Installing build dependencies...'
           yum -y install oracle-epel-release-el8 && \
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
           echo '✅ Dependencies installed.'
-
-          echo '📁 Checking contents of /workspace:'
-          ls -l /workspace
-          echo '📁 Checking contents of /workspace/MtdrSpring:'
-          ls -l /workspace/MtdrSpring
-          echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
-          ls -l /workspace/MtdrSpring/backend
-
-          echo \"🔎 Current working directory: \$(pwd)\"
 
           echo '📜 Sourcing environment variables...'
           if [ ! -f ../env.sh ]; then ls -l ..; echo '❌ env.sh not found'; exit 1; fi
