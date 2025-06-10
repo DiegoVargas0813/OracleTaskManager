@@ -17,22 +17,28 @@ steps:
       echo "🔍 Host: Current directory: $(pwd)"
       echo "🔍 Host: Directory contents:"
       ls -l
+
       echo "🔍 Host: Contents of MtdrSpring:"
       ls -l MtdrSpring
+
       echo "🔍 Host: Contents of MtdrSpring/backend:"
       ls -l MtdrSpring/backend
+
       echo "🔍 Host: Contents of MtdrSpring/utils:"
       ls -l MtdrSpring/utils || echo "No utils dir"
+
       echo "🔍 Host: env.sh exists?"
       [ -f MtdrSpring/env.sh ] && echo "env.sh found" || echo "env.sh NOT found"
+
       echo "🔍 Host: build.sh exists?"
       [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
 
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
-      # Ensure we always mount the repo root, not a subdirectory
+      # Save current path
       REPO_ROOT=$(pwd)
       echo "📦 Mounting workspace: $REPO_ROOT"
+
       docker run --rm \
         -v "$REPO_ROOT":/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -46,14 +52,19 @@ steps:
 
           echo '🔍 Container: Checking /workspace'
           ls -l /workspace
+
           echo '🔍 Container: Checking /workspace/MtdrSpring'
           ls -l /workspace/MtdrSpring
+
           echo '🔍 Container: Checking /workspace/MtdrSpring/backend'
           ls -l /workspace/MtdrSpring/backend
+
           echo '🔍 Container: Checking /workspace/MtdrSpring/utils'
           ls -l /workspace/MtdrSpring/utils || echo 'No utils dir'
+
           echo '🔍 Container: env.sh exists?'
           [ -f /workspace/MtdrSpring/env.sh ] && echo 'env.sh found' || echo 'env.sh NOT found'
+
           echo '🔍 Container: build.sh exists?'
           [ -f /workspace/MtdrSpring/backend/build.sh ] && echo 'build.sh found' || echo 'build.sh NOT found'
 
@@ -65,11 +76,12 @@ steps:
           echo '✅ Dependencies installed.'
 
           echo '📜 Sourcing environment variables...'
-          if [ ! -f ../env.sh ]; then ls -l ..; echo '❌ env.sh not found'; exit 1; fi
-          chmod +x ../env.sh
-          . ../env.sh
+          chmod +x /workspace/MtdrSpring/env.sh || { echo '❌ env.sh not executable'; exit 1; }
+          . /workspace/MtdrSpring/env.sh
+
           echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
 
           echo '🚀 Running build script...'
-          ./build.sh
+          chmod +x /workspace/MtdrSpring/backend/build.sh
+          /workspace/MtdrSpring/backend/build.sh
         "
