@@ -30,9 +30,11 @@ steps:
 
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
-      echo "📦 Mounting workspace: $(pwd)"
+      # Ensure we always mount the repo root, not a subdirectory
+      REPO_ROOT=$(pwd)
+      echo "📦 Mounting workspace: $REPO_ROOT"
       docker run --rm \
-        -v $(pwd):/workspace \
+        -v "$REPO_ROOT":/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -w /workspace/MtdrSpring/backend \
         -e DOCKER_REGISTRY="$DOCKER_REGISTRY" \
