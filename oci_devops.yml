@@ -5,42 +5,42 @@ shell: bash
 
 env:
   variables:
-    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-17
     DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axvz6pcfltnr/hellodevops/deploy1
     OCIR_USERNAME: axvz6pcfltnr/a01635782@tec.mx
     OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P
 
 steps:
-  # 1) Opcional: inspeccionar estructura y cargar env.sh
+  # 1) Inspecciona y carga env.sh
   - type: Command
-    name: "Check Directory Structure & Source Env"
+    name: "Check Dir & Source Env"
     image: oraclelinux:8
     command: |
       set -e
-      echo "🔍 Runner: Current directory: $(pwd)"
-      ls -l
-      echo "🔍 Contents of MtdrSpring/backend:"
+      echo "🔍 CWD: $(pwd)"
       ls -l MtdrSpring/backend
-
-      echo '📜 Sourcing environment variables...'
       chmod +x MtdrSpring/env.sh
       . MtdrSpring/env.sh
-      echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
+      echo "✅ MTDRWORKSHOP_LOCATION=$MTDRWORKSHOP_LOCATION"
 
-  # 2) Empaquetar con Maven sin ejecutar tests
+  # 2) Empaqueta JAR con Maven (sin tests)
   - type: Command
     name: "Build Java JAR (skip tests)"
     image: apache/maven:3.8.8-jdk-17
     workingDirectory: MtdrSpring/backend
     command: |
       mvn clean package -DskipTests
+      echo "🔍 target/:"
+      ls -l target
 
-  # 3) Construir y subir la imagen Docker
+  # 3) Construye y sube imagen Docker
   - type: Command
-    name: "Build & Push Docker Image"
+    name: "Build & Push Docker"
     image: docker:24
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin $DOCKER_REGISTRY
+
+      # Diagnóstico extra: confirma que jar existe en el contexto
+      ls -l MtdrSpring/backend/target
 
       docker build \
         -f MtdrSpring/backend/Dockerfile \
