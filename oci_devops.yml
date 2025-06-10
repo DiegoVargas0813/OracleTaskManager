@@ -11,47 +11,40 @@ env:
     OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P
 
 steps:
+  # 1) Opcional: inspeccionar estructura y cargar env.sh
   - type: Command
-    name: "Check Directory Structure and Run Build"
+    name: "Check Directory Structure & Source Env"
     image: oraclelinux:8
     command: |
       set -e
-
       echo "🔍 Runner: Current directory: $(pwd)"
-      echo "🔍 Runner: Directory contents:"
       ls -l
-
-      echo "🔍 Runner: Contents of MtdrSpring:"
-      ls -l MtdrSpring
-
-      echo "🔍 Runner: Contents of MtdrSpring/backend:"
+      echo "🔍 Contents of MtdrSpring/backend:"
       ls -l MtdrSpring/backend
 
-      echo "🔍 Runner: Contents of MtdrSpring/utils:"
-      ls -l MtdrSpring/utils || echo "No utils dir"
-
-      echo "🔍 Runner: env.sh exists?"
-      [ -f MtdrSpring/env.sh ] && echo "env.sh found" || echo "env.sh NOT found"
-
-      echo "🔍 Runner: build.sh exists?"
-      [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
-
-      echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
-
-      echo '🧰 Installing build dependencies...'
-      yum -y install nodejs npm maven java-17-openjdk-devel docker
-      echo '✅ Dependencies installed.'
-
-      # Dynamically set JAVA_HOME to the correct OpenJDK path
-      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-      echo "JAVA_HOME set to $JAVA_HOME"
-
       echo '📜 Sourcing environment variables...'
-      chmod +x MtdrSpring/env.sh || { echo '❌ env.sh not executable'; exit 1; }
+      chmod +x MtdrSpring/env.sh
       . MtdrSpring/env.sh
-
       echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
 
-      echo '🚀 Running build script...'
-      chmod +x "$MTDRWORKSHOP_LOCATION/backend/build.sh"
-      "$MTDRWORKSHOP_LOCATION/backend/build.sh"
+  # 2) Empaquetar con Maven sin ejecutar tests
+  - type: Command
+    name: "Build Java JAR (skip tests)"
+    image: apache/maven:3.8.8-jdk-17
+    workingDirectory: MtdrSpring/backend
+    command: |
+      mvn clean package -DskipTests
+
+  # 3) Construir y subir la imagen Docker
+  - type: Command
+    name: "Build & Push Docker Image"
+    image: docker:24
+    command: |
+      echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin $DOCKER_REGISTRY
+
+      docker build \
+        -f MtdrSpring/backend/Dockerfile \
+        -t $DOCKER_REGISTRY/todolistapp-springboot:latest \
+        MtdrSpring/backend
+
+      docker push $DOCKER_REGISTRY/todolistapp-springboot:latest
