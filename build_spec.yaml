@@ -22,6 +22,10 @@ env:
     MTDR_DB_OCID: ocid1.autonomousdatabase.oc1.mx-queretaro-1.anyxeljrlhbismyagbmfvt4tg4nuq6wo6vlaj2vdzm47otpo2vy6x3aql26q
     NAMESPACE: axvz6pcfltnr
     TODO_PDB_NAME: mtdb
+    OCIR_USERNAME: axvz6pcfltnr/a01635782@tec.mx    # tu tenancy/user
+    OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P            # tu token de OCIR
+    DOCKER_REGISTRY_HOST: mx-queretaro-1.ocir.io   # sin namespace ni repo
+    DOCKER_IMAGE: $DOCKER_REGISTRY_HOST/$NAMESPACE/hellodevops/deploy1/todolistapp-springboot
 
 steps:
   - type: Command
@@ -132,6 +136,22 @@ steps:
         ls -l MtdrSpring
         ls -l MtdrSpring/wallet
         ls -l MtdrSpring/tls
+
+  - type: Command
+    name: "🔐 Docker Login a OCIR"
+    image: docker:24
+    command: |
+      echo "$OCIR_AUTH_TOKEN" | docker login $DOCKER_REGISTRY_HOST \
+        --username "$OCIR_USERNAME" --password-stdin
+
+  - type: Command
+    name: "🐳 Build y Push Docker image"
+    image: docker:24
+    command: |
+      cd MtdrSpring/backend
+      ls -l target/*.jar
+      docker build -t "$DOCKER_IMAGE" .
+      docker push "$DOCKER_IMAGE"
 
   - type: Command
     name: "Fix permissions"
