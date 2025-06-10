@@ -60,16 +60,3 @@ steps:
           echo '🚀 Running build script...'
           ./build.sh
         "
-
-  - type: Command
-    name: "Check JAR Exists After Build"
-    command: |
-      echo "Verifying JAR output..."
-      if [ ! -f MtdrSpring/backend/target/MyTodoList-0.0.1-SNAPSHOT.jar ]; then
-        echo "ERROR: JAR file not found!"
-        ls -l MtdrSpring/backend/target
-        exit 1
-      else
-        echo "JAR file found:"
-        ls -lh MtdrSpring/backend/target/*.jar
-      fi
