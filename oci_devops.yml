@@ -23,16 +23,6 @@ steps:
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
-  - type: Command
-    name: "Login en OCIR"
-    command: |
-      cd MtdrSpring
-      oci os object get --bucket-name reacttodo-rolax --name deployment_config.tgz --file deployment_config.tgz
-      tar -xzvf deployment_config.tgz
-      ls -l
-      cat env.sh || echo "env.sh no se encontró"
-      source env.sh
-
 
   - type: Command
     name: "Run Build in Oracle Linux 8 Container"

@@ -44,6 +44,7 @@ else
   set_javahome
 fi
 
+#
 #state directory
 if test -d ~/mtdrworkshop-state; then
   export MTDRWORKSHOP_STATE_HOME=~/mtdrworkshop-state
