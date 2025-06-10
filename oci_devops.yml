@@ -36,9 +36,6 @@ steps:
       echo "🔍 Runner: build.sh exists?"
       [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
 
-      echo "🔍 Contenido de target/:"
-      ls -l "$MTDRWORKSHOP_LOCATION/backend/target"
-
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
       echo '🧰 Installing build dependencies...'
