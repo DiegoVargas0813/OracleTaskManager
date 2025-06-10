@@ -43,12 +43,10 @@ steps:
 
           echo '📁 Checking contents of /workspace:'
           ls -l /workspace
-          echo '📁 Checking contents of /workspace/$(basename $(pwd)):'
-          ls -l /workspace/$(basename $(pwd))
-          echo '📁 Checking contents of /workspace/$(basename $(pwd))/MtdrSpring:'
-          ls -l /workspace/$(basename $(pwd))/MtdrSpring
-          echo '📁 Checking contents of /workspace/$(basename $(pwd))/MtdrSpring/backend:'
-          ls -l /workspace/$(basename $(pwd))/MtdrSpring/backend
+          echo '📁 Checking contents of /workspace/MtdrSpring:'
+          ls -l /workspace/MtdrSpring
+          echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
+          ls -l /workspace/MtdrSpring/backend
 
           echo \"🔎 Current working directory: \$(pwd)\"
 
