@@ -5,46 +5,53 @@ shell: bash
 
 env:
   variables:
+    JAVA_HOME: /usr/lib/jvm/java-17-openjdk-17
     DOCKER_REGISTRY: mx-queretaro-1.ocir.io/axvz6pcfltnr/hellodevops/deploy1
     OCIR_USERNAME: axvz6pcfltnr/a01635782@tec.mx
     OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P
 
 steps:
-  # 1) Inspecciona y carga env.sh
   - type: Command
-    name: "Check Dir & Source Env"
+    name: "Check Directory Structure and Run Build"
     image: oraclelinux:8
     command: |
       set -e
-      echo "🔍 CWD: $(pwd)"
+
+      echo "🔍 Runner: Current directory: $(pwd)"
+      echo "🔍 Runner: Directory contents:"
+      ls -l
+
+      echo "🔍 Runner: Contents of MtdrSpring:"
+      ls -l MtdrSpring
+
+      echo "🔍 Runner: Contents of MtdrSpring/backend:"
       ls -l MtdrSpring/backend
-      chmod +x MtdrSpring/env.sh
+
+      echo "🔍 Runner: Contents of MtdrSpring/utils:"
+      ls -l MtdrSpring/utils || echo "No utils dir"
+
+      echo "🔍 Runner: env.sh exists?"
+      [ -f MtdrSpring/env.sh ] && echo "env.sh found" || echo "env.sh NOT found"
+
+      echo "🔍 Runner: build.sh exists?"
+      [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
+
+      echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
+
+      echo '🧰 Installing build dependencies...'
+      yum -y install nodejs npm maven java-17-openjdk-devel docker
+      echo '✅ Dependencies installed.'
+
+      # Dynamically set JAVA_HOME to the correct OpenJDK path
+      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+      echo "JAVA_HOME set to $JAVA_HOME"
+
+      echo '📜 Sourcing environment variables...'
+      chmod +x MtdrSpring/env.sh || { echo '❌ env.sh not executable'; exit 1; }
       . MtdrSpring/env.sh
-      echo "✅ MTDRWORKSHOP_LOCATION=$MTDRWORKSHOP_LOCATION"
 
-  # 2) Empaqueta JAR con Maven (sin tests)
-  - type: Command
-    name: "Build Java JAR (skip tests)"
-    image: apache/maven:3.8.8-jdk-17
-    workingDirectory: MtdrSpring/backend
-    command: |
-      mvn clean package -DskipTests
-      echo "🔍 target/:"
-      ls -l target
+      echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
 
-  # 3) Construye y sube imagen Docker
-  - type: Command
-    name: "Build & Push Docker"
-    image: docker:24
-    command: |
-      echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin $DOCKER_REGISTRY
-
-      # Diagnóstico extra: confirma que jar existe en el contexto
-      ls -l MtdrSpring/backend/target
-
-      docker build \
-        -f MtdrSpring/backend/Dockerfile \
-        -t $DOCKER_REGISTRY/todolistapp-springboot:latest \
-        MtdrSpring/backend
-
-      docker push $DOCKER_REGISTRY/todolistapp-springboot:latest
+      echo '🚀 Running build script...'
+      chmod +x "$MTDRWORKSHOP_LOCATION/backend/build.sh"
+      "$MTDRWORKSHOP_LOCATION/backend/build.sh"
