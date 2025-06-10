@@ -13,75 +13,42 @@ env:
 steps:
   - type: Command
     name: "Check Directory Structure and Run Build"
+    image: oraclelinux:8
     command: |
-      echo "🔍 Host: Current directory: $(pwd)"
-      echo "🔍 Host: Directory contents:"
+      set -e
+
+      echo "🔍 Runner: Current directory: $(pwd)"
+      echo "🔍 Runner: Directory contents:"
       ls -l
 
-      echo "🔍 Host: Contents of MtdrSpring:"
+      echo "🔍 Runner: Contents of MtdrSpring:"
       ls -l MtdrSpring
 
-      echo "🔍 Host: Contents of MtdrSpring/backend:"
+      echo "🔍 Runner: Contents of MtdrSpring/backend:"
       ls -l MtdrSpring/backend
 
-      echo "🔍 Host: Contents of MtdrSpring/utils:"
+      echo "🔍 Runner: Contents of MtdrSpring/utils:"
       ls -l MtdrSpring/utils || echo "No utils dir"
 
-      echo "🔍 Host: env.sh exists?"
+      echo "🔍 Runner: env.sh exists?"
       [ -f MtdrSpring/env.sh ] && echo "env.sh found" || echo "env.sh NOT found"
 
-      echo "🔍 Host: build.sh exists?"
+      echo "🔍 Runner: build.sh exists?"
       [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
 
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
-      # Save current path
-      REPO_ROOT=$(pwd)
-      echo "📦 Mounting workspace: $REPO_ROOT"
+      echo '🧰 Installing build dependencies...'
+      yum -y install oracle-epel-release-el8
+      yum -y install nodejs npm maven java-17-openjdk-devel docker
+      echo '✅ Dependencies installed.'
 
-      docker run --rm \
-        -v "$REPO_ROOT":/workspace \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        -w /workspace/MtdrSpring/backend \
-        -e DOCKER_REGISTRY="$DOCKER_REGISTRY" \
-        -e OCIR_USERNAME="$OCIR_USERNAME" \
-        -e OCIR_AUTH_TOKEN="$OCIR_AUTH_TOKEN" \
-        oraclelinux:8 \
-        bash -c "
-          set -e
+      echo '📜 Sourcing environment variables...'
+      chmod +x MtdrSpring/env.sh || { echo '❌ env.sh not executable'; exit 1; }
+      . MtdrSpring/env.sh
 
-          echo '🔍 Container: Checking /workspace'
-          ls -l /workspace
+      echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
 
-          echo '🔍 Container: Checking /workspace/MtdrSpring'
-          ls -l /workspace/MtdrSpring
-
-          echo '🔍 Container: Checking /workspace/MtdrSpring/backend'
-          ls -l /workspace/MtdrSpring/backend
-
-          echo '🔍 Container: Checking /workspace/MtdrSpring/utils'
-          ls -l /workspace/MtdrSpring/utils || echo 'No utils dir'
-
-          echo '🔍 Container: env.sh exists?'
-          [ -f /workspace/MtdrSpring/env.sh ] && echo 'env.sh found' || echo 'env.sh NOT found'
-
-          echo '🔍 Container: build.sh exists?'
-          [ -f /workspace/MtdrSpring/backend/build.sh ] && echo 'build.sh found' || echo 'build.sh NOT found'
-
-          echo \"🔎 Current working directory: \$(pwd)\"
-
-          echo '🧰 Installing build dependencies...'
-          yum -y install oracle-epel-release-el8 && \
-          yum -y install nodejs npm maven java-17-openjdk-devel docker && \
-          echo '✅ Dependencies installed.'
-
-          echo '📜 Sourcing environment variables...'
-          chmod +x /workspace/MtdrSpring/env.sh || { echo '❌ env.sh not executable'; exit 1; }
-          . /workspace/MtdrSpring/env.sh
-
-          echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
-
-          echo '🚀 Running build script...'
-          chmod +x /workspace/MtdrSpring/backend/build.sh
-          /workspace/MtdrSpring/backend/build.sh
-        "
+      echo '🚀 Running build script...'
+      chmod +x MtdrSpring/backend/build.sh
+      MtdrSpring/backend/build.sh
