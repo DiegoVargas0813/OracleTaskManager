@@ -12,24 +12,21 @@ env:
 
 steps:
   - type: Command
-    name: "Check Directory Structure"
+    name: "Check Directory Structure and Run Build"
     command: |
       echo "Current directory: $(pwd)"
       echo "Directory contents:"
-      ls -R
+      ls -l
+      echo "Contents of MtdrSpring:"
+      ls -l MtdrSpring
+      echo "Contents of MtdrSpring/backend:"
+      ls -l MtdrSpring/backend
 
-  - type: Command
-    name: "Docker Login to OCIR"
-    command: |
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
-
-  - type: Command
-    name: "Run Build in Oracle Linux 8 Container"
-    command: |
       echo "📦 Mounting workspace: $(pwd)"
       docker run --rm \
-        -v $PWD:/workspace \
+        -v $(pwd):/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -w /workspace/MtdrSpring/backend \
         -e DOCKER_REGISTRY="$DOCKER_REGISTRY" \
@@ -51,14 +48,13 @@ steps:
           echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
           ls -l /workspace/MtdrSpring/backend
 
-          echo "🔎 Current working directory: $(pwd)"
+          echo \"🔎 Current working directory: \$(pwd)\"
 
           echo '📜 Sourcing environment variables...'
           if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
           chmod +x /workspace/MtdrSpring/env.sh
           . /workspace/MtdrSpring/env.sh
-          echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
-
+          echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
 
           echo '🚀 Running build script...'
           ./build.sh
