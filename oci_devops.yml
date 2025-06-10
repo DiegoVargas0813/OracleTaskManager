@@ -28,8 +28,6 @@ steps:
     name: "Run Build in Oracle Linux 8 Container"
     command: |
       echo "📦 Mounting workspace: $(pwd)"
-      # Ensure we are in the repo root
-      cd $(git rev-parse --show-toplevel 2>/dev/null || echo $PWD)
       docker run --rm \
         -v $PWD:/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -54,7 +52,8 @@ steps:
           if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
           chmod +x /workspace/MtdrSpring/env.sh
           . /workspace/MtdrSpring/env.sh
-          echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
+          echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
+
 
           echo '🚀 Running build script...'
           ./build.sh
