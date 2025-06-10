@@ -15,7 +15,6 @@
 *.zip
 *.tar.gz
 *.rar
-backend/target/*
 backend/.settings/*
 backend/.project
 backend/.classpath
