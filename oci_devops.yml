@@ -49,5 +49,5 @@ steps:
       echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
 
       echo '🚀 Running build script...'
-      chmod +x MtdrSpring/backend/build.sh
-      MtdrSpring/backend/build.sh
+      chmod +x "$MTDRWORKSHOP_LOCATION/backend/build.sh"
+      "$MTDRWORKSHOP_LOCATION/backend/build.sh"
