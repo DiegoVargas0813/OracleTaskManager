@@ -26,9 +26,9 @@ steps:
 
       echo "📦 Mounting workspace: $(pwd)"
       docker run --rm \
-        -v $(pwd):/workspace \
+        -v $(pwd)/..:/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -w /workspace/MtdrSpring/backend \
+        -w /workspace/$(basename $(pwd))/MtdrSpring/backend \
         -e DOCKER_REGISTRY="$DOCKER_REGISTRY" \
         -e OCIR_USERNAME="$OCIR_USERNAME" \
         -e OCIR_AUTH_TOKEN="$OCIR_AUTH_TOKEN" \
@@ -43,17 +43,19 @@ steps:
 
           echo '📁 Checking contents of /workspace:'
           ls -l /workspace
-          echo '📁 Checking contents of /workspace/MtdrSpring:'
-          ls -l /workspace/MtdrSpring
-          echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
-          ls -l /workspace/MtdrSpring/backend
+          echo '📁 Checking contents of /workspace/$(basename $(pwd)):'
+          ls -l /workspace/$(basename $(pwd))
+          echo '📁 Checking contents of /workspace/$(basename $(pwd))/MtdrSpring:'
+          ls -l /workspace/$(basename $(pwd))/MtdrSpring
+          echo '📁 Checking contents of /workspace/$(basename $(pwd))/MtdrSpring/backend:'
+          ls -l /workspace/$(basename $(pwd))/MtdrSpring/backend
 
           echo \"🔎 Current working directory: \$(pwd)\"
 
           echo '📜 Sourcing environment variables...'
-          if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
-          chmod +x /workspace/MtdrSpring/env.sh
-          . /workspace/MtdrSpring/env.sh
+          if [ ! -f /workspace/$(basename $(pwd))/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
+          chmod +x /workspace/$(basename $(pwd))/MtdrSpring/env.sh
+          . /workspace/$(basename $(pwd))/MtdrSpring/env.sh
           echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
 
           echo '🚀 Running build script...'
