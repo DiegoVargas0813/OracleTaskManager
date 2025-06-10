@@ -14,21 +14,11 @@ steps:
   - type: Command
     name: "Check Directory Structure and Run Build"
     command: |
-      echo "Current directory: $(pwd)"
-      echo "Directory contents:"
-      ls -l
-      echo "Contents of MtdrSpring:"
-      ls -l MtdrSpring
-      echo "Contents of MtdrSpring/backend:"
-      ls -l MtdrSpring/backend
-
-      echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
-
       echo "📦 Mounting workspace: $(pwd)"
       docker run --rm \
-        -v $(pwd):/workspace \
+        -v $(pwd):/workspace/github_OracleTaskManager \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -w /workspace/MtdrSpring/backend \
+        -w /workspace/github_OracleTaskManager/MtdrSpring/backend \
         -e DOCKER_REGISTRY="$DOCKER_REGISTRY" \
         -e OCIR_USERNAME="$OCIR_USERNAME" \
         -e OCIR_AUTH_TOKEN="$OCIR_AUTH_TOKEN" \
@@ -41,19 +31,19 @@ steps:
           yum -y install nodejs npm maven java-17-openjdk-devel docker && \
           echo '✅ Dependencies installed.'
 
-          echo '📁 Checking contents of /workspace:'
-          ls -l /workspace
-          echo '📁 Checking contents of /workspace/MtdrSpring:'
-          ls -l /workspace/MtdrSpring
-          echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
-          ls -l /workspace/MtdrSpring/backend
+          echo '📁 Checking contents of /workspace/github_OracleTaskManager:'
+          ls -l /workspace/github_OracleTaskManager
+          echo '📁 Checking contents of /workspace/github_OracleTaskManager/MtdrSpring:'
+          ls -l /workspace/github_OracleTaskManager/MtdrSpring
+          echo '📁 Checking contents of /workspace/github_OracleTaskManager/MtdrSpring/backend:'
+          ls -l /workspace/github_OracleTaskManager/MtdrSpring/backend
 
           echo \"🔎 Current working directory: \$(pwd)\"
 
           echo '📜 Sourcing environment variables...'
-          if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
-          chmod +x /workspace/MtdrSpring/env.sh
-          . /workspace/MtdrSpring/env.sh
+          if [ ! -f /workspace/github_OracleTaskManager/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
+          chmod +x /workspace/github_OracleTaskManager/MtdrSpring/env.sh
+          . /workspace/github_OracleTaskManager/MtdrSpring/env.sh
           echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
 
           echo '🚀 Running build script...'
