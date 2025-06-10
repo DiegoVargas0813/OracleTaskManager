@@ -26,9 +26,9 @@ steps:
 
       echo "📦 Mounting workspace: $(pwd)"
       docker run --rm \
-        -v $(pwd)/..:/workspace \
+        -v $(pwd):/workspace \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -w /workspace/$(basename $(pwd))/MtdrSpring/backend \
+        -w /workspace/MtdrSpring/backend \
         -e DOCKER_REGISTRY="$DOCKER_REGISTRY" \
         -e OCIR_USERNAME="$OCIR_USERNAME" \
         -e OCIR_AUTH_TOKEN="$OCIR_AUTH_TOKEN" \
