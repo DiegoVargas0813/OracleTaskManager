@@ -48,6 +48,8 @@ steps:
           echo '📁 Checking contents of /workspace/MtdrSpring/backend:'
           ls -l /workspace/MtdrSpring/backend
 
+          echo "🔎 Current working directory: $(pwd)"
+
           echo '📜 Sourcing environment variables...'
           if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
           chmod +x /workspace/MtdrSpring/env.sh
