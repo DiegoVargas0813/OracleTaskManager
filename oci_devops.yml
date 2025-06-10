@@ -51,7 +51,7 @@ steps:
           echo \"🔎 Current working directory: \$(pwd)\"
 
           echo '📜 Sourcing environment variables...'
-          if [ ! -f ../env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
+          if [ ! -f ../env.sh ]; then ls -l ..; echo '❌ env.sh not found'; exit 1; fi
           chmod +x ../env.sh
           . ../env.sh
           echo \"✅ MTDRWORKSHOP_LOCATION: \$MTDRWORKSHOP_LOCATION\"
