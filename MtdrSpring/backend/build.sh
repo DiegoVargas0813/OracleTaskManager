@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure we are in the backend directory (where this script and Dockerfile are)
+cd "$(dirname "$0")"
+
 export IMAGE_NAME=todolistapp-springboot
 export IMAGE_VERSION=0.2
 
