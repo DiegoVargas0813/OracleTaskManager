@@ -25,6 +25,13 @@ steps:
 
 
   - type: Command
+    name: "Debug contents before env.sh"
+    command: |
+      echo "🔍 Checking full directory structure"
+      ls -R /workspace
+
+
+  - type: Command
     name: "Run Build in Oracle Linux 8 Container"
     command: |
       echo "📦 Mounting workspace: $(pwd)"
