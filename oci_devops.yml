@@ -50,7 +50,10 @@ steps:
 
           echo '📜 Sourcing environment variables...'
           if [ ! -f /workspace/MtdrSpring/env.sh ]; then echo '❌ env.sh not found'; exit 1; fi
-          source /workspace/MtdrSpring/env.sh
+          chmod +x /workspace/MtdrSpring/env.sh
+          . /workspace/MtdrSpring/env.sh
+          echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
+
 
           echo '🚀 Running build script...'
           ./build.sh
