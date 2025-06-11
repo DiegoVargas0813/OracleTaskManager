@@ -52,8 +52,10 @@ steps:
       echo "✅ MTDRWORKSHOP_LOCATION: $MTDRWORKSHOP_LOCATION"
 
       echo '🚀 Running build script...'
-      chmod +x "$MTDRWORKSHOP_LOCATION/backend/build.sh"
-      "$MTDRWORKSHOP_LOCATION/backend/build.sh"
+      cd "$MTDRWORKSHOP_LOCATION"
+      source env.sh
+      cd backend
+      bash build.sh
 
       echo "🔍 After build.sh: Listing backend/target directory"
       ls -l "$MTDRWORKSHOP_LOCATION/backend/target" || echo "No target dir"
