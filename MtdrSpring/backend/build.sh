@@ -23,7 +23,7 @@ if [ ! -f pom.xml ]; then
     echo "❌ pom.xml not found in $(pwd)"
     exit 1
 fi
-mvn -e clean package spring-boot:repackage -DskipTests || { echo "❌ Maven build failed"; exit 1; }
+mvn -e clean package spring-boot:repackage -DskipTests
 echo "🔍 Listing target directory after Maven build:"
 ls -lh target
 docker build -f Dockerfile -t $IMAGE .
