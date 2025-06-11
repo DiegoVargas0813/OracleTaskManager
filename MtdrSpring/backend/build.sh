@@ -15,7 +15,8 @@ fi
 
 export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
 
-mvn clean package spring-boot:repackage -DskipTests -e -X
+cd "$MTDRWORKSHOP_LOCATION/backend"
+mvn clean package spring-boot:repackage -DskipTests
 echo "🔍 Listing target directory after Maven build:"
 ls -lh target
 docker build -f Dockerfile -t $IMAGE .
