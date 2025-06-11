@@ -18,7 +18,7 @@ fi
 
 export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
 
-mvn -Dmaven.multiModuleProjectDirectory=$PWD clean package spring-boot:repackage -DskipTests
+mvn clean package spring-boot:repackage -DskipTests -e -X
 echo "🔍 Listing target directory after Maven build:"
 ls -lh target
 docker build -f Dockerfile -t $IMAGE .
