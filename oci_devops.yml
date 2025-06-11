@@ -55,7 +55,7 @@ steps:
       cd "$MTDRWORKSHOP_LOCATION"
       source env.sh
       cd backend
-      source build.sh
+      bash build.sh
 
       echo "🔍 After build.sh: Listing backend/target directory"
       ls -l "$MTDRWORKSHOP_LOCATION/backend/target" || echo "No target dir"
