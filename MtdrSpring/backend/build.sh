@@ -15,7 +15,13 @@ fi
 
 export IMAGE=${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_VERSION}
 
-cd "$MTDRWORKSHOP_LOCATION/backend"
+# Always cd to the directory containing this script (which should be backend/)
+cd "$(dirname "$0")"
+echo "✅ Current directory: $(pwd)"
+if [ ! -f pom.xml ]; then
+    echo "❌ pom.xml not found in $(pwd)"
+    exit 1
+fi
 mvn clean package spring-boot:repackage -DskipTests
 echo "🔍 Listing target directory after Maven build:"
 ls -lh target
