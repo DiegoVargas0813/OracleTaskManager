@@ -3,5 +3,5 @@ FROM openjdk:17
 #COPY src /tmp/src/
 WORKDIR /tmp/
 EXPOSE 8080
-COPY target/*.jar MyTodoList.jar
+COPY MtdrSpring/backend/target/*.jar MyTodoList.jar
 ENTRYPOINT ["java","-jar","MyTodoList.jar"]
