@@ -1,5 +1,5 @@
 #!/bin/bash
-#fix
+#fix 2
 
 export IMAGE_NAME=todolistapp-springboot
 export IMAGE_VERSION=0.2
