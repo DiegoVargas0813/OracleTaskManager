@@ -25,7 +25,7 @@ env:
     OCIR_USERNAME: axvz6pcfltnr/a01635782@tec.mx    # tu tenancy/user
     OCIR_AUTH_TOKEN: mgLChj]GCkxLACp]rt5P            # tu token de OCIR
     DOCKER_REGISTRY_HOST: mx-queretaro-1.ocir.io   # sin namespace ni repo
-    DOCKER_IMAGE: $DOCKER_REGISTRY_HOST/$NAMESPACE/hellodevops/deploy1/todolistapp-springboot
+    DOCKER_IMAGE: $DOCKER_REGISTRY_HOST/$NAMESPACE/hellodevops/deploy1/todolistapp-springboot:latest
 
 steps:
   - type: Command
@@ -143,6 +143,20 @@ steps:
     command: |
       echo "$OCIR_AUTH_TOKEN" | docker login $DOCKER_REGISTRY_HOST \
         --username "$OCIR_USERNAME" --password-stdin
+
+  - type: Command
+    name: "✅ Prepare JAR for Docker"
+    command: |
+      cd MtdrSpring/backend/target
+      echo "📦 Archivos disponibles:"
+      ls -l
+      if [ -f MyTodoList-0.0.1-SNAPSHOT.jar ]; then
+        cp MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
+        echo "✅ Copiado como MyTodoList.jar"
+      else
+        echo "❌ No se encontró MyTodoList-0.0.1-SNAPSHOT.jar"
+        exit 1
+      fi
 
   - type: Command
     name: "🐳 Build y Push Docker image"
