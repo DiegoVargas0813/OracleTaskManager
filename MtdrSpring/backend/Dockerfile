@@ -3,5 +3,5 @@ FROM openjdk:17
 #COPY src /tmp/src/
 WORKDIR /tmp/
 EXPOSE 8080
-COPY COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
+COPY target/MyTodoList-0.0.1-SNAPSHOT.jar MyTodoList.jar
 ENTRYPOINT ["java", "-jar", "MyTodoList-0.0.1-SNAPSHOT.jar"]
