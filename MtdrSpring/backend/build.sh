@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 export IMAGE_NAME=todolistapp-springboot
 export IMAGE_VERSION=0.2
@@ -23,7 +22,7 @@ if [ ! -f pom.xml ]; then
     echo "❌ pom.xml not found in $(pwd)"
     exit 1
 fi
-mvn -e clean package spring-boot:repackage -DskipTests -Dmaven.multiModuleProjectDirectory="$(pwd)"
+mvn -e clean package spring-boot:repackage -DskipTests -Dmaven.multiModuleProjectDirectory=$(pwd)
 echo "🔍 Listing target directory after Maven build:"
 ls -lh target
 docker build -f Dockerfile -t $IMAGE .
