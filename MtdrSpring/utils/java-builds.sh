@@ -42,6 +42,10 @@ while ! state_done DOCKER_REGISTRY; do
   sleep 5
 done
 
+echo "🏗️ Compilando el backend con Maven..."
+cd "$MTDRWORKSHOP_LOCATION/backend"
+mvn clean install -Dmaven.multiModuleProjectDirectory="$MTDRWORKSHOP_LOCATION/backend"
+
 state_set_done JAVA_BUILDS
 
 
