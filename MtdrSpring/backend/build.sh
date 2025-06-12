@@ -4,6 +4,9 @@
 export IMAGE_NAME=todolistapp-springboot
 export IMAGE_VERSION=0.2
 
+java -version
+mvn -version
+
 
 if [ -z "$DOCKER_REGISTRY" ]; then
     export DOCKER_REGISTRY=$(state_get DOCKER_REGISTRY)
@@ -23,7 +26,12 @@ if [ ! -f pom.xml ]; then
     echo "❌ pom.xml not found in $(pwd)"
     exit 1
 fi
-mvn -e clean package spring-boot:repackage -DskipTests -Dmaven.multiModuleProjectDirectory=$(pwd)
+
+PROJECT_ROOT=$(pwd)
+echo "📁 Setting Maven multiModuleProjectDirectory to: $PROJECT_ROOT"
+mvn -e clean package spring-boot:repackage -DskipTests -Dmaven.multiModuleProjectDirectory="$PROJECT_ROOT"
+
+
 echo "🔍 Listing target directory after Maven build:"
 ls -lh target
 docker build -f Dockerfile -t $IMAGE .
