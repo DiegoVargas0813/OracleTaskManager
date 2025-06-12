@@ -20,30 +20,25 @@ steps:
       echo "🔍 Runner: Directory contents:"
       ls -l
 
-      echo "🔍 Runner: Contents of MtdrSpring:"
-      ls -l MtdrSpring
-
-      echo "🔍 Runner: Contents of MtdrSpring/backend:"
-      ls -l MtdrSpring/backend
-
-      echo "🔍 Runner: Contents of MtdrSpring/utils:"
-      ls -l MtdrSpring/utils || echo "No utils dir"
-
-      echo "🔍 Runner: env.sh exists?"
-      [ -f MtdrSpring/env.sh ] && echo "env.sh found" || echo "env.sh NOT found"
-
-      echo "🔍 Runner: build.sh exists?"
-      [ -f MtdrSpring/backend/build.sh ] && echo "build.sh found" || echo "build.sh NOT found"
-
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
       echo '🧰 Installing build dependencies...'
-      yum -y install nodejs npm maven java-17-openjdk-devel docker
-      echo '✅ Dependencies installed.'
+      yum -y install nodejs npm java-17-openjdk-devel docker curl tar
 
-      # Dynamically set JAVA_HOME to the correct OpenJDK path
-      export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
-      echo "JAVA_HOME set to $JAVA_HOME"
+      # Install Maven 3.8.8
+      MAVEN_VERSION=3.8.8
+      curl -fsSL https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz -o /tmp/apache-maven.tar.gz
+      tar -xzf /tmp/apache-maven.tar.gz -C /opt
+      export MAVEN_HOME=/opt/apache-maven-${MAVEN_VERSION}
+      export PATH=$MAVEN_HOME/bin:$PATH
+      echo "export MAVEN_HOME=/opt/apache-maven-${MAVEN_VERSION}" >> ~/.bashrc
+      echo "export PATH=\$MAVEN_HOME/bin:\$PATH" >> ~/.bashrc
+
+      mvn -version
+      java -version
+      node -v
+      npm -v
+      docker --version
 
       echo '📜 Sourcing environment variables...'
       chmod +x MtdrSpring/env.sh || { echo '❌ env.sh not executable'; exit 1; }
