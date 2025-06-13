@@ -41,7 +41,7 @@ done
 
 echo "🏗️ Compilando el backend con Maven..."
 cd "$MTDRWORKSHOP_LOCATION/backend"
-mvn clean package -Pskip-frontend -Dmaven.multiModuleProjectDirectory="$MTDRWORKSHOP_LOCATION/backend"
+mvn clean package -Dmaven.multiModuleProjectDirectory="$MTDRWORKSHOP_LOCATION/backend"
 
 # Definir la ruta al .jar generado
 JAR_PATH="$MTDRWORKSHOP_LOCATION/backend/target/MyTodoList-0.0.1-SNAPSHOT.jar"
