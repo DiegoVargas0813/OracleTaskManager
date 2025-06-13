@@ -12,7 +12,7 @@ env:
 steps:
   - type: Command
     name: "Check Directory Structure and Run Build"
-    image: oraclelinux:9
+    image: ubuntu:24.04
     command: |
       set -e
 
@@ -23,7 +23,8 @@ steps:
       echo "$OCIR_AUTH_TOKEN" | docker login -u "$OCIR_USERNAME" --password-stdin mx-queretaro-1.ocir.io
 
       echo '🧰 Installing build dependencies...'
-      yum -y install nodejs npm java-17-openjdk-devel docker curl tar
+      apt-get update
+      apt-get install -y nodejs npm openjdk-17-jdk docker.io curl tar
 
       # Install Maven 3.8.8
       MAVEN_VERSION=3.8.8
