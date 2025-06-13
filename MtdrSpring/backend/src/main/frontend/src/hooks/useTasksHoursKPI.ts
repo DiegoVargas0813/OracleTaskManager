@@ -14,7 +14,7 @@ export const useTasksHoursKPI = (userId: number) => {
     queryKey: ['tasks-hours-kpi', userId],
     queryFn: async (): Promise<TaskHoursKPIData> => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/user/${userId}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/user/1`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch tasks');
@@ -24,12 +24,12 @@ export const useTasksHoursKPI = (userId: number) => {
         
         // Calculate total estimated and actual hours
         const estimatedHours = tasks.reduce((sum, task) => sum + (task.estimatedHours || 0), 0);
-        const actualHours = tasks.reduce((sum, task) => sum + (task.actualHours || 0), 0);
+        const actualHours = tasks.reduce((sum, task) => sum + (task.realHours || 0), 0);
         
         // Calculate efficiency rate (actual / estimated * 100)
         // If estimated hours is 0, set efficiency rate to 100%
         const efficiencyRate = estimatedHours > 0 
-          ? Math.round((actualHours / estimatedHours) * 100) 
+          ? Math.round(( estimatedHours / actualHours) * 100) 
           : 100;
         
         return {

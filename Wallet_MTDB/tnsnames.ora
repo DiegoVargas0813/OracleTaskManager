@@ -1,0 +1,12 @@
+mtdb_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=ge48d28f7f44672_mtdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+mtdb_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=ge48d28f7f44672_mtdb_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+mtdb_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=ge48d28f7f44672_mtdb_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+mtdb_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=ge48d28f7f44672_mtdb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+mtdb_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=ge48d28f7f44672_mtdb_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

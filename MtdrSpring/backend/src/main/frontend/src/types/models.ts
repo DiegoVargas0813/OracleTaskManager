@@ -25,7 +25,7 @@ export interface Project {
   id: number;
   name: string;
   description: string;
-  creation_ts: string;
+  creationTs: string;
   assignedTo?: Manager;
   sprints?: Sprint[];
 }

@@ -49,7 +49,7 @@ import { useAssignTaskToSprint } from '@/hooks/useAssignTaskToSprint';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 
-const ProjectDetails = () => {
+const DeveloperProjectDetails = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const { data: project, isLoading: projectLoading, error: projectError } = useProject(Number(projectId));
@@ -356,10 +356,7 @@ const ProjectDetails = () => {
                       </div>
                     </div>
                     
-                    <Button size="sm" className="gap-1" onClick={() => handleAddTask()}>
-                      <Plus size={14} />
-                      <span>Add Task</span>
-                    </Button>
+                    
                   </div>
                   
                   <div>
@@ -601,4 +598,4 @@ const ProjectDetails = () => {
   );
 };
 
-export default ProjectDetails;
+export default DeveloperProjectDetails;

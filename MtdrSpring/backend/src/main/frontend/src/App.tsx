@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
+import DeveloperProjectDetails from "./pages/developerProjectDetails";
 import ProjectDetails from "./pages/ProjectDetails";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
@@ -24,6 +25,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/developer-dashboard" element={<DeveloperDashboard />} />
+            <Route path="/developer-project-details/:projectId" element={<DeveloperProjectDetails />} />
             <Route path="/projects/:projectId" element={<ProjectDetails />} />
             <Route path="/sprints" element={<Navigate to="/sprints/active" />} />
             <Route path="/reports" element={<Reports />} />

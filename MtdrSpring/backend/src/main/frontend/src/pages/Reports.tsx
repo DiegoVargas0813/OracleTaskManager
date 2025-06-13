@@ -1,5 +1,4 @@
-
-import { BarChart } from 'lucide-react';
+import { BarChart, FileText, Loader2, Download } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -9,18 +8,32 @@ import { useSprintTasks, fetchSprintTasks } from '@/hooks/useSprintTasks';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { useUsers } from '@/hooks/useUsers';
 import { useUserSprintTasks } from '@/hooks/useUserSprintTasks';
 import ReportePorDesarrollador from './ReportePorDesarrollador';
 import { toast } from 'sonner';
 import { Task } from '@/types/models';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const Reports = () => {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
   const managerId = currentUser?.id || 1;
   const { data: projects, isLoading: projectsLoading } = useProjects(managerId);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [selectedSprintId, setSelectedSprintId] = useState<number | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [aiReport, setAiReport] = useState<string>('');
 
   // Get sprints for the selected project
   const { data: sprints, isLoading: sprintsLoading } = useSprints(selectedProjectId || (projects?.[0]?.id ?? undefined));
@@ -37,9 +50,145 @@ const Reports = () => {
     }))
   });
 
+  const formatSprintLabel = (sprint: any) => {
+    const startDate = new Date(sprint.startDate);
+    const formattedDate = startDate.toLocaleDateString('es-ES', {
+      month: 'short',
+      day: 'numeric'
+    });
+    return `Sprint ${sprint.id} `;
+  };
+
+  const generateAIReport = async () => {
+    if (!selectedSprintId) {
+      toast.error("Por favor selecciona un sprint");
+      return;
+    }
+
+    setIsGeneratingReport(true);
+    try {
+      // Obtener los datos del sprint seleccionado
+      const sprintTasks = await fetchSprintTasks(selectedSprintId);
+      const sprint = sprints?.find(s => s.id === selectedSprintId);
+      
+      if (!sprint || !sprintTasks) {
+        throw new Error('No se encontraron datos del sprint');
+      }
+
+      // Preparar el prompt para OpenAI
+      const prompt = `Genera un reporte detallado del sprint ${sprint.id} con la siguiente información:
+        - Fecha de inicio: ${sprint.start_date}
+        - Fecha de fin: ${sprint.end_date}
+        - Total de tareas: ${sprintTasks.length}
+        - Tareas completadas: ${sprintTasks.filter(t => t.status === 'completed').length}
+        - Tareas pendientes: ${sprintTasks.filter(t => t.status === 'pending').length}
+        - Tareas en progreso: ${sprintTasks.filter(t => t.status === 'in_progress').length}
+        
+        Por favor, proporciona un análisis detallado del progreso del sprint, incluyendo:
+        1. Resumen general del sprint
+        2. Análisis de las tareas completadas
+        3. Identificación de posibles bloqueos o retrasos
+        4. Recomendaciones para el siguiente sprint
+        5. Métricas clave de rendimiento`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: "Eres un asistente experto en análisis de sprints y gestión de proyectos ágiles. Tu tarea es generar reportes detallados y útiles basados en los datos proporcionados."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al generar el reporte con OpenAI');
+      }
+
+      const data = await response.json();
+      const reportContent = data.choices[0].message.content;
+
+      // Crear un elemento temporal para el reporte
+      const reportElement = document.createElement('div');
+      reportElement.style.padding = '20px';
+      reportElement.style.fontFamily = 'Arial, sans-serif';
+      reportElement.style.maxWidth = '800px';
+      reportElement.style.margin = '0 auto';
+      reportElement.style.backgroundColor = 'white';
+      
+      // Agregar el contenido del reporte
+      reportElement.innerHTML = `
+        <h1 style="color: #2563eb; text-align: center; margin-bottom: 20px;">Reporte de Sprint ${sprint.id}</h1>
+        <div style="margin-bottom: 20px;">
+          <p><strong>Fecha de inicio:</strong> ${sprint.start_date}</p>
+          <p><strong>Fecha de fin:</strong> ${sprint.end_date}</p>
+          <p><strong>Total de tareas:</strong> ${sprintTasks.length}</p>
+          <p><strong>Tareas completadas:</strong> ${sprintTasks.filter(t => t.status === 'completed').length}</p>
+          <p><strong>Tareas pendientes:</strong> ${sprintTasks.filter(t => t.status === 'pending').length}</p>
+          <p><strong>Tareas en progreso:</strong> ${sprintTasks.filter(t => t.status === 'in_progress').length}</p>
+        </div>
+        <div style="white-space: pre-wrap;">${reportContent}</div>
+      `;
+
+      // Agregar el elemento al DOM temporalmente
+      document.body.appendChild(reportElement);
+
+      // Generar el PDF
+      const canvas = await html2canvas(reportElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 30;
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // Descargar el PDF
+      pdf.save(`reporte-sprint-${sprint.id}.pdf`);
+
+      // Limpiar el elemento temporal
+      document.body.removeChild(reportElement);
+
+      toast.success("Reporte generado y descargado exitosamente");
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Error al generar el reporte");
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
   // Prepare data for the first chart (total hours per sprint)
   const sprintHoursData = useMemo(() => {
-    return (sprints || []).map((sprint, idx) => {
+    const sortedSprints = [...(sprints || [])].sort((a, b) => {
+      const dateA = new Date(a.startDate);
+      const dateB = new Date(b.startDate);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sortedSprints.map((sprint, idx) => {
       const result = sprintTasksResults[idx];
       let estimated = 0;
       let real = 0;
@@ -54,7 +203,7 @@ const Reports = () => {
         real = result.data.reduce((sum, t) => sum + (t.realHours || 0), 0);
       }
       return {
-        sprint: sprint.name || `Sprint ${sprint.id}`,
+        sprint: formatSprintLabel(sprint),
         estimated,
         real
       };
@@ -75,9 +224,15 @@ const Reports = () => {
   // Prepare data for the second chart (hours worked by each developer per sprint)
   const sprintUserHoursData = useMemo(() => {
     if (!users || !sprints) return [];
-    return sprints.map((sprint, sprintIdx) => {
+    const sortedSprints = [...sprints].sort((a, b) => {
+      const dateA = new Date(a.startDate);
+      const dateB = new Date(b.startDate);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sortedSprints.map((sprint, sprintIdx) => {
       const result = sprintTasksResults[sprintIdx];
-      const row = { sprint: sprint.name || `Sprint ${sprint.id}` };
+      const row = { sprint: formatSprintLabel(sprint) };
       users.forEach(user => {
         let hours = 0;
         if (result && Array.isArray(result.data)) {
@@ -99,9 +254,15 @@ const Reports = () => {
   // Prepare data for the completed tasks chart (Graphic 3)
   const completedTasksData = useMemo(() => {
     if (!users || !sprints) return [];
-    return sprints.map((sprint, sprintIdx) => {
+    const sortedSprints = [...sprints].sort((a, b) => {
+      const dateA = new Date(a.startDate);
+      const dateB = new Date(b.startDate);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sortedSprints.map((sprint, sprintIdx) => {
       const result = sprintTasksResults[sprintIdx];
-      const row = { sprint: sprint.name || `Sprint ${sprint.id}` };
+      const row = { sprint: formatSprintLabel(sprint) };
       users.forEach(user => {
         let completed = 0;
         if (result && Array.isArray(result.data)) {
@@ -130,6 +291,56 @@ const Reports = () => {
                
               </p>
             </div>
+
+            {/* Sección de Generación de Reporte con IA */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-muted-foreground" />
+                  Generar Reporte con IA
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <Select
+                      value={selectedSprintId?.toString()}
+                      onValueChange={(value) => setSelectedSprintId(Number(value))}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Seleccionar Sprint" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sprints?.map((sprint) => (
+                          <SelectItem key={sprint.id} value={sprint.id.toString()}>
+                            {formatSprintLabel(sprint)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Button 
+                      onClick={generateAIReport}
+                      disabled={isGeneratingReport || !selectedSprintId}
+                      className="flex items-center gap-2"
+                    >
+                      {isGeneratingReport ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Generando...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4" />
+                          Generar PDF
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Columna 1: Gráficas */}
               <Card className="overflow-hidden bg-white shadow-sm transition-all duration-200 hover:shadow-md mb-8">

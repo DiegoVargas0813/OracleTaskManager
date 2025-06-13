@@ -56,7 +56,7 @@ export const useSprints = (projectId?: number) => {
         return data as Sprint[];
       } catch (error) {
         console.error('Error fetching sprints from API:', error);
-        toast.error("Could not connect to the API. Using mock data instead.");
+        //toast.error("Could not connect to the API. Using mock data instead.");
         
         return mockSprints;
       }
@@ -83,7 +83,7 @@ export const useActiveSprints = (projectId?: number) => {
         return data as Sprint[];
       } catch (error) {
         console.error('Error fetching active sprints from API:', error);
-        toast.error("Could not connect to the API. Using mock data instead.");
+        //toast.error("Could not connect to the API. Using mock data instead.");
         
         // Filter mock sprints to only include "active" ones
         const now = new Date();
@@ -112,7 +112,7 @@ export const useSprint = (sprintId: number) => {
         return data as Sprint;
       } catch (error) {
         console.error(`Error fetching sprint ${sprintId} from API:`, error);
-        toast.error("Could not connect to the API. Using mock data instead.");
+        //toast.error("Could not connect to the API. Using mock data instead.");
         
         const sprint = mockSprints.find(s => s.id === sprintId);
         if (!sprint) {

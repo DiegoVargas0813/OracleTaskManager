@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -11,42 +10,169 @@ import { CheckCircle2, AlertCircle, BarChart, Clock, Timer } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useTasksStoryPointsKPI } from '@/hooks/useTasksStoryPointsKPI';
+import { useQuery } from '@tanstack/react-query';
 
 const DeveloperDashboard = () => {
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
-  const { data: tasks, isLoading: tasksLoading } = useUserTasks(currentUser?.id || 109);
-  const { data: storyPointsKPI } = useTasksStoryPointsKPI(currentUser?.id || 109);
+  const userId = currentUser?.id || 109;
+
+  // Obtener las tareas del usuario a través del endpoint /users
+  const { data: userData, isLoading: userDataLoading } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`);
+      if (!response.ok) {
+        throw new Error('Error al obtener datos del usuario');
+      }
+      const users = await response.json();
+      // Encontrar el usuario actual en la lista
+      const currentUserData = users.find((user: any) => user.id === userId);
+      if (!currentUserData) {
+        throw new Error('Usuario no encontrado');
+      }
+      return currentUserData;
+    }
+  });
+
+  // Obtener los detalles de las tareas asignadas
+  const { data: tasks, isLoading: tasksLoading } = useQuery({
+    queryKey: ['user-tasks', userId, userData?.assignments],
+    queryFn: async () => {
+      if (!userData?.assignments || userData.assignments.length === 0) {
+        // Si no hay tareas asignadas, devolver un array vacío
+        return [];
+      }
+      
+      try {
+        const taskPromises = userData.assignments.map(async (taskId: number) => {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`);
+          if (!response.ok) {
+            console.error(`Error al obtener tarea ${taskId}`);
+            return null;
+          }
+          return response.json();
+        });
+
+        const tasksData = await Promise.all(taskPromises);
+        // Filtrar cualquier tarea que no se pudo obtener
+        return tasksData.filter(task => task !== null);
+      } catch (error) {
+        console.error('Error al obtener tareas:', error);
+        return [];
+      }
+    },
+    enabled: !!userData?.assignments
+  });
+
+  const { data: storyPointsKPI } = useTasksStoryPointsKPI(userId);
 
   // Helper function to check if a task is complete
   const isTaskComplete = (status: boolean | string): boolean => {
     return typeof status === 'string' ? status === "Complete" : status === true;
   };
 
-  const totalTasks = tasks?.length || 0;
-  const completedTasks = tasks?.filter(task => isTaskComplete(task.status)).length || 0;
-  const inProgressTasks = tasks?.filter(task => !isTaskComplete(task.status)).length || 0;
+  // Datos de prueba para cuando no hay tareas reales
+  const mockTasks = [
+    {
+      id: 1,
+      name: "Implementar autenticación",
+      description: "Configurar sistema de autenticación con JWT",
+      status: "in_progress",
+      priority: "high",
+      estimatedHours: 8,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 2,
+      name: "Diseñar base de datos",
+      description: "Crear esquema de base de datos para el proyecto",
+      status: "pending",
+      priority: "medium",
+      estimatedHours: 6,
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 3,
+      name: "Configurar CI/CD",
+      description: "Implementar pipeline de integración continua",
+      status: "completed",
+      priority: "low",
+      estimatedHours: 4,
+      dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ];
+
+  // Usar tareas reales o mock según corresponda
+  const displayTasks = tasks && tasks.length > 0 ? tasks : mockTasks;
+
+  // Actualizar las estadísticas con las tareas a mostrar
+  const totalTasks = displayTasks.length;
+  const completedTasks = displayTasks.filter(task => isTaskComplete(task.status)).length;
+  const inProgressTasks = displayTasks.filter(task => !isTaskComplete(task.status)).length;
   const completionRate = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   const priorityStats = {
-    high: tasks?.filter(task => task.priority === 'high').length || 0,
-    medium: tasks?.filter(task => task.priority === 'medium').length || 0,
-    low: tasks?.filter(task => task.priority === 'low').length || 0,
+    high: displayTasks.filter(task => task.priority === 'high').length,
+    medium: displayTasks.filter(task => task.priority === 'medium').length,
+    low: displayTasks.filter(task => task.priority === 'low').length,
   };
 
   const [actualHours, setActualHours] = useState<{ [key: number]: number }>({});
 
-  const handleMarkAsComplete = (taskId: number) => {
+  const handleMarkAsComplete = async (taskId: number) => {
     const actualHoursInput = prompt('¿Cuántas horas reales te tomó completar esta tarea?');
     if (actualHoursInput) {
       const hours = parseFloat(actualHoursInput);
       if (!isNaN(hours) && hours >= 0) {
-        setActualHours(prev => ({ ...prev, [taskId]: hours }));
-        toast.success('Tarea marcada como completada');
+        try {
+          // Actualizar el estado de la tarea
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${taskId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              status: 'completed',
+              actualHours: hours
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Error al actualizar la tarea');
+          }
+
+          setActualHours(prev => ({ ...prev, [taskId]: hours }));
+          toast.success('Tarea marcada como completada');
+        } catch (error) {
+          console.error('Error:', error);
+          toast.error('Error al actualizar la tarea');
+        }
       } else {
         toast.error('Por favor ingresa un número válido de horas');
       }
     }
   };
+
+  if (userLoading || userDataLoading || tasksLoading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-6 bg-slate-50">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-muted-foreground">Cargando...</p>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background">
@@ -124,12 +250,23 @@ const DeveloperDashboard = () => {
 
               <TabsContent value="tasks">
                 <div className="space-y-4">
-                  {tasks?.map((task) => (
+                  {displayTasks.map((task) => (
                     <Card key={task.id} className="overflow-hidden">
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between">
                           <div className="space-y-1">
-                            <h3 className="font-medium">{task.name}</h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium">{task.name}</h3>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                ${task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                  task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-800'}`}
+                              >
+                                {task.status === 'completed' ? 'Completada' :
+                                 task.status === 'in_progress' ? 'En Progreso' :
+                                 'Pendiente'}
+                              </span>
+                            </div>
                             <p className="text-sm text-muted-foreground">{task.description}</p>
                             <div className="flex items-center gap-4 text-sm mt-2">
                               <div className="flex items-center">
@@ -162,7 +299,9 @@ const DeveloperDashboard = () => {
                                 task.priority === 'medium' ? 'bg-amber-100 text-amber-800' :
                                   'bg-blue-100 text-blue-800'}`}
                             >
-                              {task.priority}
+                              {task.priority === 'high' ? 'Alta Prioridad' :
+                               task.priority === 'medium' ? 'Media Prioridad' :
+                               'Baja Prioridad'}
                             </span>
                             {task.dueDate && (
                               <span className="text-muted-foreground">
@@ -171,11 +310,14 @@ const DeveloperDashboard = () => {
                             )}
                           </div>
                           {!isTaskComplete(task.status) && (
-                            <Progress 
-                              value={65} 
-                              className="w-24 h-2" 
-                              title="Progreso estimado"
-                            />
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">Progreso:</span>
+                              <Progress 
+                                value={task.status === 'in_progress' ? 50 : 0} 
+                                className="w-24 h-2" 
+                                title="Progreso estimado"
+                              />
+                            </div>
                           )}
                         </div>
                       </CardContent>

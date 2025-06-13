@@ -1,11 +1,11 @@
-
 import React from 'react';
-import { BarChart, CheckCircle, PlusCircle, ArrowRight, RefreshCw } from 'lucide-react';
+import { BarChart, CheckCircle, PlusCircle, ArrowRight, RefreshCw, CalendarRange, Clock, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/Sidebar';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjects, useProject } from '@/hooks/useProjects';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useSprints } from '@/hooks/useSprints';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -15,6 +15,8 @@ import TaskHoursKPI from '@/components/dashboard/TaskHoursKPI';
 import TaskProgressKPI from '@/components/dashboard/TaskProgressKPI';
 import TaskStoryPointsKPI from '@/components/dashboard/TaskStoryPointsKPI';
 import OverallPerformanceKPI from '@/components/dashboard/OverallPerformanceKPI';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   BarChart as RechartsBarChart, 
   Bar, 
@@ -27,29 +29,71 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 const Dashboard = () => {
-  // Asegurémonos de que managerId siempre tenga un valor válido
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
   const managerId = currentUser?.id || 1;
   const queryClient = useQueryClient();
   
   const { data: projects, isLoading: projectsLoading } = useProjects(managerId);
+  const { data: project, isLoading: projectLoading } = useProject(projects?.[0]?.id || 1);
+  const { data: sprints, isLoading: sprintsLoading } = useSprints(projects?.[0]?.id || 1);
+
+  const determineStatus = (): 'planning' | 'in-progress' | 'completed' | 'on-hold' => {
+    if (!sprints || sprints.length === 0) return 'planning';
+    
+    const now = new Date();
+    const hasActiveSprints = sprints.some(sprint => {
+      const startDate = new Date(sprint.start_date);
+      const endDate = new Date(sprint.end_date);
+      return startDate <= now && endDate >= now;
+    });
+    
+    const hasCompletedSprints = sprints.some(sprint => {
+      const endDate = new Date(sprint.end_date);
+      return endDate < now;
+    });
+    
+    if (hasActiveSprints) return 'in-progress';
+    if (hasCompletedSprints && !hasActiveSprints) return 'completed';
+    return 'in-progress';
+  };
   
-  const completedTasks = 11;
-  const totalTasks = 20;
-  const completionPercentage = Math.round((completedTasks / totalTasks) * 100);
+  const calculateProgress = (): number => {
+    let totalTasks = 0;
+    let completedTasks = 0;
+    
+    if (sprints) {
+      sprints.forEach(sprint => {
+        if (sprint.tasks) {
+          totalTasks += sprint.tasks.length;
+          completedTasks += sprint.tasks.filter(task => task.status).length;
+        }
+      });
+    }
+    
+    if (totalTasks === 0) return 0;
+    return Math.round(100);
+  };
   
-  const statusData = [
-    { name: 'To Do', value: 5, color: '#3B82F6' },
-    { name: 'In Progress', value: 4, color: '#F59E0B' },
-    { name: 'Done', value: 8, color: '#10B981' },
-    { name: 'Cancelled', value: 3, color: '#EF4444' },
-  ];
+  const status = determineStatus();
+  const progress = calculateProgress();
   
-  const priorityData = [
-    { name: 'Low', value: 3, color: '#3B82F6' },
-    { name: 'Medium', value: 4, color: '#F59E0B' },
-    { name: 'High', value: 2, color: '#EF4444' },
-  ];
+  const statusColors = {
+    'planning': 'bg-blue-100 text-blue-800',
+    'in-progress': 'bg-amber-100 text-amber-800',
+    'completed': 'bg-green-100 text-green-800',
+    'on-hold': 'bg-slate-100 text-slate-800'
+  };
+  
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric',
+      timeZone: 'UTC'
+    });
+  };
 
   const handleCreateTask = () => {
     toast.info("Función de crear tarea próximamente");
@@ -57,18 +101,13 @@ const Dashboard = () => {
 
   const handleReloadKPIs = () => {
     toast.info("Recargando KPIs...");
-    
-    // Invalidar todas las consultas de KPI para forzar una recarga
     queryClient.invalidateQueries({ queryKey: ['tasks-kpi'] });
     queryClient.invalidateQueries({ queryKey: ['tasks-hours-kpi'] });
     queryClient.invalidateQueries({ queryKey: ['tasks-storypoints-kpi'] });
     queryClient.invalidateQueries({ queryKey: ['tasks-progress-kpi'] });
-    
-    // Invalidar consultas adicionales para asegurar datos frescos
     queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     queryClient.invalidateQueries({ queryKey: ['projects'] });
     
-    // Mostrar confirmación después de un breve retraso
     setTimeout(() => {
       toast.success("KPIs actualizados correctamente");
     }, 1000);
@@ -105,103 +144,11 @@ const Dashboard = () => {
               <TaskHoursKPI userId={managerId} />
               <TaskProgressKPI userId={managerId} />
               <TaskStoryPointsKPI userId={managerId} />
-              
-              <Card className="overflow-hidden bg-white shadow-sm col-span-1 transition-all duration-200 hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">Estado de Tareas</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-2">
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        layout="horizontal"
-                        data={statusData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                      >
-                        <XAxis 
-                          dataKey="name" 
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#64748b', fontSize: 12 }}
-                        />
-                        <YAxis hide />
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white p-2 border border-gray-200 shadow-md rounded-md">
-                                  <p className="font-medium">{payload[0].payload.name}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {payload[0].value} tareas
-                                  </p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </RechartsBarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="overflow-hidden bg-white shadow-sm col-span-1 lg:col-span-3 transition-all duration-200 hover:shadow-md">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center">
-                    <BarChart className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <CardTitle className="text-lg font-medium">Prioridad de Tareas</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RechartsBarChart
-                        data={priorityData}
-                        margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
-                      >
-                        <XAxis 
-                          dataKey="name" 
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }}
-                        />
-                        <YAxis hide />
-                        <Tooltip 
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white p-2 border border-gray-200 shadow-md rounded-md">
-                                  <p className="font-medium">Prioridad: {payload[0].payload.name}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {payload[0].value} tareas
-                                  </p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                          {priorityData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </RechartsBarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
-            
+
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-900">Tu Proyecto</h2>
-              {projectsLoading ? (
+              {projectsLoading || projectLoading ? (
                 <Card className="overflow-hidden bg-white shadow-sm">
                   <CardContent className="h-24 flex items-center justify-center">
                     <div className="animate-pulse flex space-x-4 w-full">
@@ -213,19 +160,61 @@ const Dashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ) : projects && projects.length > 0 ? (
+              ) : project ? (
                 <Card className="overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200">
                   <CardHeader>
-                    <CardTitle className="text-xl text-gray-900">{projects[0].name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{projects[0].description}</p>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-xl text-gray-900">{project.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                      </div>
+                      <Badge className={statusColors[status]}>
+                        {status === 'planning' && 'Planificación'}
+                        {status === 'in-progress' && 'En Progreso'}
+                        {status === 'completed' && 'Completado'}
+                        {status === 'on-hold' && 'En Pausa'}
+                      </Badge>
+                    </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button asChild className="w-full justify-between bg-primary hover:bg-primary/90 text-white">
-                      <Link to={`/projects/${projects[0].id}`}>
-                        Ver Detalles del Proyecto
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <CalendarRange className="h-4 w-4" />
+                          <span>Creado: {formatDate('2025-03-15')}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>Última actualización: {formatDate(project.creationTs)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Progreso del Proyecto</span>
+                          <span className="font-medium">{progress}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Manager:</span>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback>JA</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">Julieta Arteaga</span>
+                        </div>
+                      </div>
+
+                      <Button asChild className="w-full justify-between bg-primary hover:bg-primary/90 text-white">
+                        <Link to={`/projects/${project.id}`}>
+                          Ver Detalles del Proyecto
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ) : (
@@ -235,17 +224,6 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               )}
-            </div>
-            
-            <div className="flex justify-center mt-8 mb-4">
-              <Button
-                onClick={handleReloadKPIs}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Recargar KPIs
-              </Button>
             </div>
           </div>
         </main>

@@ -30,23 +30,21 @@ const Sidebar = () => {
 
   // Define menu items based on user role
   const getMenuItems = () => {
-    if (currentUser?.role === "Developer") {
+    if (currentUser?.role === "manager") {
       return [
-        { name: 'My Dashboard', icon: LayoutDashboard, path: '/developer-dashboard' },
-        { name: 'Sprints', icon: CalendarClock, path: '/sprints' },
-        { name: 'Team', icon: Users, path: '/team' },
-        { name: 'Calendar', icon: Calendar, path: '/calendar' },
-        { name: 'Reports', icon: BarChart3, path: '/reports' },
-        { name: 'Settings', icon: Settings, path: '/settings' },
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+      { name: 'Your Project', icon: FolderKanban, path: `/projects/${defaultProjectId}` },
+      { name: 'Reports', icon: BarChart3, path: '/reports' },
+      { name: 'Settings', icon: Settings, path: '/settings' },
       ];
     }
 
     // Default menu items for managers and other roles
     return [
-      { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-      { name: 'Your Project', icon: FolderKanban, path: `/projects/${defaultProjectId}` },
-      { name: 'Reports', icon: BarChart3, path: '/reports' },
-      { name: 'Settings', icon: Settings, path: '/settings' },
+      { name: 'Dashboard', icon: LayoutDashboard, path: '/developer-dashboard' },
+        { name: 'Your Project', icon: FolderKanban, path: `/developer-project-details/${defaultProjectId}` },
+
+
     ];
   };
 
@@ -61,7 +59,7 @@ const Sidebar = () => {
     >
       <div className="flex items-center p-4 border-b border-border">
         <Layout className="h-6 w-6 text-primary mr-2" />
-        {!collapsed && <span className="font-semibold text-lg animate-fade-in">TaskView</span>}
+        {!collapsed && <span className="font-semibold text-lg animate-fade-in">MetriK</span>}
       </div>
       
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">

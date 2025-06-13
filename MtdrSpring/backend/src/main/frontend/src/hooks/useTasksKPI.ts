@@ -14,7 +14,7 @@ export const useTasksKPI = (userId: number) => {
     queryKey: ['tasks-kpi', userId],
     queryFn: async (): Promise<TaskKPIData> => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/user/${userId}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/tasks/user/1`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch tasks');

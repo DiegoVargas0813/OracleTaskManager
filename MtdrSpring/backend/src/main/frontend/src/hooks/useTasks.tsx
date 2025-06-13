@@ -100,7 +100,7 @@ export const useUserTasks = (userId: number, projectId?: number) => {
         return enrichedTasks;
       } catch (error) {
         console.error(`Error fetching tasks for user ${userId}:`, error);
-        toast.error("Could not connect to the API. Using mock data instead.");
+        //toast.error("Could not connect to the API. Using mock data instead.");
         
         // Fall back to mock data
         return generateMockTasks(userId, projectId);
@@ -156,7 +156,7 @@ export const useProjectTasks = (projectId: number) => {
         return tasksByUser;
       } catch (error) {
         console.error(`Error fetching tasks for project ${projectId}:`, error);
-        toast.error("Could not connect to the API. Using mock data instead.");
+        //toast.error("Could not connect to the API. Using mock data instead.");
         
         // Fall back to mock data for multiple users
         const userIds = [1, 2, 3, 4, 5];

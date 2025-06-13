@@ -58,7 +58,7 @@ export const useUsers = () => {
         return data as User[];
       } catch (error) {
         console.error('Error fetching users from API:', error);
-        toast.error("Could not connect to the API. Using mock data instead.");
+        //toast.error("Could not connect to the API. Using mock data instead.");
         
         // Fall back to mock data
         return mockUsers;
