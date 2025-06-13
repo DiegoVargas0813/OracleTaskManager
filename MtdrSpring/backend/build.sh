@@ -30,8 +30,7 @@ fi
 
 PROJECT_ROOT=$(pwd)
 echo "📁 Setting Maven multiModuleProjectDirectory to: $PROJECT_ROOT"
-mvn -e clean package spring-boot:repackage -DskipTests -Dmaven.multiModuleProjectDirectory="$PROJECT_ROOT" \
-    -Dfrontend-maven-plugin.systemNode=true -Dfrontend-maven-plugin.systemNpm=true
+mvn -e clean package spring-boot:repackage -DskipTests -Dmaven.multiModuleProjectDirectory="$PROJECT_ROOT"
 
 
 echo "🔍 Listing target directory after Maven build:"
