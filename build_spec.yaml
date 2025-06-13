@@ -144,6 +144,8 @@ steps:
       echo "$OCIR_AUTH_TOKEN" | docker login $DOCKER_REGISTRY_HOST \
         --username "$OCIR_USERNAME" --password-stdin
 
+  
+
   - type: Command
     name: "✅ Prepare JAR for Docker"
     command: |

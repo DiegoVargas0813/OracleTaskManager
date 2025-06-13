@@ -248,4 +248,37 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+  <profile>
+    <id>skip-frontend</id>
+    <activation>
+      <activeByDefault>false</activeByDefault>
+    </activation>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>com.github.eirslett</groupId>
+          <artifactId>frontend-maven-plugin</artifactId>
+          <executions>
+            <!-- Desactiva npm install -->
+            <execution>
+              <id>install node and npm</id>
+              <phase>none</phase>
+            </execution>
+            <execution>
+              <id>npm install</id>
+              <phase>none</phase>
+            </execution>
+            <execution>
+              <id>npm run build</id>
+              <phase>none</phase>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+</profiles>
+
 </project>
